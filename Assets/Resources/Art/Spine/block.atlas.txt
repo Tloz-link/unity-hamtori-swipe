@@ -1,0 +1,30 @@
+block.png
+size:181,138
+filter:Linear,Linear
+pma:true
+Ellipse 1 copy
+bounds:2,5,131,131
+offsets:1,1,133,133
+Rectangle 4 copy
+bounds:135,41,95,26
+offsets:1,1,97,28
+rotate:90
+Rectangle 6
+bounds:163,79,15,12
+offsets:1,1,17,14
+eye_white
+bounds:157,2,37,7
+offsets:1,1,39,9
+rotate:90
+eyebrows
+bounds:166,21,56,10
+offsets:1,1,58,12
+rotate:90
+eyes
+bounds:163,93,43,16
+offsets:1,1,45,18
+rotate:90
+hands
+bounds:135,4,35,20
+offsets:1,1,37,22
+rotate:90

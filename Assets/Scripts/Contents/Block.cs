@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
+using UnityEngine.UI;
 
 public class Block : MonoBehaviour
 {
@@ -19,11 +19,11 @@ public class Block : MonoBehaviour
         }
     }
 
-    private TextMeshPro _text;
+    private Text _text;
 
     void Start()
     {
-        _text = GetComponentInChildren<TextMeshPro>();
+        _text = GetComponentInChildren<Text>();
         Hp = 10;
     }
 
