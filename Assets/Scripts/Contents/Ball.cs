@@ -40,6 +40,8 @@ public class Ball : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition) + new Vector3(0, 0, 10);
+            mousePos -= new Vector3(0, 0, mousePos.z);
+            transform.position -= new Vector3(0, 0, transform.position.z);
             _direction = (mousePos - transform.position).normalized;
             _state = BallState.Move;
         }
