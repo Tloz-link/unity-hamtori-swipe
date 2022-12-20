@@ -23,8 +23,9 @@ public class UIManager
     public void SetCanvas(GameObject go, bool sort = true)
     {
         Canvas canvas = go.GetOrAddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.overrideSorting = true;
+        // 이번게임에선 필요 없음!
+        //canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        //canvas.overrideSorting = true;
 
         if (sort)
         {

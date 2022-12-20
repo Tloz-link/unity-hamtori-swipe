@@ -7,6 +7,7 @@ public class Ball : MonoBehaviour
 {
     private float _speed;
     private Vector3 _direction;
+
     private bool _colBlock;
 
     private enum BallState
@@ -37,14 +38,7 @@ public class Ball : MonoBehaviour
 
     void UpdateIdle()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition) + new Vector3(0, 0, 10);
-            mousePos -= new Vector3(0, 0, mousePos.z);
-            transform.position -= new Vector3(0, 0, transform.position.z);
-            _direction = (mousePos - transform.position).normalized;
-            _state = BallState.Move;
-        }
+
     }
 
     void UpdateMove()
@@ -53,6 +47,12 @@ public class Ball : MonoBehaviour
         transform.position += _direction * _speed * Time.deltaTime;
         float angle = Mathf.Atan2(_direction.y, _direction.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
+    }
+
+    public void Shoot(Vector3 direction)
+    {
+        _direction = direction;
+        _state = BallState.Move;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

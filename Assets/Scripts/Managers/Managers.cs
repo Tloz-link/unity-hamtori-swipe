@@ -8,7 +8,9 @@ public class Managers : MonoBehaviour
     public static Managers Instance { get { Init(); return s_instance; } }
 
     #region Contents
+    GameManagerEX _game = new GameManagerEX();
 
+    public static GameManagerEX Game { get { return Instance._game; } }
     #endregion
 
     #region Core
@@ -56,6 +58,9 @@ public class Managers : MonoBehaviour
             s_instance._data.Init();
             s_instance._sound.Init();
             s_instance._pool.Init();
+
+            //Content
+            s_instance._game.Init();
         }
     }
 
