@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 346757561922469575}
   - component: {fileID: 9146318408805791058}
   - component: {fileID: 6068934925720407023}
-  - component: {fileID: 28557674807101174}
   m_Layer: 3
   m_Name: Ball
   m_TagString: Ball
@@ -30,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 7454200922710676900}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 50, y: -460, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -137,16 +136,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49f1849b758747949937168045c8f8e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &28557674807101174
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7454200922710676900}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18bfeaf959020fe459b2550b6d7da9f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  IsUsing: 0
