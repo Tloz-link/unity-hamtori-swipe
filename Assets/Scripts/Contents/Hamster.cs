@@ -37,7 +37,8 @@ public class Hamster : MonoBehaviour
         Idle,
         Ready,
         Shoot,
-        Wait
+        Wait,
+        Clean
     }
 
     private HamState _state;
@@ -75,12 +76,18 @@ public class Hamster : MonoBehaviour
     private float _initSpeed;
     private Vector3 _destPos;
 
+    // Clean Timer
+    private float _cleanTick;
+    private const float CLEAN_DELAY = 1.0f;
+
     void Start()
     {
         _spine = GetComponent<SkeletonAnimation>();
         _animationStates = Enum.GetNames(typeof(Anims));
         Managers.Game.OnIdleHandler -= OnIdle;
         Managers.Game.OnIdleHandler += OnIdle;
+        Managers.Game.OnCleanHandler -= OnClean;
+        Managers.Game.OnCleanHandler += OnClean;
         _initSpeed = 2000f;
         State = HamState.Idle;
     }
@@ -100,6 +107,9 @@ public class Hamster : MonoBehaviour
                 break;
             case HamState.Wait:
                 updateWait();
+                break;
+            case HamState.Clean:
+                updateClean();
                 break;
         }
     }
@@ -178,6 +188,15 @@ public class Hamster : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, _destPos, _initSpeed * Time.deltaTime);
     }
 
+    private void updateClean()
+    {
+        _cleanTick += Time.deltaTime;
+        if (_cleanTick > CLEAN_DELAY)
+        {
+            Managers.Game.State = GameManagerEX.GameState.Idle;
+        }
+    }
+
     public void ChangePos(Vector3 pos)
     {
         _destPos = pos;
@@ -227,6 +246,11 @@ public class Hamster : MonoBehaviour
         _arrowMoon.SetActive(true);
 
         RootArrow.transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
+    }
+
+    private void OnClean()
+    {
+        State = HamState.Clean;
     }
 
     private void OnIdle()

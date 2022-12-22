@@ -9,6 +9,7 @@ public class GameManagerEX
 
     public Action OnIdleHandler = null;
     public Action OnShootHandler = null;
+    public Action OnCleanHandler = null;
     public enum GameState
     {
         Idle,
@@ -33,6 +34,10 @@ public class GameManagerEX
                     if (OnShootHandler != null)
                         OnShootHandler.Invoke();
                     break;
+                case GameState.Clean:
+                    if (OnCleanHandler != null)
+                        OnCleanHandler.Invoke();
+                    break;
             }
         }
     }
@@ -56,7 +61,7 @@ public class GameManagerEX
         for (int i = 1; i <= FullBallCount; ++i)
         {
             GameObject ball = Managers.Resource.Instantiate("Contents/Ball");
-            AddBall(ball.GetComponent<Ball>());
+            AddBall(ball.GetComponent<Ball>(), true);
         }
     }
 
@@ -71,7 +76,7 @@ public class GameManagerEX
         ReadyBalls();
     }
 
-    public void AddBall(Ball ball)
+    public void AddBall(Ball ball, bool init = false)
     {
         Debug.Assert(CurrentBallCount < FullBallCount);
 
@@ -89,7 +94,12 @@ public class GameManagerEX
         else if (CurrentBallCount == FullBallCount)
         {
             ReadyBalls();
-            State = GameState.Idle;
+            if (init == false)
+            {
+                GenerateBlock();
+                MoveBlocks();
+            }
+            State = GameState.Clean;
         }
     }
 
@@ -106,17 +116,6 @@ public class GameManagerEX
     #endregion
 
     #region Block
-
-    #endregion
-
-    public void Init()
-    {
-        Hamster = GameObject.Find("Hamster");
-
-        InitBall();
-        InitBlock();
-    }
-
     private Dictionary<int, GameObject> _blocks = new Dictionary<int, GameObject>();
     public int BlockId { get; private set; } = 0;
 
@@ -124,7 +123,7 @@ public class GameManagerEX
     public GameObject BlockRoot
     {
         get
-        { 
+        {
             if (_blockRoot == null)
             {
                 _blockRoot = GameObject.Find("@BlockList");
@@ -182,8 +181,26 @@ public class GameManagerEX
         go.transform.localPosition = pos;
 
         Block block = go.GetComponent<Block>();
-        block.Hp = 10;
+        block.Hp = FullBallCount;
         block.Id = ++BlockId;
         _blocks.Add(block.Id, go);
+    }
+
+    private void MoveBlocks()
+    {
+        foreach (var go in _blocks)
+        {
+            Block block = go.Value.GetComponent<Block>();
+            block.MoveNextPos();
+        }
+    }
+    #endregion
+
+    public void Init()
+    {
+        Hamster = GameObject.Find("Hamster");
+
+        InitBall();
+        InitBlock();
     }
 }

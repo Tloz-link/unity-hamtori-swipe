@@ -23,22 +23,50 @@ public class Block : MonoBehaviour
 
     private Text _text;
 
-    void Start()
+    private bool _isClean;
+    private Vector3 _movePos;
+    private float _moveSpeed;
+
+    void Awake()
     {
         _text = GetComponentInChildren<Text>();
-        Hp = 10;
+        _isClean = false;
+        _moveSpeed = 1200;
     }
 
     void Update()
     {
-        
+        if (_isClean == false)
+        {
+            return;
+        }
+
+        Vector3 dir = _movePos - transform.position;
+        if (dir.magnitude < 0.0001f)
+        {
+            _isClean = false;
+        }
+        else
+        {
+            float moveDist = Mathf.Clamp(_moveSpeed * Time.deltaTime, 0, dir.magnitude);
+            transform.position += dir.normalized * moveDist;
+        }
+    }
+
+    public void MoveNextPos()
+    {
+        _movePos = transform.position - new Vector3(0, 142, 0);
+        _isClean = true;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Ball")
         {
-            --Hp;
+            if (Hp > 0)
+            {
+                --Hp;
+            }
         }
     }
 }
