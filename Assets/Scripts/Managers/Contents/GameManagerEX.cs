@@ -69,7 +69,7 @@ public class GameManagerEX
     {
         GameObject ball = _ballQueue.Dequeue();
         ball.transform.parent = _shootRoot.transform;
-        ball.transform.localPosition = Hamster.transform.position.Get2D();
+        ball.transform.position = Hamster.transform.position.Get2D();
         ball.GetComponent<Ball>().Shoot(BallDirection);
 
         CurrentBallCount = _ballQueue.Count;
@@ -109,7 +109,7 @@ public class GameManagerEX
         int dir = (Hamster.transform.localPosition.x >= 0) ? 1 : -1;
         foreach (GameObject ball in _ballQueue)
         {
-            ball.GetComponent<Ball>().Ready(new Vector3((Hamster.transform.localPosition.x - (50 * dir)) - (50 * idx * dir), Hamster.transform.position.y - 60, 0));
+            ball.GetComponent<Ball>().Ready(new Vector3((Hamster.transform.localPosition.x - (50 * dir)) - (50 * idx * dir), Hamster.transform.localPosition.y - 60, 0));
             idx++;
         }
     }

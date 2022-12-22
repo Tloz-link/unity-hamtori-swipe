@@ -116,6 +116,11 @@ public class Hamster : MonoBehaviour
 
     private void updateIdle()
     {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Managers.Scene.LoadScene(Define.Scene.DevScene);
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
             State = HamState.Ready;

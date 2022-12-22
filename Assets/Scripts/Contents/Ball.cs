@@ -50,6 +50,9 @@ public class Ball : MonoBehaviour
 
     void UpdateMove()
     {
+        Vector2 dir = GetComponent<Rigidbody2D>().velocity;
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0, 0, angle - 90);
         if (transform.position.y <= Managers.Game.Hamster.transform.position.y - 60)
         {
             GetComponent<Rigidbody2D>().velocity = Vector2.zero;
