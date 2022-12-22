@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class Block : MonoBehaviour
 {
+    public int Id { get; set; }
+
     private int _hp;
     public int Hp
     {
@@ -15,7 +17,7 @@ public class Block : MonoBehaviour
             if (_text != null)
                 _text.text = $"{_hp}";
             if (_hp <= 0)
-                Managers.Resource.Destroy(gameObject);
+                Managers.Game.RemoveBlock(Id);
         }
     }
 

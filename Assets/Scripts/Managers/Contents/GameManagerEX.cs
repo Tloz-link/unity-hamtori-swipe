@@ -5,15 +5,7 @@ using UnityEngine;
 
 public class GameManagerEX
 {
-    public int CurrentBallCount { get; private set; }
-    public int FullBallCount { get; private set; }
-    private GameObject _shootRoot;
-    private GameObject _waitRoot;
-
     public GameObject Hamster { get; private set; }
-
-    private Queue<GameObject> _ballQueue = new Queue<GameObject>();
-    public Vector3 BallDirection { get; set; }
 
     public Action OnIdleHandler = null;
     public Action OnShootHandler = null;
@@ -21,10 +13,12 @@ public class GameManagerEX
     {
         Idle,
         Shoot,
-        Wait
+        Wait,
+        Clean
     }
     private GameState _state;
-    public GameState State {
+    public GameState State
+    {
         get { return _state; }
         set
         {
@@ -43,15 +37,21 @@ public class GameManagerEX
         }
     }
 
-    public void Init()
+    #region Ball
+    public int CurrentBallCount { get; private set; }
+    public int FullBallCount { get; private set; }
+    private GameObject _shootRoot;
+    private GameObject _waitRoot;
+
+    private Queue<GameObject> _ballQueue = new Queue<GameObject>();
+    public Vector3 BallDirection { get; set; }
+
+    public void InitBall()
     {
-        State = GameState.Idle;
         CurrentBallCount = 0;
         FullBallCount = 5;
-        Hamster = GameObject.Find("Hamster");
         _shootRoot = GameObject.Find("@SHOOT");
         _waitRoot = GameObject.Find("@WAIT");
-        //todo : 못찾을 경우 자동으로 추가하기 (프로퍼티 쓰는것도 생각해야함)
 
         for (int i = 1; i <= FullBallCount; ++i)
         {
@@ -64,17 +64,16 @@ public class GameManagerEX
     {
         GameObject ball = _ballQueue.Dequeue();
         ball.transform.parent = _shootRoot.transform;
-        ball.transform.position = Hamster.transform.position;
-        ball.transform.localPosition -= new Vector3(0, 0, ball.transform.localPosition.z);
+        ball.transform.localPosition = Hamster.transform.position.Get2D();
         ball.GetComponent<Ball>().Shoot(BallDirection);
 
         CurrentBallCount = _ballQueue.Count;
+        ReadyBalls();
     }
 
     public void AddBall(Ball ball)
     {
-        if (CurrentBallCount >= FullBallCount)
-            return;
+        Debug.Assert(CurrentBallCount < FullBallCount);
 
         _ballQueue.Enqueue(ball.gameObject);
         ball.transform.parent = _waitRoot.transform;
@@ -87,8 +86,7 @@ public class GameManagerEX
             dest.x = Mathf.Clamp(dest.x, -380f, 380f);
             Hamster.GetComponent<Hamster>().ChangePos(dest);
         }
-
-        if (CurrentBallCount == FullBallCount)
+        else if (CurrentBallCount == FullBallCount)
         {
             ReadyBalls();
             State = GameState.Idle;
@@ -104,5 +102,88 @@ public class GameManagerEX
             ball.GetComponent<Ball>().Ready(new Vector3((Hamster.transform.localPosition.x - (50 * dir)) - (50 * idx * dir), Hamster.transform.position.y - 60, 0));
             idx++;
         }
-     }
+    }
+    #endregion
+
+    #region Block
+
+    #endregion
+
+    public void Init()
+    {
+        Hamster = GameObject.Find("Hamster");
+
+        InitBall();
+        InitBlock();
+    }
+
+    private Dictionary<int, GameObject> _blocks = new Dictionary<int, GameObject>();
+    public int BlockId { get; private set; } = 0;
+
+    private GameObject _blockRoot;
+    public GameObject BlockRoot
+    {
+        get
+        { 
+            if (_blockRoot == null)
+            {
+                _blockRoot = GameObject.Find("@BlockList");
+            }
+            return _blockRoot;
+        }
+    }
+
+    public void InitBlock()
+    {
+        int startX = -422;
+        int deltaX = 140;
+        int startY = 636;
+        int deltaY = 142;
+
+        CreateBlock(new Vector3(startX + (deltaX * 0), startY - (deltaY * 2), 0));
+        CreateBlock(new Vector3(startX + (deltaX * 0), startY - (deltaY * 3), 0));
+        CreateBlock(new Vector3(startX + (deltaX * 6), startY - (deltaY * 2), 0));
+        CreateBlock(new Vector3(startX + (deltaX * 6), startY - (deltaY * 3), 0));
+        CreateBlock(new Vector3(startX + (deltaX * 1), startY - (deltaY * 2), 0));
+        CreateBlock(new Vector3(startX + (deltaX * 1), startY - (deltaY * 3), 0));
+        CreateBlock(new Vector3(startX + (deltaX * 5), startY - (deltaY * 2), 0));
+        CreateBlock(new Vector3(startX + (deltaX * 5), startY - (deltaY * 3), 0));
+    }
+
+    public void RemoveBlock(int id)
+    {
+        Debug.Assert(_blocks.ContainsKey(id) == true);
+
+        Managers.Resource.Destroy(_blocks[id]);
+        _blocks.Remove(id);
+    }
+
+    public void GenerateBlock()
+    {
+        int count = UnityEngine.Random.Range(1, 5);
+        List<Vector3> spawnList = new List<Vector3>();
+
+        for (int i = 0; i < 7; ++i)
+        {
+            spawnList.Add(new Vector3(-422 + (i * 140), 636, 0));
+        }
+
+        for (int i = 0; i < count; ++i)
+        {
+            int rand = UnityEngine.Random.Range(0, spawnList.Count);
+            CreateBlock(spawnList[rand]);
+            spawnList.RemoveAt(rand);
+        }
+    }
+
+    private void CreateBlock(Vector3 pos)
+    {
+        GameObject go = Managers.Resource.Instantiate("Contents/Block", BlockRoot.transform);
+        go.transform.localPosition = pos;
+
+        Block block = go.GetComponent<Block>();
+        block.Hp = 10;
+        block.Id = ++BlockId;
+        _blocks.Add(block.Id, go);
+    }
 }

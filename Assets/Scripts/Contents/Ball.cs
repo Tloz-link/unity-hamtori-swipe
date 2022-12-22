@@ -49,8 +49,6 @@ public class Ball : MonoBehaviour
     void UpdateIdle()
     {
         transform.rotation = Quaternion.identity;
-
-        //todo (테스트용 매니저 참조)
         transform.position = Vector3.MoveTowards(transform.position, _destPos, _initSpeed * Time.deltaTime);
     }
 

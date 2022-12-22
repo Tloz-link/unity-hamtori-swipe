@@ -15,4 +15,9 @@ public static class Extension
     {
         return Util.GetOrAddComponent<T>(go);
     }
+
+    public static Vector3 Get2D(this Vector3 vec)
+    {
+        return vec - new Vector3(0, 0, vec.z);
+    }
 }

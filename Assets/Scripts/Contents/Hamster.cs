@@ -8,7 +8,19 @@ public class Hamster : MonoBehaviour
 {
     private string[] _animationStates;
     private SkeletonAnimation _spine;
-    private LineRenderer _line;
+
+    private List<GameObject> _stars = new List<GameObject>();
+    private GameObject _arrowMoon;
+    private GameObject _rootArrow;
+    public GameObject RootArrow
+    {
+        get
+        {
+            if (_rootArrow == null)
+                _rootArrow = GameObject.Find("@ArrowList");
+            return _rootArrow;
+        }
+    }
 
     enum Anims
     {
@@ -44,6 +56,8 @@ public class Hamster : MonoBehaviour
                     _spine.AnimationName = _animationStates[(int)Anims.charge_ing];
                     break;
                 case HamState.Shoot:
+                    ClearLine();
+                    Managers.Game.State = GameManagerEX.GameState.Shoot;
                     _spine.AnimationName = _animationStates[(int)Anims.charge_ready];
                     break;
                 case HamState.Wait:
@@ -64,8 +78,6 @@ public class Hamster : MonoBehaviour
     void Start()
     {
         _spine = GetComponent<SkeletonAnimation>();
-        _line = GetComponent<LineRenderer>();
-        _line.enabled = false;
         _animationStates = Enum.GetNames(typeof(Anims));
         Managers.Game.OnIdleHandler -= OnIdle;
         Managers.Game.OnIdleHandler += OnIdle;
@@ -94,7 +106,6 @@ public class Hamster : MonoBehaviour
 
     private void updateIdle()
     {
-        _line.enabled = false;
         if (Input.GetMouseButtonDown(0))
         {
             State = HamState.Ready;
@@ -112,6 +123,8 @@ public class Hamster : MonoBehaviour
 
     private void updateReady()
     {
+        ClearLine();
+
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition) + new Vector3(0, 0, 10);
         mousePos -= new Vector3(0, 0, mousePos.z - transform.position.z);
         Vector3 dir = (mousePos - transform.position).normalized;
@@ -119,22 +132,17 @@ public class Hamster : MonoBehaviour
         if (angle < 15 || angle > 165)
         {
             State = HamState.Idle;
+            return;
         }
 
-        Vector3 dest = Physics2D.Raycast(transform.position, dir, 10000, 1 << LayerMask.NameToLayer("Wall")).centroid;
-        _line.SetPosition(0, transform.position);
-        _line.SetPosition(1, dest);
-        _line.enabled = true;
+        Vector3 dest = Physics2D.CircleCast(transform.position, 40, dir, 10000, 1 << LayerMask.NameToLayer("Wall")).centroid;
+        GenerateLine((dest - transform.position).Get2D(), angle);
 
         if (Input.GetMouseButtonUp(0))
         {
-            _line.enabled = false;
             Managers.Game.BallDirection = dir;
             _shotTick = 0;
             State = HamState.Shoot;
-
-            //todo (state 병합)
-            Managers.Game.State = GameManagerEX.GameState.Shoot;
         }
 
         if (Input.touchCount > 0)
@@ -145,9 +153,6 @@ public class Hamster : MonoBehaviour
                 Managers.Game.BallDirection = dir;
                 _shotTick = 0;
                 State = HamState.Shoot;
-
-                //todo (state 병합)
-                Managers.Game.State = GameManagerEX.GameState.Shoot;
             }
         }
     }
@@ -170,13 +175,58 @@ public class Hamster : MonoBehaviour
 
     private void updateWait()
     {
-        //todo (테스트용 매니저 참조)
         transform.position = Vector3.MoveTowards(transform.position, _destPos, _initSpeed * Time.deltaTime);
     }
 
     public void ChangePos(Vector3 pos)
     {
         _destPos = pos;
+    }
+
+    private void ClearLine()
+    {
+        if (_arrowMoon == null)
+        {
+            _arrowMoon = Managers.Resource.Instantiate("Contents/ArrowMoon", RootArrow.transform);
+        }
+
+        for (int i = 0; i < _stars.Count; ++i)
+        {
+            _stars[i].SetActive(false);
+        }
+        _arrowMoon.SetActive(false);
+    }
+
+    private void GenerateLine(Vector3 line, float angle)
+    {
+        float dist = line.magnitude;
+        int need = (int)dist / 40;
+        int lack = need - _stars.Count;
+        for (int i = 0; i < lack; ++i)
+        {
+            GameObject star = Managers.Resource.Instantiate("Contents/ArrowStar", RootArrow.transform);
+            _stars.Add(star);
+            star.SetActive(false);
+        }
+
+        Debug.Assert(need <= _stars.Count, $"need : {need}   _starts.Count : {_stars.Count}");
+
+        for (int i = 0; i < need; ++i)
+        {
+            _stars[i].transform.localPosition = new Vector3(0, dist - (need - i) * 40, 0);
+            _stars[i].SetActive(true);
+
+            if (i <= 2)
+            {
+                Color color = _stars[i].GetComponent<SpriteRenderer>().color;
+                color.a = 0.4f;
+                _stars[i].GetComponent<SpriteRenderer>().color = color;
+            }
+        }
+        _arrowMoon.transform.localPosition = new Vector3(0, dist, 0);
+        _arrowMoon.SetActive(true);
+
+        RootArrow.transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
     }
 
     private void OnIdle()
