@@ -1,10 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 
-public class Ball : MonoBehaviour
+public class UI_Ball : UI_Base
 {
     private float _speed;
     private Vector3 _destPos;
@@ -19,11 +17,16 @@ public class Ball : MonoBehaviour
 
     private float _initSpeed;
 
-    void Start()
+    public override void Init()
     {
         _speed = 6f;
         _initSpeed = 1200f;
         _state = BallState.Idle;
+    }
+
+    void Start()
+    {
+        Init();
     }
 
     void Update()

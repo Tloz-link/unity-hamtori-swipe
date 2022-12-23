@@ -28,7 +28,7 @@ public class UI_Game : UI_Scene
         base.Init();
 
         Bind<Text>(typeof(Texts));
-        Bind<SkeletonAnimation>(typeof(SkeletonAnimations));
+        Bind<SkeletonGraphic>(typeof(SkeletonAnimations));
         OnIdle();
 
         // Submit Event
@@ -45,21 +45,22 @@ public class UI_Game : UI_Scene
 
     private void OnIdle()
     {
-        SkeletonAnimation bubble = Get<SkeletonAnimation>((int)SkeletonAnimations.Bubble);
+        SkeletonGraphic bubble = Get<SkeletonGraphic>((int)SkeletonAnimations.Bubble);
         bubble.AnimationState.Complete -= OnCompleteAnimation;
         bubble.AnimationState.Complete += OnCompleteAnimation;
     }
 
     private void OnShoot()
     {
-        SkeletonAnimation bubble = Get<SkeletonAnimation>((int)SkeletonAnimations.Bubble);
+        SkeletonGraphic bubble = Get<SkeletonGraphic>((int)SkeletonAnimations.Bubble);
         bubble.AnimationState.Complete -= OnCompleteAnimation;
-        bubble.AnimationName = "animation";
+        bubble.AnimationState.SetAnimation(0, "animation", true);
+        bubble.AnimationState.TimeScale = 1;
     }
 
     private void OnCompleteAnimation(TrackEntry entry)
     {
         entry.Complete -= OnCompleteAnimation;
-        Get<SkeletonAnimation>((int)SkeletonAnimations.Bubble).AnimationName = null;
+        Get<SkeletonGraphic>((int)SkeletonAnimations.Bubble).AnimationState.TimeScale = 0;
     }
 }

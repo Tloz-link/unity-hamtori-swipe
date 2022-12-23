@@ -48,7 +48,7 @@ public class GameManagerEX
     private GameObject _shootRoot;
     private GameObject _waitRoot;
 
-    private Queue<GameObject> _ballQueue = new Queue<GameObject>();
+    private Queue<UI_Ball> _ballQueue = new Queue<UI_Ball>();
     public Vector3 BallDirection { get; set; }
 
     public void InitBall()
@@ -60,35 +60,35 @@ public class GameManagerEX
 
         for (int i = 1; i <= FullBallCount; ++i)
         {
-            GameObject ball = Managers.Resource.Instantiate("Contents/Ball");
-            AddBall(ball.GetComponent<Ball>(), true);
+            UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>();
+            AddBall(ball, true);
         }
     }
 
     public void ShootBall()
     {
-        GameObject ball = _ballQueue.Dequeue();
-        ball.transform.parent = _shootRoot.transform;
+        UI_Ball ball = _ballQueue.Dequeue();
+        ball.transform.SetParent(_shootRoot.transform);
         ball.transform.position = Hamster.transform.position.Get2D();
-        ball.GetComponent<Ball>().Shoot(BallDirection);
+        ball.Shoot(BallDirection);
 
         CurrentBallCount = _ballQueue.Count;
         ReadyBalls();
     }
 
-    public void AddBall(Ball ball, bool init = false)
+    public void AddBall(UI_Ball ball, bool init = false)
     {
         Debug.Assert(CurrentBallCount < FullBallCount);
 
-        _ballQueue.Enqueue(ball.gameObject);
-        ball.transform.parent = _waitRoot.transform;
+        _ballQueue.Enqueue(ball);
+        ball.transform.SetParent(_waitRoot.transform);
         ball.transform.localPosition -= new Vector3(0, 0, ball.transform.localPosition.z);
         CurrentBallCount = _ballQueue.Count;
 
         if (CurrentBallCount == 1)
         {
             Vector3 dest = new Vector3(ball.transform.position.x, Hamster.transform.position.y, Hamster.transform.position.z);
-            dest.x = Mathf.Clamp(dest.x, -380f, 380f);
+            dest.x = Mathf.Clamp(dest.x, 160f, 920f);
             Hamster.GetComponent<Hamster>().ChangePos(dest);
         }
         else if (CurrentBallCount == FullBallCount)
@@ -107,16 +107,16 @@ public class GameManagerEX
     {
         int idx = 1;
         int dir = (Hamster.transform.localPosition.x >= 0) ? 1 : -1;
-        foreach (GameObject ball in _ballQueue)
+        foreach (UI_Ball ball in _ballQueue)
         {
-            ball.GetComponent<Ball>().Ready(new Vector3((Hamster.transform.localPosition.x - (50 * dir)) - (50 * idx * dir), Hamster.transform.localPosition.y - 60, 0));
+            ball.Ready(new Vector3((Hamster.transform.localPosition.x - (50 * dir)) - (50 * idx * dir), Hamster.transform.localPosition.y - 60, 0));
             idx++;
         }
     }
     #endregion
 
     #region Block
-    private Dictionary<int, GameObject> _blocks = new Dictionary<int, GameObject>();
+    private Dictionary<int, UI_Block> _blocks = new Dictionary<int, UI_Block>();
     public int BlockId { get; private set; } = 0;
 
     private GameObject _blockRoot;
@@ -153,7 +153,7 @@ public class GameManagerEX
     {
         Debug.Assert(_blocks.ContainsKey(id) == true);
 
-        Managers.Resource.Destroy(_blocks[id]);
+        Managers.Resource.Destroy(_blocks[id].gameObject);
         _blocks.Remove(id);
     }
 
@@ -177,20 +177,19 @@ public class GameManagerEX
 
     private void CreateBlock(Vector3 pos)
     {
-        GameObject go = Managers.Resource.Instantiate("Contents/Block", BlockRoot.transform);
-        go.transform.localPosition = pos;
+        UI_Block block = Managers.UI.makeSubItem<UI_Block>(BlockRoot.transform);
+        block.transform.localPosition = pos;
 
-        Block block = go.GetComponent<Block>();
         block.Hp = FullBallCount;
         block.Id = ++BlockId;
-        _blocks.Add(block.Id, go);
+        _blocks.Add(block.Id, block);
     }
 
     private void MoveBlocks()
     {
         foreach (var go in _blocks)
         {
-            Block block = go.Value.GetComponent<Block>();
+            UI_Block block = go.Value;
             block.MoveNextPos();
         }
     }

@@ -3,14 +3,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Hamster : MonoBehaviour
 {
     private string[] _animationStates;
-    private SkeletonAnimation _spine;
+    private SkeletonGraphic _spine;
 
-    private List<GameObject> _stars = new List<GameObject>();
-    private GameObject _arrowMoon;
+    private List<UI_ArrowStar> _stars = new List<UI_ArrowStar>();
+    private UI_ArrowMoon _arrowMoon;
     private GameObject _rootArrow;
     public GameObject RootArrow
     {
@@ -51,18 +52,18 @@ public class Hamster : MonoBehaviour
             switch (_state)
             {
                 case HamState.Idle:
-                    _spine.AnimationName = _animationStates[(int)Anims.idle1];
+                    _spine.AnimationState.SetAnimation(0, _animationStates[(int)Anims.idle1], true);
                     break;
                 case HamState.Ready:
-                    _spine.AnimationName = _animationStates[(int)Anims.charge_ing];
+                    _spine.AnimationState.SetAnimation(0, _animationStates[(int)Anims.charge_ing], true);
                     break;
                 case HamState.Shoot:
                     ClearLine();
                     Managers.Game.State = GameManagerEX.GameState.Shoot;
-                    _spine.AnimationName = _animationStates[(int)Anims.charge_ready];
+                    _spine.AnimationState.SetAnimation(0, _animationStates[(int)Anims.charge_ready], true);
                     break;
                 case HamState.Wait:
-                    _spine.AnimationName = _animationStates[(int)Anims.idle2];
+                    _spine.AnimationState.SetAnimation(0, _animationStates[(int)Anims.idle2], true);
                     break;
             }
         }
@@ -82,7 +83,7 @@ public class Hamster : MonoBehaviour
 
     void Start()
     {
-        _spine = GetComponent<SkeletonAnimation>();
+        _spine = GetComponent<SkeletonGraphic>();
         _animationStates = Enum.GetNames(typeof(Anims));
         Managers.Game.OnIdleHandler -= OnIdle;
         Managers.Game.OnIdleHandler += OnIdle;
@@ -140,8 +141,7 @@ public class Hamster : MonoBehaviour
     {
         ClearLine();
 
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition) + new Vector3(0, 0, 10);
-        mousePos -= new Vector3(0, 0, mousePos.z - transform.position.z);
+        Vector3 mousePos = Input.mousePosition;
         Vector3 dir = (mousePos - transform.position).normalized;
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         if (angle < 15 || angle > 165)
@@ -211,14 +211,14 @@ public class Hamster : MonoBehaviour
     {
         if (_arrowMoon == null)
         {
-            _arrowMoon = Managers.Resource.Instantiate("Contents/ArrowMoon", RootArrow.transform);
+            _arrowMoon = Managers.UI.makeSubItem<UI_ArrowMoon>(RootArrow.transform);
         }
 
         for (int i = 0; i < _stars.Count; ++i)
         {
-            _stars[i].SetActive(false);
+            _stars[i].gameObject.SetActive(false);
         }
-        _arrowMoon.SetActive(false);
+        _arrowMoon.gameObject.SetActive(false);
     }
 
     private void GenerateLine(Vector3 line, float angle)
@@ -228,9 +228,9 @@ public class Hamster : MonoBehaviour
         int lack = need - _stars.Count;
         for (int i = 0; i < lack; ++i)
         {
-            GameObject star = Managers.Resource.Instantiate("Contents/ArrowStar", RootArrow.transform);
+            UI_ArrowStar star = Managers.UI.makeSubItem<UI_ArrowStar>(RootArrow.transform);
             _stars.Add(star);
-            star.SetActive(false);
+            star.gameObject.SetActive(false);
         }
 
         Debug.Assert(need <= _stars.Count, $"need : {need}   _starts.Count : {_stars.Count}");
@@ -238,17 +238,18 @@ public class Hamster : MonoBehaviour
         for (int i = 0; i < need; ++i)
         {
             _stars[i].transform.localPosition = new Vector3(0, dist - (need - i) * 40, 0);
-            _stars[i].SetActive(true);
+            _stars[i].transform.localRotation = Quaternion.identity;
+            _stars[i].gameObject.SetActive(true);
 
             if (i <= 2)
             {
-                Color color = _stars[i].GetComponent<SpriteRenderer>().color;
+                Color color = _stars[i].GetComponent<Image>().color;
                 color.a = 0.4f;
-                _stars[i].GetComponent<SpriteRenderer>().color = color;
+                _stars[i].GetComponent<Image>().color = color;
             }
         }
         _arrowMoon.transform.localPosition = new Vector3(0, dist, 0);
-        _arrowMoon.SetActive(true);
+        _arrowMoon.gameObject.SetActive(true);
 
         RootArrow.transform.rotation = Quaternion.AngleAxis(angle - 90, Vector3.forward);
     }

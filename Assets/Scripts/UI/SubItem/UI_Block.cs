@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Block : MonoBehaviour
+public class UI_Block : UI_Base
 {
     public int Id { get; set; }
 
@@ -27,7 +27,11 @@ public class Block : MonoBehaviour
     private Vector3 _movePos;
     private float _moveSpeed;
 
-    void Awake()
+    public override void Init()
+    {
+    }
+
+    private void Awake()
     {
         _text = GetComponentInChildren<Text>();
         _isClean = false;
