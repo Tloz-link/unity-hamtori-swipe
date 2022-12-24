@@ -48,7 +48,14 @@ public class UI_Ball : UI_Base
     void UpdateIdle()
     {
         transform.rotation = Quaternion.identity;
-        transform.localPosition = Vector3.MoveTowards(transform.localPosition, _destPos, _initSpeed * Time.deltaTime);
+        float distance = Mathf.Abs(transform.localPosition.x - _destPos.x);
+        if (distance < 0.0001f)
+        {
+            return;
+        }
+
+        float delta = 1 + distance / 400f;
+        transform.localPosition = Vector3.MoveTowards(transform.localPosition, _destPos, _initSpeed * Time.deltaTime * delta);
     }
 
     void UpdateMove()
@@ -56,10 +63,10 @@ public class UI_Ball : UI_Base
         Vector2 dir = GetComponent<Rigidbody2D>().velocity;
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0, 0, angle - 90);
-        if (transform.position.y <= Managers.Game.Hamster.transform.position.y - 60)
+        if (transform.localPosition.y <= Managers.Game.Hamster.transform.localPosition.y - 60)
         {
             GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-            transform.position -= new Vector3(0, transform.position.y - (Managers.Game.Hamster.transform.position.y - 60), 0);
+            transform.localPosition -= new Vector3(0, transform.localPosition.y - (Managers.Game.Hamster.transform.localPosition.y - 60), 0);
             _state = BallState.Wait;
             Managers.Game.AddBall(this);
         }
@@ -72,7 +79,7 @@ public class UI_Ball : UI_Base
 
     public void Shoot(Vector3 direction)
     {
-        GetComponent<Rigidbody2D>().AddForce(direction.normalized * _speed);
+        GetComponent<Rigidbody2D>().AddForce(direction.normalized * _speed * Managers.Game.CanvasScale);
         _state = BallState.Move;
     }
 

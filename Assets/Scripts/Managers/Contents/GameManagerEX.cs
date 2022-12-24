@@ -5,17 +5,23 @@ using UnityEngine;
 
 public class GameManagerEX
 {
+    public float CanvasScale { get; set; }
+    public Vector3 BoardFloorPos { get; set; }
+
     public GameObject Hamster { get; private set; }
+    private GameObject _hamsterRoot;
 
     public Action OnIdleHandler = null;
     public Action OnShootHandler = null;
     public Action OnCleanHandler = null;
+    public Action OnOverHandler = null;
     public enum GameState
     {
         Idle,
         Shoot,
-        Wait,
-        Clean
+        Clean,
+
+        Over
     }
     private GameState _state;
     public GameState State
@@ -38,25 +44,34 @@ public class GameManagerEX
                     if (OnCleanHandler != null)
                         OnCleanHandler.Invoke();
                     break;
+                case GameState.Over:
+                    if (OnOverHandler != null)
+                        OnOverHandler.Invoke();
+                    break;
             }
         }
     }
 
     #region Ball
-    public int CurrentBallCount { get; private set; }
     public int FullBallCount { get; private set; }
+    public int ShootBallCount { get; set; }
+    public int ReturnBallCount { get; set; }
     private GameObject _shootRoot;
     private GameObject _waitRoot;
 
-    private Queue<UI_Ball> _ballQueue = new Queue<UI_Ball>();
+    public Queue<UI_Ball> BallQueue { get; private set; } = new Queue<UI_Ball>();
+    public Queue<UI_Ball> ReturnBallQueue { get; private set; } = new Queue<UI_Ball>();
     public Vector3 BallDirection { get; set; }
+    public Vector3 ShootPos { get; set; }
 
     public void InitBall()
     {
-        CurrentBallCount = 0;
         FullBallCount = 5;
+        ShootBallCount = 0;
+        ReturnBallCount = 0;
         _shootRoot = GameObject.Find("@SHOOT");
         _waitRoot = GameObject.Find("@WAIT");
+        ShootPos = Hamster.transform.localPosition;
 
         for (int i = 1; i <= FullBallCount; ++i)
         {
@@ -67,49 +82,80 @@ public class GameManagerEX
 
     public void ShootBall()
     {
-        UI_Ball ball = _ballQueue.Dequeue();
+        UI_Ball ball = BallQueue.Dequeue();
         ball.transform.SetParent(_shootRoot.transform);
-        ball.transform.position = Hamster.transform.position.Get2D();
+        ball.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
+        ball.transform.localPosition = ShootPos.Get2D();
         ball.Shoot(BallDirection);
+        ++ShootBallCount;
 
-        CurrentBallCount = _ballQueue.Count;
         ReadyBalls();
     }
 
     public void AddBall(UI_Ball ball, bool init = false)
     {
-        Debug.Assert(CurrentBallCount < FullBallCount);
-
-        _ballQueue.Enqueue(ball);
-        ball.transform.SetParent(_waitRoot.transform);
-        ball.transform.localPosition -= new Vector3(0, 0, ball.transform.localPosition.z);
-        CurrentBallCount = _ballQueue.Count;
-
-        if (CurrentBallCount == 1)
+        if (init == true)
         {
-            Vector3 dest = new Vector3(ball.transform.position.x, Hamster.transform.position.y, Hamster.transform.position.z);
-            dest.x = Mathf.Clamp(dest.x, 160f, 920f);
+            BallQueue.Enqueue(ball);
+        }
+        else
+        {
+            ReturnBallQueue.Enqueue(ball);
+        }
+
+        ball.transform.SetParent(_waitRoot.transform);
+        ball.transform.localScale = new Vector3(0.8f, 0.8f, 1f);
+        ball.transform.localPosition -= new Vector3(0, 0, ball.transform.localPosition.z);
+
+        if (init == true)
+        {
+            if (BallQueue.Count == FullBallCount)
+            {
+                ReadyBalls(true);
+            }
+            return;
+        }
+
+        ++ReturnBallCount;
+        if (ReturnBallCount == 1)
+        {
+            Vector3 dest = new Vector3(ball.transform.localPosition.x, Hamster.transform.localPosition.y, Hamster.transform.localPosition.z);
+            dest.x = Mathf.Clamp(dest.x, -380f, 380f);
             Hamster.GetComponent<Hamster>().ChangePos(dest);
         }
-        else if (CurrentBallCount == FullBallCount)
+        else if (ReturnBallCount == FullBallCount)
         {
+            while (ReturnBallQueue.Count > 0)
+                BallQueue.Enqueue(ReturnBallQueue.Dequeue());
+
+            ShootPos = Hamster.transform.localPosition;
             ReadyBalls();
-            if (init == false)
-            {
-                GenerateBlock();
-                MoveBlocks();
-            }
+            GenerateBlock();
+            MoveBlocks();
             State = GameState.Clean;
         }
     }
 
-    private void ReadyBalls()
+    private void ReadyBalls(bool isInit = false)
     {
-        int idx = 1;
-        int dir = (Hamster.transform.localPosition.x >= 0) ? 1 : -1;
-        foreach (UI_Ball ball in _ballQueue)
+        int dir = (ShootPos.x >= 0) ? -1 : 1;
+        int delta = 50;
+        float maxX = ShootPos.x + (50 * dir) + (delta * (FullBallCount - 1) * dir);
+        if (maxX < -450f || maxX > 450f)
         {
-            ball.Ready(new Vector3((Hamster.transform.localPosition.x - (50 * dir)) - (50 * idx * dir), Hamster.transform.localPosition.y - 60, 0));
+            float range = (dir == 1) ? 450f - (ShootPos.x + 50f) : 450f + (ShootPos.x - 50f);
+            delta = (int)range / FullBallCount;
+        }
+
+        int idx = 0;
+        foreach (UI_Ball ball in BallQueue)
+        {
+            float posX = ShootPos.x + (50 * dir) + (delta * idx * dir);
+            if (isInit == true)
+            {
+                ball.transform.localPosition = new Vector3(posX, ShootPos.y - 60, 0);
+            }
+            ball.Ready(new Vector3(posX, ShootPos.y - 60, 0));
             idx++;
         }
     }
@@ -193,13 +239,58 @@ public class GameManagerEX
             block.MoveNextPos();
         }
     }
+
+    public bool CheckBlocks()
+    {
+        foreach (var go in _blocks)
+        {
+            UI_Block block = go.Value;
+            if (block.transform.localPosition.y < -400)
+            {
+                GameOver();
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     #endregion
 
     public void Init()
     {
         Hamster = GameObject.Find("Hamster");
+        _hamsterRoot = GameObject.Find("@Hamster");
 
         InitBall();
         InitBlock();
+    }
+
+    public void GameOver()
+    {
+        State = GameState.Over;
+
+        Managers.UI.ShowPopupUI<UI_GameOver>();
+    }
+
+    public void Restart()
+    {
+        foreach (UI_Ball ball in BallQueue)
+        {
+            Managers.Resource.Destroy(ball.gameObject);
+        }
+        BallQueue.Clear();
+
+        foreach (var pair in _blocks)
+        {
+            UI_Block block = pair.Value;
+            Managers.Resource.Destroy(block.gameObject);
+        }
+        _blocks.Clear();
+
+        Hamster.transform.SetParent(_hamsterRoot.transform);
+        Hamster.transform.localPosition = new Vector3(0f, -560f, 0f);
+        Init();
+        State = GameState.Idle;
     }
 }

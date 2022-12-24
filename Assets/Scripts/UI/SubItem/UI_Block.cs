@@ -45,7 +45,7 @@ public class UI_Block : UI_Base
             return;
         }
 
-        Vector3 dir = _movePos - transform.position;
+        Vector3 dir = _movePos - transform.localPosition;
         if (dir.magnitude < 0.0001f)
         {
             _isClean = false;
@@ -53,13 +53,13 @@ public class UI_Block : UI_Base
         else
         {
             float moveDist = Mathf.Clamp(_moveSpeed * Time.deltaTime, 0, dir.magnitude);
-            transform.position += dir.normalized * moveDist;
+            transform.localPosition += dir.normalized * moveDist;
         }
     }
 
     public void MoveNextPos()
     {
-        _movePos = transform.position - new Vector3(0, 142, 0);
+        _movePos = transform.localPosition - new Vector3(0, 142, 0);
         _isClean = true;
     }
 

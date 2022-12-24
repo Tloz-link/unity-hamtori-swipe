@@ -39,7 +39,9 @@ public class Hamster : MonoBehaviour
         Ready,
         Shoot,
         Wait,
-        Clean
+        Clean,
+
+        Over
     }
 
     private HamState _state;
@@ -58,8 +60,7 @@ public class Hamster : MonoBehaviour
                     _spine.AnimationState.SetAnimation(0, _animationStates[(int)Anims.charge_ing], true);
                     break;
                 case HamState.Shoot:
-                    ClearLine();
-                    Managers.Game.State = GameManagerEX.GameState.Shoot;
+                    BeginShoot();
                     _spine.AnimationState.SetAnimation(0, _animationStates[(int)Anims.charge_ready], true);
                     break;
                 case HamState.Wait:
@@ -79,20 +80,25 @@ public class Hamster : MonoBehaviour
 
     // Clean Timer
     private float _cleanTick;
-    private const float CLEAN_DELAY = 1.0f;
+    private const float CLEAN_DELAY = 0.2f;
 
     void Start()
     {
         _spine = GetComponent<SkeletonGraphic>();
         _animationStates = Enum.GetNames(typeof(Anims));
+
         Managers.Game.OnIdleHandler -= OnIdle;
         Managers.Game.OnIdleHandler += OnIdle;
         Managers.Game.OnCleanHandler -= OnClean;
         Managers.Game.OnCleanHandler += OnClean;
+        Managers.Game.OnOverHandler -= OnOver;
+        Managers.Game.OnOverHandler += OnOver;
+
         _initSpeed = 2000f;
         State = HamState.Idle;
     }
 
+    #region Update
     void Update()
     {
         switch (_state)
@@ -117,13 +123,13 @@ public class Hamster : MonoBehaviour
 
     private void updateIdle()
     {
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            Managers.Scene.LoadScene(Define.Scene.DevScene);
-        }
-
         if (Input.GetMouseButtonDown(0))
         {
+            if(checkValidInput() == false)
+            {
+                return;
+            }
+
             State = HamState.Ready;
         }
 
@@ -132,25 +138,46 @@ public class Hamster : MonoBehaviour
             Touch touch = Input.GetTouch(0);
             if (touch.phase == TouchPhase.Began)
             {
+                if (checkValidInput() == false)
+                {
+                    return;
+                }
+
                 State = HamState.Ready;
             }
         }
+    }
+
+    private bool checkValidInput()
+    {
+        Vector3 floorPos = Managers.Game.BoardFloorPos;
+        float minX = floorPos.x - 250 * Managers.Game.CanvasScale;
+        float maxX = floorPos.x + 250 * Managers.Game.CanvasScale;
+
+        Vector3 mousePos = Input.mousePosition;
+        if (mousePos.y >= floorPos.y || mousePos.x < minX || mousePos.x > maxX)
+        {
+            return false;
+        }
+        return true;
     }
 
     private void updateReady()
     {
         ClearLine();
 
+        Vector3 floorPos = Managers.Game.BoardFloorPos;
         Vector3 mousePos = Input.mousePosition;
-        Vector3 dir = (mousePos - transform.position).normalized;
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        if (angle < 15 || angle > 165)
+        float ratio = (mousePos.x - (floorPos.x - 250 * Managers.Game.CanvasScale)) / (500 * Managers.Game.CanvasScale);
+        float angle = 10f + (160f * ratio);
+        if (angle < 10f || angle > 170f || mousePos.y >= floorPos.y)
         {
             State = HamState.Idle;
             return;
         }
 
-        Vector3 dest = Physics2D.CircleCast(transform.position, 40, dir, 10000, 1 << LayerMask.NameToLayer("Wall")).centroid;
+        Vector3 dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad), 0);
+        Vector3 dest = Physics2D.CircleCast(transform.position, 40 * Managers.Game.CanvasScale, dir, 10000, 1 << LayerMask.NameToLayer("Wall")).centroid;
         GenerateLine((dest - transform.position).Get2D(), angle);
 
         if (Input.GetMouseButtonUp(0))
@@ -177,20 +204,28 @@ public class Hamster : MonoBehaviour
         _shotTick += Time.deltaTime;
         if (_shotTick > SHOT_DELAY)
         {
-            if (Managers.Game.CurrentBallCount == 0)
+            if (Managers.Game.ShootBallCount == Managers.Game.FullBallCount)
             {
-                _destPos = transform.position;
                 State = HamState.Wait;
                 return;
             }
             Managers.Game.ShootBall();
             _shotTick = 0;
         }
+
+        updateWait();
     }
 
     private void updateWait()
     {
-        transform.position = Vector3.MoveTowards(transform.position, _destPos, _initSpeed * Time.deltaTime);
+        float distance = Mathf.Abs(transform.localPosition.x - _destPos.x);
+        if (distance < 0.0001f)
+        {
+            return;
+        }
+
+        float delta = 1 + distance / 300f;
+        transform.localPosition = Vector3.MoveTowards(transform.localPosition, _destPos, _initSpeed * Time.deltaTime * delta);
     }
 
     private void updateClean()
@@ -198,13 +233,29 @@ public class Hamster : MonoBehaviour
         _cleanTick += Time.deltaTime;
         if (_cleanTick > CLEAN_DELAY)
         {
+            _cleanTick = 0f;
+            if (Managers.Game.CheckBlocks() == false)
+            {
+                return;
+            }
             Managers.Game.State = GameManagerEX.GameState.Idle;
         }
     }
+    #endregion
 
     public void ChangePos(Vector3 pos)
     {
         _destPos = pos;
+    }
+
+    private void BeginShoot()
+    {
+        ClearLine();
+        Managers.Game.ShootBallCount = 0;
+        Managers.Game.ReturnBallCount = 0;
+        Managers.Game.ShootPos = transform.localPosition;
+        _destPos = transform.localPosition;
+        Managers.Game.State = GameManagerEX.GameState.Shoot;
     }
 
     private void ClearLine()
@@ -223,7 +274,7 @@ public class Hamster : MonoBehaviour
 
     private void GenerateLine(Vector3 line, float angle)
     {
-        float dist = line.magnitude;
+        float dist = line.magnitude / Managers.Game.CanvasScale;
         int need = (int)dist / 40;
         int lack = need - _stars.Count;
         for (int i = 0; i < lack; ++i)
@@ -262,5 +313,10 @@ public class Hamster : MonoBehaviour
     private void OnIdle()
     {
         State = HamState.Idle;
+    }
+
+    private void OnOver()
+    {
+        State = HamState.Over;
     }
 }
