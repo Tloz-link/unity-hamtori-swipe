@@ -27,6 +27,7 @@ public class Hamster : MonoBehaviour
     {
         charge_ing,
         charge_ready,
+        game_over,
         idle1,
         idle2,
         seed_after,
@@ -65,6 +66,9 @@ public class Hamster : MonoBehaviour
                     break;
                 case HamState.Wait:
                     _spine.AnimationState.SetAnimation(0, _animationStates[(int)Anims.idle2], true);
+                    break;
+                case HamState.Over:
+                    _spine.AnimationState.SetAnimation(0, _animationStates[(int)Anims.game_over], true);
                     break;
             }
         }
