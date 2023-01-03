@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class UIManager
@@ -76,6 +77,19 @@ public class UIManager
         go.transform.SetParent(Root.transform);
 
         return popup;
+    }
+
+    public T FindPopup<T>() where T : UI_Popup
+    {
+        return _popupStack.Where(x => x.GetType() == typeof(T)).FirstOrDefault() as T;
+    }
+
+    public T PeekPopupUI<T>() where T : UI_Popup
+    {
+        if (_popupStack.Count == 0)
+            return null;
+
+        return _popupStack.Peek() as T;
     }
 
     public void ClosePopupUI(UI_Popup popup)

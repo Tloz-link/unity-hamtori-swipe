@@ -9,7 +9,20 @@ public abstract class UI_Base : MonoBehaviour
 {
     protected Dictionary<Type, UnityEngine.Object[]> _objects = new Dictionary<Type, UnityEngine.Object[]>();
 
-    public abstract void Init();
+    protected bool _init = false;
+
+    public virtual bool Init()
+    {
+        if (_init)
+            return false;
+
+        return _init = true;
+    }
+
+    private void Start()
+    {
+        Init();
+    }
 
     protected void Bind<T>(Type type) where T : UnityEngine.Object
     {

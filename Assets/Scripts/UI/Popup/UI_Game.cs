@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using System;
 
-public class UI_GameOver : UI_Popup
+public class UI_Game : UI_Popup
 {
 
 }

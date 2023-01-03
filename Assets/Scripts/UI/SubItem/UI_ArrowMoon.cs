@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class UI_ArrowMoon : UI_Base
 {
-    public override void Init()
+    public override bool Init()
     {
-
+        if (base.Init() == false)
+            return false;
+        return true;
     }
 
     // Start is called before the first frame update
