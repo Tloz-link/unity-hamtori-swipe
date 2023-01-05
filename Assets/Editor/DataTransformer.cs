@@ -35,7 +35,31 @@ public class DataTransformer : EditorWindow
     [MenuItem("Tools/ParseExcel")]
     public static void ParseExcel()
     {
+        ParseStartData();
+    }
 
+    static void ParseStartData()
+    {
+        StartData startData;
+
+        #region ExcelData
+        string[] lines = Resources.Load<TextAsset>($"Data/Excel/StartData").text.Split("\n");
+
+        // 두번째 라인까지 스킵
+        string[] row = lines[2].Replace("\r", "").Split(',');
+
+        startData = new StartData()
+        {
+            score = int.Parse(row[0]),
+            fullBallCount = int.Parse(row[1]),
+            ballSpeed = int.Parse(row[2]),
+            hamsterPosX = float.Parse(row[3]),
+        };
+        #endregion
+
+        string xmlString = ToXML(startData);
+        File.WriteAllText($"{Application.dataPath}/Resources/Data/StartData.xml", xmlString);
+        AssetDatabase.Refresh();
     }
 
     //로더 없는 예시

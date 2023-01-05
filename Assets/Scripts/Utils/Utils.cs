@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Util
+public class Utils
 {
     public static T GetOrAddComponent<T>(GameObject go) where T : UnityEngine.Component
     {

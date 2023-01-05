@@ -10,10 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6b194f808b1af6499c93410e504af42, type: 3}
-  m_Name: sky_Atlas
+  m_Name: c1_Atlas
   m_EditorClassIdentifier: 
-  atlasFile: {fileID: 4900000, guid: f1964dc3dee534847b5874726fd24cf0, type: 3}
+  atlasFile: {fileID: 4900000, guid: 22a490790c0e791499813fc801fe3bde, type: 3}
   materials:
-  - {fileID: 2100000, guid: c46d4e111a9ce1744b0104c6f6d2def5, type: 2}
-  - {fileID: 2100000, guid: b80ff263e04689043b9f6c8a9a685fb3, type: 2}
-  - {fileID: 2100000, guid: 01ceab2ae641b804a95a90d1347b0c96, type: 2}
+  - {fileID: 2100000, guid: 5aebffa649132eb4fa1f18b958af8a2c, type: 2}

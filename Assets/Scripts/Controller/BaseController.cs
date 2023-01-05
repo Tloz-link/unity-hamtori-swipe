@@ -17,8 +17,6 @@ public class BaseController : UI_Base
         return true;
     }
 
-    protected virtual void UpdateAnimation() { }
-
     #region Spine Animation
     public void SetSkeletonAsset(string path)
     {

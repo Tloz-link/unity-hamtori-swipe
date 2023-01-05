@@ -4,27 +4,25 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class Vec2Pos
-{
-    public float x;
-    public float y;
-}
-
-[Serializable]
 public class GameData
 {
     public int score;
     public int fullBallCount;
     public int ballSpeed;
 
-    public Vec2Pos hamsterPos;
-    public Vec2Pos[] blockPosList;
+    public float hamsterPosX;
 }
 
 
 public class GameManagerEX
 {
-    GameData _gameData;
+    GameData _gameData = new GameData();
+
+    public int Score
+    {
+        get { return _gameData.score; }
+        set { _gameData.score = value; }
+    }
 
     public int FullBallCount
     {
@@ -32,20 +30,26 @@ public class GameManagerEX
         set { _gameData.fullBallCount = value; }
     }
 
-    public Vec2Pos HamsterPos
+    public int BallSpeed
     {
-        get { return _gameData.hamsterPos; }
-        set { _gameData.hamsterPos = value; }
+        get { return _gameData.ballSpeed; }
+        set { _gameData.ballSpeed = value; }
+    }
+
+    public float HamsterPosX
+    {
+        get { return _gameData.hamsterPosX; }
+        set { _gameData.hamsterPosX = value; }
     }
 
     public void Init()
     {
-        // TODO : 데이터 시트
-        FullBallCount = 5;
-        HamsterPos = new Vec2Pos
-        {
-            x = 100f,
-            y = 100f
-        };
+        StartData data = Managers.Data.Start;
+
+        Score = data.score;
+        FullBallCount = data.fullBallCount;
+        BallSpeed = data.ballSpeed;
+        HamsterPosX = data.hamsterPosX;
+
     }
 }

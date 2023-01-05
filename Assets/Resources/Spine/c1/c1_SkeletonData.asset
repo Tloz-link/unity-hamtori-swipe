@@ -10,19 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f1b3b4b945939a54ea0b23d3396115fb, type: 3}
-  m_Name: sky_SkeletonData
+  m_Name: c1_SkeletonData
   m_EditorClassIdentifier: 
   atlasAssets:
-  - {fileID: 11400000, guid: fd4270d3ac6fd994baff3f829665c23d, type: 2}
+  - {fileID: 11400000, guid: e247757430865d4499e873f697ca330c, type: 2}
   scale: 0.01
-  skeletonJSON: {fileID: 4900000, guid: f7246881f740f924fa81e3b7f6a9c07e, type: 3}
+  skeletonJSON: {fileID: 4900000, guid: bc45c31429dd5e84eb88f1f5a0be5d5d, type: 3}
   isUpgradingBlendModeMaterials: 0
   blendModeMaterials:
-    requiresBlendModeMaterials: 1
+    requiresBlendModeMaterials: 0
     applyAdditiveMaterial: 1
-    additiveMaterials:
-    - pageName: sky.png
-      material: {fileID: 2100000, guid: f2330c94156384949b0b5002da18e48b, type: 2}
+    additiveMaterials: []
     multiplyMaterials: []
     screenMaterials: []
   skeletonDataModifiers: []

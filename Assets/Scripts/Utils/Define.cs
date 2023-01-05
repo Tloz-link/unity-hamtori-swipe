@@ -20,6 +20,18 @@ public class Define
     public enum UIEvent
     {
         Click,
-        Drag
+        Pressed,
+        PointerDown,
+        PointerUp,
+    }
+
+    public enum AnimState
+    {
+        None,
+        Idle,
+        Charge,
+        Shoot,
+        Wait,
+        Gameover
     }
 }

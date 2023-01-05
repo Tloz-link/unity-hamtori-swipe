@@ -1,0 +1,3 @@
+//스코어,//공 개수,//공 속도,//햄스터 x좌표
+score,fullBallCount,ballSpeed,hamsterPosX
+0,5,1500,0

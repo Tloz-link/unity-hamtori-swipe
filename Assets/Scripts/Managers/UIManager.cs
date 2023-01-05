@@ -57,7 +57,7 @@ public class UIManager
             name = typeof(T).Name;
 
         GameObject go = Managers.Resource.Instantiate($"UI/Scene/{name}");
-        T sceneUI = Util.GetOrAddComponent<T>(go);
+        T sceneUI = Utils.GetOrAddComponent<T>(go);
         _sceneUI = sceneUI;
 
         go.transform.SetParent(Root.transform);
@@ -71,7 +71,7 @@ public class UIManager
             name = typeof(T).Name;
 
         GameObject go = Managers.Resource.Instantiate($"UI/Popup/{name}");
-        T popup = Util.GetOrAddComponent<T>(go);
+        T popup = Utils.GetOrAddComponent<T>(go);
         _popupStack.Push(popup);
 
         go.transform.SetParent(Root.transform);
