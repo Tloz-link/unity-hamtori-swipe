@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6951816080799017227}
   - component: {fileID: 5915234805818899833}
   m_Layer: 0
-  m_Name: UI_ArrowStar
+  m_Name: ArrowStar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

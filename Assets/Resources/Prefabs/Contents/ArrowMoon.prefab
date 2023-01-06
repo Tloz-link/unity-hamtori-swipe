@@ -11,8 +11,9 @@ GameObject:
   - component: {fileID: 2336428642817305558}
   - component: {fileID: 2131077052911520448}
   - component: {fileID: 2496498501621835120}
+  - component: {fileID: 6118449771102794062}
   m_Layer: 0
-  m_Name: UI_ArrowMoon
+  m_Name: ArrowMoon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -76,3 +77,16 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6118449771102794062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5702146818915079191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18bfeaf959020fe459b2550b6d7da9f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsUsing: 0

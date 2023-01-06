@@ -8,13 +8,43 @@ public class BaseController : UI_Base
 {
     protected SkeletonGraphic _anim = null;
 
+    protected Vector3 _dest;
+    protected bool _move = false;
+
     public override bool Init()
     {
         if (base.Init() == false)
             return false;
 
         _anim = GetComponent<SkeletonGraphic>();
+        _move = false;
         return true;
+    }
+
+    public virtual void Move(Vector3 dest)
+    {
+        Init();
+
+        _dest = dest;
+        _move = true;
+    }
+
+    void Update()
+    {
+        if (_move == false)
+            return;
+
+        Vector3 dir = _dest - transform.localPosition;
+        if (dir.magnitude < 0.0001f)
+        {
+            _move = false;
+        }
+        else
+        {
+            float delta = 1 + dir.magnitude / 400f;
+            float moveDist = Mathf.Clamp(1200f * Time.deltaTime * delta, 0, dir.magnitude);
+            transform.localPosition += dir.normalized * moveDist;
+        }
     }
 
     #region Spine Animation
