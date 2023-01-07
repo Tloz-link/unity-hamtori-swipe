@@ -24,6 +24,7 @@ public class UI_Game : UI_Popup
 
     Queue<UI_Ball> _waitBalls = new Queue<UI_Ball>();
     Queue<UI_Ball> _shootBalls = new Queue<UI_Ball>();
+    List<UI_Block> _blocks = new List<UI_Block>();
     List<GameObject> _arrowStars = new List<GameObject>();
     GameObject _arrowMoon;
 
@@ -58,7 +59,11 @@ public class UI_Game : UI_Popup
 
         GetObject((int)GameObjects.ControlPad).SetActive(true);
         GetObject((int)GameObjects.Floor).SetActive(true);
+
+        GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
+
         RefreshBall();
+        RefreshBlock();
     }
 
     public void RefreshBall()
@@ -84,6 +89,40 @@ public class UI_Game : UI_Popup
         }
     }
 
+    public void RefreshBlock()
+    {
+        int count = UnityEngine.Random.Range(1, 5);
+        List<int> spawnList = new List<int>();
+
+        for (int i = 0; i < 7; ++i)
+        {
+            spawnList.Add(i);
+        }
+
+        for (int i = 0; i < count; ++i)
+        {
+            int rand = UnityEngine.Random.Range(0, spawnList.Count);
+            BlockInfo info = new BlockInfo
+            {
+                x = spawnList[rand],
+                y = 0,
+                hp = 5 //hp 계산식 만들어야함
+            };
+            UI_Block block = Managers.UI.makeSubItem<UI_Block>(GetObject((int)GameObjects.BlockGroup).transform);
+            block.SetInfo(info, BlockDestroyCallBack);
+            _blocks.Add(block);
+            spawnList.RemoveAt(rand);
+        }
+
+        foreach (var block in _blocks)
+        {
+            BlockInfo info = block.GetInfo();
+            info.y += 1;
+            Vector3 dest = new Vector3(_game.BlockStartX + (info.x * _game.BlockGapX), _game.BlockStartY - (info.y * _game.BlockGapY), 0);
+            block.Move(dest);
+        }
+    }
+
     void OnPadPointerUp()
     {
         ClearLine();
@@ -98,10 +137,13 @@ public class UI_Game : UI_Popup
         StartCoroutine(ShootBalls(dir, 0.1f));
     }
 
+    int _returnBallCount;
     IEnumerator ShootBalls(Vector3 dir, float interval)
     {
         int count = _waitBalls.Count;
         GameObject hamster = GetObject((int)GameObjects.Hamster);
+        Vector3 shootPos = hamster.transform.localPosition;
+        _returnBallCount = 0;
 
         for (int i = 0; i < count; ++i)
         {
@@ -109,7 +151,7 @@ public class UI_Game : UI_Popup
 
             var ball = _waitBalls.Dequeue();
             ball.transform.SetParent(GetObject((int)GameObjects.ShootBallGroup).transform);
-            ball.transform.localPosition = hamster.transform.localPosition;
+            ball.transform.localPosition = shootPos;
             ball.Shoot(dir, transform.localScale.x);
             RefreshBall();
             _shootBalls.Enqueue(ball);
@@ -119,19 +161,29 @@ public class UI_Game : UI_Popup
         hamster.GetComponent<UI_Spine>().PlayAnimationForce(Managers.Data.Spine.hamsterWait);
     }
 
+    void BlockDestroyCallBack(UI_Block block)
+    {
+        if (_blocks.Contains(block) == false)
+            return;
+
+        _blocks.Remove(block);
+        Managers.Resource.Destroy(block.gameObject);
+    }
+
     void ShootBallCallBack(UI_Ball ball)
     {
         ball.transform.SetParent(GetObject((int)GameObjects.WaitBallGroup).transform);
         _waitBalls.Enqueue(ball);
+        _returnBallCount++;
 
-        if (_waitBalls.Count == 1)
+        if (_returnBallCount == 1)
         {
             GameObject hamster = GetObject((int)GameObjects.Hamster);
             Vector3 dest = new Vector3(ball.transform.localPosition.x, hamster.transform.localPosition.y, 0);
             dest.x = Mathf.Clamp(dest.x, -380f, 380f);
             hamster.GetComponent<UI_Spine>().Move(dest);
         }
-        else if (_waitBalls.Count == _game.FullBallCount)
+        else if (_returnBallCount == _game.FullBallCount)
         {
             RefreshUI();
         }
@@ -152,7 +204,7 @@ public class UI_Game : UI_Popup
         Vector3 src = hamster.transform.position;
         Vector3 dest = hit.centroid;
 
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < 1; ++i)
         {
             GenerateStar(src, dest, dir, i);
             if (hit.transform.tag == "Floor")
@@ -196,6 +248,7 @@ public class UI_Game : UI_Popup
 
         float ratio = (mousePos.x - leftLimit) / (padSize.x - 2 * DELTA);
         float angle = 10f + (160f * ratio);
+        angle = Math.Clamp(angle, 10f, 170f);
 
         dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad), 0);
         if (mousePos.x < leftLimit || mousePos.x > rightLimit || mousePos.y > upLimit)

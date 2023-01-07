@@ -39,7 +39,7 @@ public abstract class UI_Base : MonoBehaviour
         _move = true;
     }
 
-    void Update()
+    protected virtual void Update()
     {
         if (_move == false)
             return;

@@ -13,4 +13,12 @@ public class StartData
     public int ballSpeed;
     [XmlAttribute]
     public float hamsterPosX;
+    [XmlAttribute]
+    public float blockGapX;
+    [XmlAttribute]
+    public float blockGapY;
+    [XmlAttribute]
+    public float blockStartX;
+    [XmlAttribute]
+    public float blockStartY;
 }

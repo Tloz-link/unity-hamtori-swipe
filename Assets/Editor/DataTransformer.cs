@@ -55,6 +55,10 @@ public class DataTransformer : EditorWindow
             fullBallCount = int.Parse(row[1]),
             ballSpeed = int.Parse(row[2]),
             hamsterPosX = float.Parse(row[3]),
+            blockGapX = float.Parse(row[4]),
+            blockGapY = float.Parse(row[5]),
+            blockStartX = float.Parse(row[6]),
+            blockStartY = float.Parse(row[7]),
         };
         #endregion
 

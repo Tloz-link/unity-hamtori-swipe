@@ -13,16 +13,16 @@ MonoBehaviour:
   m_Name: sky_SkeletonData
   m_EditorClassIdentifier: 
   atlasAssets:
-  - {fileID: 11400000, guid: fd4270d3ac6fd994baff3f829665c23d, type: 2}
+  - {fileID: 11400000, guid: 4679e36d734f2a34ba8d9deb5816ebb4, type: 2}
   scale: 0.01
-  skeletonJSON: {fileID: 4900000, guid: f7246881f740f924fa81e3b7f6a9c07e, type: 3}
+  skeletonJSON: {fileID: 4900000, guid: cca87c1b413e27d488c72c4f5203a41f, type: 3}
   isUpgradingBlendModeMaterials: 0
   blendModeMaterials:
     requiresBlendModeMaterials: 1
     applyAdditiveMaterial: 1
     additiveMaterials:
     - pageName: sky.png
-      material: {fileID: 2100000, guid: 652e67c0ce2dd0f45ac01fb3ea70dd7d, type: 2}
+      material: {fileID: 2100000, guid: d92f801f9c9d4dc48b585b44cfd57163, type: 2}
     multiplyMaterials: []
     screenMaterials: []
   skeletonDataModifiers: []

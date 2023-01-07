@@ -2,6 +2,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Define;
+
+[Serializable]
+public class BlockInfo
+{
+    public int x;
+    public int y;
+    public int hp;
+}
 
 [Serializable]
 public class GameData
@@ -11,6 +20,7 @@ public class GameData
     public int ballSpeed;
 
     public float hamsterPosX;
+    public BlockInfo[] blockList = new BlockInfo[MAX_BLOCK_COUNT];
 }
 
 
@@ -40,6 +50,26 @@ public class GameManagerEX
     {
         get { return _gameData.hamsterPosX; }
         set { _gameData.hamsterPosX = value; }
+    }
+
+    public float BlockGapX
+    {
+        get { return Managers.Data.Start.blockGapX; }
+    }
+
+    public float BlockGapY
+    {
+        get { return Managers.Data.Start.blockGapY; }
+    }
+
+    public float BlockStartX
+    {
+        get { return Managers.Data.Start.blockStartX; }
+    }
+
+    public float BlockStartY
+    {
+        get { return Managers.Data.Start.blockStartY; }
     }
 
     public void Init()

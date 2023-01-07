@@ -35,7 +35,7 @@ public class UI_Ball : UI_Spine
         _shootCallBack = callBack;
     }
 
-    void Update()
+    protected override void Update()
     {
         if (_state == State.idle)
             return;
@@ -77,9 +77,10 @@ public class UI_Ball : UI_Spine
 
     public override void Move(Vector3 dest)
     {
-        base.Move(dest);
         Init();
+
         _state = State.move;
+        _dest = dest;
     }
 
     public void Shoot(Vector3 dir, float delta)

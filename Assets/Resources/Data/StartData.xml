@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<StartData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" score="0" fullBallCount="5" ballSpeed="6" hamsterPosX="0" />
+<StartData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" score="0" fullBallCount="5" ballSpeed="6" hamsterPosX="0" blockGapX="139.5" blockGapY="132.75" blockStartX="-419" blockStartY="636" />
