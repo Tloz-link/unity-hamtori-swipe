@@ -13,17 +13,48 @@ public abstract class UI_Base : MonoBehaviour
 
     protected bool _init = false;
 
+    protected Vector3 _dest;
+    protected bool _move = false;
+
     public virtual bool Init()
     {
         if (_init)
             return false;
 
+        _move = false;
         return _init = true;
     }
+
 
     private void Start()
     {
         Init();
+    }
+
+    public virtual void Move(Vector3 dest)
+    {
+        Init();
+
+        _dest = dest;
+        _move = true;
+    }
+
+    void Update()
+    {
+        if (_move == false)
+            return;
+
+        Vector3 dir = _dest - transform.localPosition;
+        if (dir.magnitude < 0.0001f)
+        {
+            _move = false;
+        }
+        else
+        {
+            float delta = 1 + dir.magnitude / 400f;
+            float moveDist = Mathf.Clamp(1200f * Time.deltaTime * delta, 0, dir.magnitude);
+            transform.localPosition += dir.normalized * moveDist;
+        }
     }
 
     protected void Bind<T>(Type type) where T : UnityEngine.Object

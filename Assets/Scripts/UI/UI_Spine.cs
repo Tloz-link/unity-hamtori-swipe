@@ -4,12 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BaseController : UI_Base
+public class UI_Spine : UI_Base
 {
     protected SkeletonGraphic _anim = null;
-
-    protected Vector3 _dest;
-    protected bool _move = false;
 
     public override bool Init()
     {
@@ -17,34 +14,7 @@ public class BaseController : UI_Base
             return false;
 
         _anim = GetComponent<SkeletonGraphic>();
-        _move = false;
         return true;
-    }
-
-    public virtual void Move(Vector3 dest)
-    {
-        Init();
-
-        _dest = dest;
-        _move = true;
-    }
-
-    void Update()
-    {
-        if (_move == false)
-            return;
-
-        Vector3 dir = _dest - transform.localPosition;
-        if (dir.magnitude < 0.0001f)
-        {
-            _move = false;
-        }
-        else
-        {
-            float delta = 1 + dir.magnitude / 400f;
-            float moveDist = Mathf.Clamp(1200f * Time.deltaTime * delta, 0, dir.magnitude);
-            transform.localPosition += dir.normalized * moveDist;
-        }
     }
 
     #region Spine Animation
@@ -58,8 +28,20 @@ public class BaseController : UI_Base
     public void PlayAnimation(string name, bool loop = true)
     {
         Init();
+        if (_anim.startingAnimation == name)
+            return;
+
         _anim.startingAnimation = name;
         _anim.startingLoop = loop;
+        _anim.Initialize(true);
+    }
+
+    public void PlayAnimationForce(string name, bool loop = true)
+    {
+        Init();
+        _anim.startingAnimation = name;
+        _anim.startingLoop = loop;
+        _anim.Initialize(true);
     }
 
     public void ChangeSkin(string name)

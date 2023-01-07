@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class UI_Ball : BaseController
+public class UI_Ball : UI_Spine
 {
     enum State
     {
@@ -25,6 +25,14 @@ public class UI_Ball : BaseController
 
         _state = State.idle;
         return true;
+    }
+
+    public void SetInfo(float startLine, Action<UI_Ball> callBack)
+    {
+        PlayAnimation(Managers.Data.Spine.ballIdle);
+        transform.localScale = new Vector3(0.8f, 0.8f, 1f);
+        _startLine = startLine;
+        _shootCallBack = callBack;
     }
 
     void Update()
@@ -74,13 +82,11 @@ public class UI_Ball : BaseController
         _state = State.move;
     }
 
-    public void Shoot(Vector3 dir, float delta, float startLine, Action<UI_Ball> callBack)
+    public void Shoot(Vector3 dir, float delta)
     {
         Init();
 
         GetComponent<Rigidbody2D>().AddForce(dir.normalized * Managers.Game.BallSpeed * delta);
-        _startLine = startLine;
-        _shootCallBack = callBack;
         _state = State.shoot;
     }
 }

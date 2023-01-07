@@ -1,0 +1,3 @@
+//블럭 기본,//공 기본,//햄스터 기본,//햄스터 차징,//햄스터 발사,//햄스터 대기,//햄스터 게임오버,//햄스터 강화 후,//햄스터 강화
+blockIdle,ballIdle,hamsterIdle,hamsterCharge,hamsterShoot,hamsterWait,hamsterGameover,hamsterSeedAfter,hamsterSeedEat
+block,idle,01_idle,03_charge_loop,03_charge_ready,01_idle2,02_game_over,04_seed_after,04_seed_eat

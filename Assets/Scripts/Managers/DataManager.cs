@@ -13,10 +13,12 @@ public interface ILoader<Key, Value>
 public class DataManager
 {
     public StartData Start { get; private set; }
+    public SpineData Spine { get; private set; }
 
     public void Init()
     {
         Start = LoadSingleXml<StartData>("StartData");
+        Spine = LoadSingleXml<SpineData>("SpineData");
     }
 
     //Loader LoadJson<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>

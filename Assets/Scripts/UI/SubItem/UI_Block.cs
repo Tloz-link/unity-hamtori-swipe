@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_Block : BaseController
+public class UI_Block : UI_Spine
 {
     public override bool Init()
     {

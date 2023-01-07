@@ -36,6 +36,7 @@ public class DataTransformer : EditorWindow
     public static void ParseExcel()
     {
         ParseStartData();
+        ParseSpineData();
     }
 
     static void ParseStartData()
@@ -59,6 +60,37 @@ public class DataTransformer : EditorWindow
 
         string xmlString = ToXML(startData);
         File.WriteAllText($"{Application.dataPath}/Resources/Data/StartData.xml", xmlString);
+        AssetDatabase.Refresh();
+    }
+
+    static void ParseSpineData()
+    {
+        SpineData spineData;
+
+        #region ExcelData
+        string[] lines = Resources.Load<TextAsset>($"Data/Excel/SpineData").text.Split("\n");
+
+        // 두번째 라인까지 스킵
+        string[] row = lines[2].Replace("\r", "").Split(',');
+
+        spineData = new SpineData()
+        {
+            blockIdle = row[0],
+
+            ballIdle = row[1],
+
+            hamsterIdle = row[2],
+            hamsterCharge = row[3],
+            hamsterShoot = row[4],
+            hamsterWait = row[5],
+            hamsterGameover = row[6],
+            hamsterSeedAfter = row[7],
+            hamsterSeedEat = row[8]
+        };
+        #endregion
+
+        string xmlString = ToXML(spineData);
+        File.WriteAllText($"{Application.dataPath}/Resources/Data/SpineData.xml", xmlString);
         AssetDatabase.Refresh();
     }
 
