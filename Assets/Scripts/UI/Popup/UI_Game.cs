@@ -48,22 +48,20 @@ public class UI_Game : UI_Popup
             _waitBalls.Enqueue(ball);
         }
 
-        RefreshUI();
+        StartCoroutine(RefreshUI(0));
         return true;
     }
 
-    public void RefreshUI()
+    IEnumerator RefreshUI(float interval)
     {
-        if (_init == false)
-            return;
-
-        GetObject((int)GameObjects.ControlPad).SetActive(true);
-        GetObject((int)GameObjects.Floor).SetActive(true);
-
-        GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
-
+        yield return new WaitForSeconds(interval);
         RefreshBall();
         RefreshBlock();
+
+        yield return new WaitForSeconds(0.1f);
+        GetObject((int)GameObjects.ControlPad).SetActive(true);
+        GetObject((int)GameObjects.Floor).SetActive(true);
+        GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
     }
 
     public void RefreshBall()
@@ -106,7 +104,7 @@ public class UI_Game : UI_Popup
             {
                 x = spawnList[rand],
                 y = 0,
-                hp = 5 //hp 계산식 만들어야함
+                hp = _game.Score
             };
             UI_Block block = Managers.UI.makeSubItem<UI_Block>(GetObject((int)GameObjects.BlockGroup).transform);
             block.SetInfo(info, BlockDestroyCallBack);
@@ -183,9 +181,11 @@ public class UI_Game : UI_Popup
             dest.x = Mathf.Clamp(dest.x, -380f, 380f);
             hamster.GetComponent<UI_Spine>().Move(dest);
         }
-        else if (_returnBallCount == _game.FullBallCount)
+
+        if (_returnBallCount == _game.FullBallCount)
         {
-            RefreshUI();
+            _game.Score++;
+            StartCoroutine(RefreshUI(0.4f));
         }
     }
 

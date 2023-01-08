@@ -4,16 +4,12 @@ using UnityEngine;
 
 public class GameScene : BaseScene
 {
-    protected override void Init()
+    protected override bool Init()
     {
-        base.Init();
+        if (base.Init() == false)
+            return false;
 
         SceneType = Define.Scene.DevScene;
+        return true;
     }
-
-    public override void Clear()
-    {
-        
-    }
-
 }
