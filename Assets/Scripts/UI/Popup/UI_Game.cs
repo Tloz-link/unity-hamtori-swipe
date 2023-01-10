@@ -44,6 +44,7 @@ public class UI_Game : UI_Popup
     Queue<UI_Ball> _waitBalls = new Queue<UI_Ball>();
     Queue<UI_Ball> _shootBalls = new Queue<UI_Ball>();
     List<UI_Block> _blocks = new List<UI_Block>();
+    List<UI_Item_Star> _items = new List<UI_Item_Star>();
     List<GameObject> _arrowStars = new List<GameObject>();
     GameObject _arrowMoon;
 
@@ -57,6 +58,8 @@ public class UI_Game : UI_Popup
         BindObject(typeof(GameObjects));
         BindText(typeof(Texts));
 
+        AdjustUIByResolution();
+
         GetObject((int)GameObjects.CloudBG).SetActive(false);
         GetObject((int)GameObjects.PowerSkill).SetActive(false);
         GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>();
@@ -66,13 +69,18 @@ public class UI_Game : UI_Popup
         for (int i = 0; i < _game.FullBallCount; ++i)
         {
             UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.WaitBallGroup).transform);
-            ball.SetInfo(GetObject((int)GameObjects.ControlPad).transform.localPosition.y, ShootBallCallBack);
+            ball.SetInfo(GetObject((int)GameObjects.ControlPad).transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, ShootBallCallBack, CreateBallCallBack);
             _waitBalls.Enqueue(ball);
         }
 
         StartCoroutine(RefreshBoard(0));
         RefreshUI();
+        return true;
+    }
 
+    void AdjustUIByResolution()
+    {
+        // 해상도 별 UI 조정
         float scaleHeight = ((float)Screen.width / Screen.height) / ((float)9 / 16);
         Vector2 canvasSize;
 
@@ -114,7 +122,6 @@ public class UI_Game : UI_Popup
         }
 
         GetObject((int)GameObjects.BackGround).GetComponent<RectTransform>().sizeDelta = canvasSize;
-        return true;
     }
 
     void RefreshUI()
@@ -159,7 +166,7 @@ public class UI_Game : UI_Popup
 
     public void RefreshBlock()
     {
-        int count = UnityEngine.Random.Range(1, 5);
+        int count = UnityEngine.Random.Range(2, 7);
         List<int> spawnList = new List<int>();
 
         for (int i = 0; i < 7; ++i)
@@ -167,7 +174,7 @@ public class UI_Game : UI_Popup
             spawnList.Add(i);
         }
 
-        for (int i = 0; i < count; ++i)
+        for (int i = 0; i < count - 1; ++i)
         {
             int rand = UnityEngine.Random.Range(0, spawnList.Count);
             BlockInfo info = new BlockInfo
@@ -182,12 +189,29 @@ public class UI_Game : UI_Popup
             spawnList.RemoveAt(rand);
         }
 
+        ItemInfo itemInfo = new ItemInfo
+        {
+            x = spawnList[0],
+            y = 0,
+        };
+        UI_Item_Star star = Managers.UI.makeSubItem<UI_Item_Star>(GetObject((int)GameObjects.BlockGroup).transform);
+        star.SetInfo(itemInfo, AcquireStarCallBack);
+        _items.Add(star);
+
         foreach (var block in _blocks)
         {
             BlockInfo info = block.GetInfo();
             info.y += 1;
             Vector3 dest = new Vector3(_game.BlockStartX + (info.x * _game.BlockGapX), _game.BlockStartY - (info.y * _game.BlockGapY), 0);
             block.Move(dest);
+        }
+
+        foreach (var item in _items)
+        {
+            ItemInfo info = item.GetInfo();
+            info.y += 1;
+            Vector3 dest = new Vector3(_game.BlockStartX + (info.x * _game.BlockGapX), _game.BlockStartY - (info.y * _game.BlockGapY), 0);
+            item.Move(dest);
         }
     }
 
@@ -206,12 +230,14 @@ public class UI_Game : UI_Popup
     }
 
     int _returnBallCount;
+    int _createBallCount;
     IEnumerator ShootBalls(Vector3 dir, float interval)
     {
         int count = _waitBalls.Count;
         GameObject hamster = GetObject((int)GameObjects.Hamster);
         Vector3 shootPos = hamster.transform.localPosition;
         _returnBallCount = 0;
+        _createBallCount = 0;
 
         for (int i = 0; i < count; ++i)
         {
@@ -229,6 +255,20 @@ public class UI_Game : UI_Popup
         hamster.GetComponent<UI_Spine>().PlayAnimationForce(Managers.Data.Spine.hamsterWait);
     }
 
+    void AcquireStarCallBack(UI_Item_Star star)
+    {
+        if (_items.Contains(star) == false)
+            return;
+
+        UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.ShootBallGroup).transform);
+        ball.SetInfo(star.transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, ShootBallCallBack, CreateBallCallBack);
+        ball.Create(transform.localScale.x);
+        _game.FullBallCount++;
+
+        _items.Remove(star);
+        Managers.Resource.Destroy(star.gameObject);
+    }
+
     void BlockDestroyCallBack(UI_Block block)
     {
         if (_blocks.Contains(block) == false)
@@ -238,11 +278,22 @@ public class UI_Game : UI_Popup
         Managers.Resource.Destroy(block.gameObject);
     }
 
+    void CreateBallCallBack(UI_Ball ball)
+    {
+        _createBallCount++;
+        ReachBall(ball);
+    }
+
     void ShootBallCallBack(UI_Ball ball)
+    {
+        _returnBallCount++;
+        ReachBall(ball);
+    }
+
+    void ReachBall(UI_Ball ball)
     {
         ball.transform.SetParent(GetObject((int)GameObjects.WaitBallGroup).transform);
         _waitBalls.Enqueue(ball);
-        _returnBallCount++;
 
         if (_returnBallCount == 1)
         {
@@ -252,7 +303,7 @@ public class UI_Game : UI_Popup
             hamster.GetComponent<UI_Spine>().Move(dest);
         }
 
-        if (_returnBallCount == _game.FullBallCount)
+        if (_returnBallCount + _createBallCount == _game.FullBallCount)
         {
             _game.Score++;
             RefreshUI();
@@ -309,7 +360,7 @@ public class UI_Game : UI_Popup
     bool GetShootDir(out Vector3 dir)
     {
         Vector3 mousePos = Input.mousePosition;
-        mousePos -= transform.position;
+        mousePos -= GetObject((int)GameObjects.GameBoard).transform.position;
         mousePos /= transform.localScale.x;
 
         Vector2 padSize = GetObject((int)GameObjects.ControlPad).GetComponent<RectTransform>().sizeDelta;

@@ -10,13 +10,18 @@ public class UI_Ball : UI_Spine
     {
         idle,
         shoot,
-        move
+        move,
+        create
     }
     State _state;
 
+    CircleCollider2D _collider;
+
     //shoot
     Action<UI_Ball> _shootCallBack;
+    Action<UI_Ball> _createCallBack;
     float _startLine;
+
 
     public override bool Init()
     {
@@ -27,12 +32,16 @@ public class UI_Ball : UI_Spine
         return true;
     }
 
-    public void SetInfo(float startLine, Action<UI_Ball> callBack)
+    public void SetInfo(Vector3 initPos, float startLine, Action<UI_Ball> shootCallBack, Action<UI_Ball> createCallBack)
     {
+        _collider = GetComponent<CircleCollider2D>();
+
         PlayAnimation(Managers.Data.Spine.ballIdle);
+        transform.localPosition = initPos;
         transform.localScale = new Vector3(0.8f, 0.8f, 1f);
         _startLine = startLine;
-        _shootCallBack = callBack;
+        _shootCallBack = shootCallBack;
+        _createCallBack = createCallBack;
     }
 
     protected override void Update()
@@ -42,6 +51,19 @@ public class UI_Ball : UI_Spine
 
         switch(_state)
         {
+            case State.create:
+                {
+                    if (transform.localPosition.y <= _startLine)
+                    {
+                        GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+                        transform.localPosition = new Vector3(transform.localPosition.x, _startLine, 0);
+                        transform.rotation = Quaternion.identity;
+                        _collider.enabled = true;
+                        _state = State.idle;
+                        _createCallBack.Invoke(this);
+                    }
+                }
+                break;
             case State.shoot:
                 {
                     Vector2 dir = GetComponent<Rigidbody2D>().velocity;
@@ -89,5 +111,15 @@ public class UI_Ball : UI_Spine
 
         GetComponent<Rigidbody2D>().AddForce(dir.normalized * Managers.Game.BallSpeed * delta);
         _state = State.shoot;
+    }
+
+    public void Create(float delta)
+    {
+        Init();
+
+        GetComponent<Rigidbody2D>().AddForce(Vector3.down * Managers.Game.BallSpeed * delta);
+        transform.rotation = Quaternion.identity;
+        _collider.enabled = false;
+        _state = State.create;
     }
 }

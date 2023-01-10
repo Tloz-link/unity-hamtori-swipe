@@ -5,6 +5,13 @@ using UnityEngine;
 using static Define;
 
 [Serializable]
+public class ItemInfo
+{
+    public int x;
+    public int y;
+}
+
+[Serializable]
 public class BlockInfo
 {
     public int x;
@@ -21,6 +28,7 @@ public class GameData
 
     public float hamsterPosX;
     public BlockInfo[] blockList = new BlockInfo[MAX_BLOCK_COUNT];
+    public ItemInfo[] itemList = new ItemInfo[MAX_BLOCK_COUNT];
 }
 
 
