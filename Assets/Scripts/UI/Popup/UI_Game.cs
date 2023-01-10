@@ -134,8 +134,19 @@ public class UI_Game : UI_Popup
         yield return new WaitForSeconds(interval);
         RefreshBall();
         RefreshBlock();
-
         yield return new WaitForSeconds(0.1f);
+
+        if (CheckGameOver() == true)
+        {
+            yield break;
+        }
+        
+        //if (CheckStar() == true)
+        //{
+        //    RefreshBall();
+        //    yield return new WaitForSeconds(0.1f);
+        //}
+
         GetObject((int)GameObjects.ControlPad).SetActive(true);
         GetObject((int)GameObjects.Floor).SetActive(true);
         GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
@@ -214,6 +225,43 @@ public class UI_Game : UI_Popup
             item.Move(dest);
         }
     }
+
+    bool CheckGameOver()
+    {
+        foreach (var block in _blocks)
+        {
+            BlockInfo info = block.GetInfo();
+            if (info.y >= 8)
+            {
+                UI_GameOver ui = Managers.UI.ShowPopupUI<UI_GameOver>();
+                ui.SetInfo(GetObject((int)GameObjects.Hamster).transform.position, () =>
+                {
+                    Managers.UI.ClosePopupUI();
+                    Managers.UI.ClosePopupUI();
+                    Managers.Game.Init();
+                    Managers.UI.ShowPopupUI<UI_Game>();
+                });
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //bool CheckStar()
+    //{
+    //    bool ret = false;
+    //    foreach (var item in _items)
+    //    {
+    //        ItemInfo info = item.GetInfo();
+    //        if (info.y >= 8)
+    //        {
+    //            _game.FullBallCount++;
+    //            item.TouchStar();
+    //            ret = true;
+    //        }
+    //    }
+    //    return ret;
+    //}
 
     void OnPadPointerUp()
     {

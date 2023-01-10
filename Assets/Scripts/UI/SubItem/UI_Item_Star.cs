@@ -30,11 +30,16 @@ public class UI_Item_Star : UI_Spine
         return _info;
     }
 
+    public void TouchStar()
+    {
+        _destroyCallBack.Invoke(this);
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Ball")
         {
-            _destroyCallBack.Invoke(this);
+            TouchStar();
         }
     }
 }
