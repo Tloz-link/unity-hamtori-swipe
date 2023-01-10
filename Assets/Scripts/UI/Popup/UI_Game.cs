@@ -9,6 +9,17 @@ public class UI_Game : UI_Popup
 {
     enum GameObjects
     {
+        BackGround,
+        StarBG,
+        CloudBG,
+
+        // Header
+        Score,
+        Power,
+        Option,
+
+        // Game Board
+        GameBoard,
         ControlPad,
         Hamster,
         ArrowGroup1,
@@ -17,7 +28,15 @@ public class UI_Game : UI_Popup
         ShootBallGroup,
         WaitBallGroup,
         BlockGroup,
-        Floor
+        Floor,
+        PowerSkill,
+        LeftSkill,
+        RightSkill
+    }
+
+    enum Texts
+    {
+        ScoreText
     }
 
     GameManagerEX _game;
@@ -36,7 +55,10 @@ public class UI_Game : UI_Popup
         _game = Managers.Game;
 
         BindObject(typeof(GameObjects));
+        BindText(typeof(Texts));
 
+        GetObject((int)GameObjects.CloudBG).SetActive(false);
+        GetObject((int)GameObjects.PowerSkill).SetActive(false);
         GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>();
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPressed, Define.UIEvent.Pressed);
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerUp, Define.UIEvent.PointerUp);
@@ -48,11 +70,59 @@ public class UI_Game : UI_Popup
             _waitBalls.Enqueue(ball);
         }
 
-        StartCoroutine(RefreshUI(0));
+        StartCoroutine(RefreshBoard(0));
+        RefreshUI();
+
+        float scaleHeight = ((float)Screen.width / Screen.height) / ((float)9 / 16);
+        Vector2 canvasSize;
+
+        if (scaleHeight <= 1)
+        {
+            // ¼¼·Î·Î ±è
+            canvasSize = new Vector2(1080, Screen.height / transform.localScale.x);
+            float deltaY = Mathf.Abs((1080 * (Screen.height * 1080 / Screen.width)) - (1080 * 1920)) / 2 / 1080;
+            float scoreDeltaY = GetObject((int)(GameObjects.Option)).GetComponent<RectTransform>().sizeDelta.y;
+
+            GetObject((int)(GameObjects.StarBG)).transform.localPosition += new Vector3(0, deltaY, 0);
+            GetObject((int)(GameObjects.Option)).transform.localPosition += new Vector3(0, deltaY, 0);
+            GetObject((int)(GameObjects.Score)).transform.localPosition += new Vector3(0, deltaY, 0);
+            if (deltaY > scoreDeltaY)
+            {
+                GetObject((int)(GameObjects.Score)).transform.localPosition -= new Vector3(0, scoreDeltaY, 0);
+            }
+
+            GetObject((int)(GameObjects.Power)).transform.localPosition -= new Vector3(0, deltaY * 0.8f, 0);
+            GetObject((int)(GameObjects.GameBoard)).transform.localPosition -= new Vector3(0, deltaY * 0.8f, 0);
+        }
+        else
+        {
+            // °¡·Î·Î ±è
+            canvasSize = new Vector2(2048, 1920);
+            canvasSize.x = Math.Min(canvasSize.x, Screen.width / transform.localScale.x);
+            float deltaX = Mathf.Abs((1920 * (canvasSize.x * 1920 / canvasSize.y)) - (1080 * 1920)) / 2 / 1920;
+
+            GetObject((int)(GameObjects.Option)).transform.localPosition += new Vector3(deltaX, 0, 0);
+            GetObject((int)(GameObjects.RightSkill)).transform.localPosition += new Vector3(deltaX * 0.1f, 0, 0);
+            GetObject((int)(GameObjects.LeftSkill)).transform.localPosition -= new Vector3(deltaX * 0.1f, 0, 0);
+            GetObject((int)(GameObjects.Power)).transform.localPosition += new Vector3(deltaX * 0.2f, 0, 0);
+            GetObject((int)(GameObjects.Score)).transform.localPosition -= new Vector3(deltaX * 0.2f, 0, 0);
+
+            if (deltaX >= 480)
+            {
+                GetObject((int)GameObjects.CloudBG).SetActive(true);
+            }
+        }
+
+        GetObject((int)GameObjects.BackGround).GetComponent<RectTransform>().sizeDelta = canvasSize;
         return true;
     }
 
-    IEnumerator RefreshUI(float interval)
+    void RefreshUI()
+    {
+        GetText((int)Texts.ScoreText).text = $"{_game.Score}";
+    }
+
+    IEnumerator RefreshBoard(float interval)
     {
         yield return new WaitForSeconds(interval);
         RefreshBall();
@@ -185,7 +255,8 @@ public class UI_Game : UI_Popup
         if (_returnBallCount == _game.FullBallCount)
         {
             _game.Score++;
-            StartCoroutine(RefreshUI(0.4f));
+            RefreshUI();
+            StartCoroutine(RefreshBoard(0.4f));
         }
     }
 
