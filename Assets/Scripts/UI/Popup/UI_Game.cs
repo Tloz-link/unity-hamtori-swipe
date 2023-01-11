@@ -36,7 +36,9 @@ public class UI_Game : UI_Popup
 
     enum Texts
     {
-        ScoreText
+        ScoreText,
+        PowerUpCooltimeText,
+        GlassesCooltimeText
     }
 
     enum Images
@@ -138,6 +140,9 @@ public class UI_Game : UI_Popup
     void RefreshUI()
     {
         GetText((int)Texts.ScoreText).text = $"{_game.Score}";
+        GetText((int)Texts.PowerUpCooltimeText).text = (_game.PowerUpCooltime == 0) ? "" : $"{_game.PowerUpCooltime}";
+        GetText((int)Texts.GlassesCooltimeText).text = (_game.GlassesCooltime == 0) ? "" : $"{_game.GlassesCooltime}";
+
         if (_game.GlassesCooltime == 0)
             GetImage((int)Images.GlassesSkill).sprite = Managers.Resource.Load<Sprite>(_startData.glassesOnSpritePath);
         else
