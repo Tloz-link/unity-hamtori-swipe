@@ -164,7 +164,6 @@ public class UI_Game : UI_Popup
         }
 
         RefreshUI();
-        GetObject((int)GameObjects.ControlPad).SetActive(true);
         GetObject((int)GameObjects.Floor).SetActive(true);
         GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
         _game.State = GameState.idle;
@@ -289,13 +288,15 @@ public class UI_Game : UI_Popup
 
     void OnPadPointerUp()
     {
+        if (_game.State != GameState.idle)
+            return;
+
         ClearLine();
 
         Vector3 dir;
         if (GetShootDir(out dir) == false)
             return;
 
-        GetObject((int)GameObjects.ControlPad).SetActive(false);
         GetObject((int)GameObjects.Floor).SetActive(false);
         _game.State = GameState.shoot;
 
@@ -399,9 +400,9 @@ public class UI_Game : UI_Popup
         if (_game.PowerUpCooltime > 0 || _game.State != GameState.idle)
             return;
 
-        //todo 애니메이션 넣기
         _game.PowerUpCooltime = _startData.powerUpFullCooltime;
         _game.BallDamage = _startData.powerUpValue;
+        StartCoroutine(CoSkillAnimation(Managers.Data.Spine.hamsterSeedEat));
 
         RefreshUI();
     }
@@ -411,15 +412,31 @@ public class UI_Game : UI_Popup
         if (_game.GlassesCooltime > 0 || _game.State != GameState.idle)
             return;
 
-        //todo 애니메이션 넣기
         _game.GlassesCooltime = _startData.glassesFullColltime;
         _game.LineCount = _startData.glassesValue;
+        StartCoroutine(CoSkillAnimation(Managers.Data.Spine.hamsterSeedAfter));
 
         RefreshUI();
     }
 
+    IEnumerator CoSkillAnimation(string name)
+    {
+        UI_Spine hamAnim = GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>();
+        hamAnim.PlayAnimation(name);
+        _game.State = GameState.skill;
+
+        float length = hamAnim.GetAnimationLength(name);
+        yield return new WaitForSeconds(length);
+
+        _game.State = GameState.idle;
+        hamAnim.PlayAnimation(Managers.Data.Spine.hamsterIdle);
+    }
+
     void OnPadPressed()
     {
+        if (_game.State != GameState.idle)
+            return;
+
         ClearLine();
 
         Vector3 dir;
@@ -480,7 +497,7 @@ public class UI_Game : UI_Popup
         dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad), 0);
         if (mousePos.x < leftLimit || mousePos.x > rightLimit || mousePos.y > upLimit)
         {
-            GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterGameover);
+            GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
             return false;
         }
         return true;

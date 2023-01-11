@@ -25,6 +25,11 @@ public class UI_Spine : UI_Base
         _anim.Initialize(true);
     }
 
+    public float GetAnimationLength(string name)
+    {
+        return _anim.skeletonDataAsset.GetSkeletonData(true).FindAnimation(name).Duration;
+    }
+
     public void PlayAnimation(string name, bool loop = true)
     {
         Init();
@@ -69,6 +74,7 @@ public class UI_Spine : UI_Base
 
         _anim.startingLoop = false;
         _anim.startingAnimation = name;
+        _anim.Initialize(true);
 
         float length = _anim.skeletonDataAsset.GetSkeletonData(true).FindAnimation(name).Duration;
         yield return new WaitForSeconds(length); // 애니 시간만큼 대기

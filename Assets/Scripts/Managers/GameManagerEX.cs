@@ -22,7 +22,8 @@ public class BlockInfo
 public enum GameState
 {
     idle,
-    shoot
+    shoot,
+    skill
 }
 
 [Serializable]
