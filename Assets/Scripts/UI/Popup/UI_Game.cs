@@ -39,7 +39,14 @@ public class UI_Game : UI_Popup
         ScoreText
     }
 
+    enum Images
+    {
+        PowerUpSkill,
+        GlassesSkill
+    }
+
     GameManagerEX _game;
+    StartData _startData;
 
     Queue<UI_Ball> _waitBalls = new Queue<UI_Ball>();
     Queue<UI_Ball> _shootBalls = new Queue<UI_Ball>();
@@ -54,9 +61,11 @@ public class UI_Game : UI_Popup
             return false;
 
         _game = Managers.Game;
+        _startData = Managers.Data.Start;
 
         BindObject(typeof(GameObjects));
         BindText(typeof(Texts));
+        BindImage(typeof(Images));
 
         AdjustUIByResolution();
 
@@ -65,6 +74,8 @@ public class UI_Game : UI_Popup
         GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>();
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPressed, Define.UIEvent.Pressed);
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerUp, Define.UIEvent.PointerUp);
+        GetImage((int)Images.PowerUpSkill).gameObject.BindEvent(OnPowerUpSkill);
+        GetImage((int)Images.GlassesSkill).gameObject.BindEvent(OnGlassesSkill);
 
         for (int i = 0; i < _game.FullBallCount; ++i)
         {
@@ -127,29 +138,36 @@ public class UI_Game : UI_Popup
     void RefreshUI()
     {
         GetText((int)Texts.ScoreText).text = $"{_game.Score}";
+        if (_game.GlassesCooltime == 0)
+            GetImage((int)Images.GlassesSkill).sprite = Managers.Resource.Load<Sprite>(_startData.glassesOnSpritePath);
+        else
+            GetImage((int)Images.GlassesSkill).sprite = Managers.Resource.Load<Sprite>(_startData.glassesOffSpritePath);
+
+        if (_game.PowerUpCooltime == 0)
+            GetImage((int)Images.PowerUpSkill).sprite = Managers.Resource.Load<Sprite>(_startData.powerUpOnSpritePath);
+        else
+            GetImage((int)Images.PowerUpSkill).sprite = Managers.Resource.Load<Sprite>(_startData.powerUpOffSpritePath);
     }
 
     IEnumerator RefreshBoard(float interval)
     {
+        CheckStar();
         yield return new WaitForSeconds(interval);
+
         RefreshBall();
         RefreshBlock();
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.2f);
 
         if (CheckGameOver() == true)
         {
             yield break;
         }
-        
-        //if (CheckStar() == true)
-        //{
-        //    RefreshBall();
-        //    yield return new WaitForSeconds(0.1f);
-        //}
 
+        RefreshUI();
         GetObject((int)GameObjects.ControlPad).SetActive(true);
         GetObject((int)GameObjects.Floor).SetActive(true);
         GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
+        _game.State = GameState.idle;
     }
 
     public void RefreshBall()
@@ -177,7 +195,12 @@ public class UI_Game : UI_Popup
 
     public void RefreshBlock()
     {
-        int count = UnityEngine.Random.Range(2, 7);
+        int count = UnityEngine.Random.Range(4, 7);
+        if (_game.Score < 5)
+        {
+            count = _game.Score + 1;
+        }
+
         List<int> spawnList = new List<int>();
 
         for (int i = 0; i < 7; ++i)
@@ -210,20 +233,10 @@ public class UI_Game : UI_Popup
         _items.Add(star);
 
         foreach (var block in _blocks)
-        {
-            BlockInfo info = block.GetInfo();
-            info.y += 1;
-            Vector3 dest = new Vector3(_game.BlockStartX + (info.x * _game.BlockGapX), _game.BlockStartY - (info.y * _game.BlockGapY), 0);
-            block.Move(dest);
-        }
+            block.MoveNext();
 
         foreach (var item in _items)
-        {
-            ItemInfo info = item.GetInfo();
-            info.y += 1;
-            Vector3 dest = new Vector3(_game.BlockStartX + (info.x * _game.BlockGapX), _game.BlockStartY - (info.y * _game.BlockGapY), 0);
-            item.Move(dest);
-        }
+            item.MoveNext();
     }
 
     bool CheckGameOver()
@@ -247,21 +260,32 @@ public class UI_Game : UI_Popup
         return false;
     }
 
-    //bool CheckStar()
-    //{
-    //    bool ret = false;
-    //    foreach (var item in _items)
-    //    {
-    //        ItemInfo info = item.GetInfo();
-    //        if (info.y >= 8)
-    //        {
-    //            _game.FullBallCount++;
-    //            item.TouchStar();
-    //            ret = true;
-    //        }
-    //    }
-    //    return ret;
-    //}
+    void CheckStar()
+    {
+        List<UI_Item_Star> removeList = new List<UI_Item_Star>();
+
+        foreach (var item in _items)
+        {
+            ItemInfo info = item.GetInfo();
+            if (info.y >= 7)
+            {
+                UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.WaitBallGroup).transform);
+                Vector3 dest = new Vector3(item.transform.localPosition.x, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, 0);
+                ball.SetInfo(item.transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, ShootBallCallBack, CreateBallCallBack);
+                ball.Move(dest);
+                _waitBalls.Enqueue(ball);
+                _game.FullBallCount++;
+
+                removeList.Add(item);
+            }
+        }
+
+        foreach (var item in removeList)
+        {
+            _items.Remove(item);
+            Managers.Resource.Destroy(item.gameObject);
+        }
+    }
 
     void OnPadPointerUp()
     {
@@ -273,6 +297,7 @@ public class UI_Game : UI_Popup
 
         GetObject((int)GameObjects.ControlPad).SetActive(false);
         GetObject((int)GameObjects.Floor).SetActive(false);
+        _game.State = GameState.shoot;
 
         StartCoroutine(ShootBalls(dir, 0.1f));
     }
@@ -353,13 +378,46 @@ public class UI_Game : UI_Popup
 
         if (_returnBallCount + _createBallCount == _game.FullBallCount)
         {
-            _game.Score++;
-            RefreshUI();
+            UpdateValue();
             StartCoroutine(RefreshBoard(0.4f));
         }
     }
 
-    //TODO 나중에 멀티 터치 테스트 해봐야함
+    void UpdateValue()
+    {
+        _game.Score++;
+        _game.LineCount = 1;
+        _game.BallDamage = 1;
+        if (_game.GlassesCooltime > 0)
+            _game.GlassesCooltime--;
+        if (_game.PowerUpCooltime > 0)
+            _game.PowerUpCooltime--;
+    }
+
+    void OnPowerUpSkill()
+    {
+        if (_game.PowerUpCooltime > 0 || _game.State != GameState.idle)
+            return;
+
+        //todo 애니메이션 넣기
+        _game.PowerUpCooltime = _startData.powerUpFullCooltime;
+        _game.BallDamage = _startData.powerUpValue;
+
+        RefreshUI();
+    }
+
+    void OnGlassesSkill()
+    {
+        if (_game.GlassesCooltime > 0 || _game.State != GameState.idle)
+            return;
+
+        //todo 애니메이션 넣기
+        _game.GlassesCooltime = _startData.glassesFullColltime;
+        _game.LineCount = _startData.glassesValue;
+
+        RefreshUI();
+    }
+
     void OnPadPressed()
     {
         ClearLine();
@@ -374,7 +432,7 @@ public class UI_Game : UI_Popup
         Vector3 src = hamster.transform.position;
         Vector3 dest = hit.centroid;
 
-        for (int i = 0; i < 1; ++i)
+        for (int i = 0; i <_game.LineCount; ++i)
         {
             GenerateStar(src, dest, dir, i);
             if (hit.transform.tag == "Floor")
@@ -390,7 +448,6 @@ public class UI_Game : UI_Popup
         GameObject lastStar = _arrowStars[_arrowStars.Count - 1];
         _arrowMoon = Managers.Resource.Instantiate("Contents/ArrowMoon");
         CopyObjectStatus(lastStar, _arrowMoon);
-
         _arrowStars.RemoveAt(_arrowStars.Count - 1);
         Managers.Resource.Destroy(lastStar);
     }
@@ -423,7 +480,7 @@ public class UI_Game : UI_Popup
         dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad), 0);
         if (mousePos.x < leftLimit || mousePos.x > rightLimit || mousePos.y > upLimit)
         {
-            GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
+            GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterGameover);
             return false;
         }
         return true;

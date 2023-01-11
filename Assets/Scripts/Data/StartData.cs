@@ -21,4 +21,26 @@ public class StartData
     public float blockStartX;
     [XmlAttribute]
     public float blockStartY;
+
+    [XmlAttribute]
+    public int lineCount;
+    [XmlAttribute]
+    public int ballDamage;
+    [XmlAttribute]
+    public int glassesFullColltime;
+    [XmlAttribute]
+    public int powerUpFullCooltime;
+    [XmlAttribute]
+    public int glassesValue;
+    [XmlAttribute]
+    public int powerUpValue;
+
+    [XmlAttribute]
+    public string glassesOnSpritePath;
+    [XmlAttribute]
+    public string glassesOffSpritePath;
+    [XmlAttribute]
+    public string powerUpOnSpritePath;
+    [XmlAttribute]
+    public string powerUpOffSpritePath;
 }

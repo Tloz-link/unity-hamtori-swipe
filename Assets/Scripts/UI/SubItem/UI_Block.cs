@@ -8,6 +8,7 @@ public class UI_Block : UI_Spine
 {
     Action<UI_Block> _destroyCallBack;
     BlockInfo _info;
+    StartData _startData;
 
     enum Texts
     {
@@ -20,6 +21,7 @@ public class UI_Block : UI_Spine
             return false;
 
         BindText(typeof(Texts));
+        _startData = Managers.Data.Start;
         return true;
     }
 
@@ -30,8 +32,15 @@ public class UI_Block : UI_Spine
         _info = info;
         _destroyCallBack = destroyCallBack;
 
-        transform.localPosition = new Vector3(Managers.Game.BlockStartX + (info.x * Managers.Game.BlockGapX), Managers.Game.BlockStartY, 0);
+        transform.localPosition = new Vector3(_startData.blockStartX + (info.x * _startData.blockGapX), _startData.blockStartY, 0);
         RefreshUI();
+    }
+
+    public void MoveNext()
+    {
+        _info.y += 1;
+        Vector3 dest = new Vector3(_startData.blockStartX + (_info.x * _startData.blockGapX), _startData.blockStartY - (_info.y * _startData.blockGapY), 0);
+        Move(dest);
     }
 
     public void RefreshUI()
@@ -48,7 +57,7 @@ public class UI_Block : UI_Spine
     {
         if (collision.gameObject.tag == "Ball")
         {
-            _info.hp -= 1;
+            _info.hp -= Managers.Game.BallDamage;
             RefreshUI();
             if (_info.hp <= 0)
             {

@@ -59,6 +59,16 @@ public class DataTransformer : EditorWindow
             blockGapY = float.Parse(row[5]),
             blockStartX = float.Parse(row[6]),
             blockStartY = float.Parse(row[7]),
+            lineCount = int.Parse(row[8]),
+            ballDamage = int.Parse(row[9]),
+            glassesFullColltime = int.Parse(row[10]),
+            powerUpFullCooltime = int.Parse(row[11]),
+            glassesValue = int.Parse(row[12]),
+            powerUpValue = int.Parse(row[13]),
+            glassesOnSpritePath = row[14],
+            glassesOffSpritePath = row[15],
+            powerUpOnSpritePath = row[16],
+            powerUpOffSpritePath = row[17]
         };
         #endregion
 

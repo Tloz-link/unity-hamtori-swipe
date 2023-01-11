@@ -1,3 +1,3 @@
-//스코어,//공 개수,//공 속도,//햄스터 x좌표,// 블럭 x간격,//블럭 y간격,//블럭 시작좌표x,//블럭 시작좌표y
-score,fullBallCount,ballSpeed,hamsterPosX,blockGapX,blockGapY,blockStartX,blockStartY
-1,1,6,0,139.5,132.75,-419,636
+//스코어,//공 개수,//공 속도,//햄스터 x좌표,// 블럭 x간격,//블럭 y간격,//블럭 시작좌표x,//블럭 시작좌표y,// 화설표 선 개수,// 공 데미지,// 안경 쿨타임,// 파워업 쿨타임,// 안경 값,// 파워업 값,// 안경on 경로,// 안경off 경로,// 파워업on 경로,// 파워업 off 경로
+score,fullBallCount,ballSpeed,hamsterPosX,blockGapX,blockGapY,blockStartX,blockStartY,lineCount,ballDamage,glassesFullColltime,powerUpFullCooltime,glassesValue,powerUpValue,glassesOnSpritePath,glassesOffSpritePath,powerUpOnSpritePath,powerUpOffSpritePath
+1,1,6,0,139.5,132.75,-419,636,1,1,3,8,3,2,Sprites/UI/Glasses_on,Sprites/UI/Glasses_off,Sprites/UI/PowerUp_on,Sprites/UI/PowerUp_off

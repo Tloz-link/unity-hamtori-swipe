@@ -19,12 +19,26 @@ public class BlockInfo
     public int hp;
 }
 
+public enum GameState
+{
+    idle,
+    shoot
+}
+
 [Serializable]
 public class GameData
 {
+    public GameState gameState;
+
     public int score;
     public int fullBallCount;
     public int ballSpeed;
+
+    //½ºÅ³
+    public int glassesCooltime;
+    public int lineCount;
+    public int powerUpCooltime;
+    public int ballDamage;
 
     public float hamsterPosX;
     public BlockInfo[] blockList = new BlockInfo[MAX_BLOCK_COUNT];
@@ -35,6 +49,12 @@ public class GameData
 public class GameManagerEX
 {
     GameData _gameData = new GameData();
+
+    public GameState State
+    {
+        get { return _gameData.gameState; }
+        set { _gameData.gameState = value; }
+    }
 
     public int Score
     {
@@ -60,34 +80,42 @@ public class GameManagerEX
         set { _gameData.hamsterPosX = value; }
     }
 
-    public float BlockGapX
+    public int GlassesCooltime
     {
-        get { return Managers.Data.Start.blockGapX; }
+        get { return _gameData.glassesCooltime; }
+        set { _gameData.glassesCooltime = value; }
     }
 
-    public float BlockGapY
+    public int LineCount
     {
-        get { return Managers.Data.Start.blockGapY; }
+        get { return _gameData.lineCount; }
+        set { _gameData.lineCount = value; }
     }
 
-    public float BlockStartX
+    public int PowerUpCooltime
     {
-        get { return Managers.Data.Start.blockStartX; }
+        get { return _gameData.powerUpCooltime; }
+        set { _gameData.powerUpCooltime = value; }
     }
 
-    public float BlockStartY
+    public int BallDamage
     {
-        get { return Managers.Data.Start.blockStartY; }
+        get { return _gameData.ballDamage; }
+        set { _gameData.ballDamage = value; }
     }
 
     public void Init()
     {
         StartData data = Managers.Data.Start;
 
+        State = GameState.idle;
         Score = data.score;
         FullBallCount = data.fullBallCount;
         BallSpeed = data.ballSpeed;
         HamsterPosX = data.hamsterPosX;
-
+        GlassesCooltime = 0;
+        PowerUpCooltime = 0;
+        LineCount = data.lineCount;
+        BallDamage = data.ballDamage;
     }
 }

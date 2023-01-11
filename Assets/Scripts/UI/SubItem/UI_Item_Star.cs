@@ -7,11 +7,13 @@ public class UI_Item_Star : UI_Spine
 {
     Action<UI_Item_Star> _destroyCallBack;
     ItemInfo _info;
+    StartData _startData;
 
     public override bool Init()
     {
         if (base.Init() == false)
             return false;
+        _startData = Managers.Data.Start;
         return true;
     }
 
@@ -22,7 +24,14 @@ public class UI_Item_Star : UI_Spine
         _info = info;
         _destroyCallBack = destroyCallBack;
 
-        transform.localPosition = new Vector3(Managers.Game.BlockStartX + (info.x * Managers.Game.BlockGapX), Managers.Game.BlockStartY, 0);
+        transform.localPosition = new Vector3(_startData.blockStartX + (info.x * _startData.blockGapX), _startData.blockStartY, 0);
+    }
+
+    public void MoveNext()
+    {
+        _info.y += 1;
+        Vector3 dest = new Vector3(_startData.blockStartX + (_info.x * _startData.blockGapX), _startData.blockStartY - (_info.y * _startData.blockGapY), 0);
+        Move(dest);
     }
 
     public ItemInfo GetInfo()
@@ -30,16 +39,11 @@ public class UI_Item_Star : UI_Spine
         return _info;
     }
 
-    public void TouchStar()
-    {
-        _destroyCallBack.Invoke(this);
-    }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "Ball")
         {
-            TouchStar();
+            _destroyCallBack.Invoke(this);
         }
     }
 }
