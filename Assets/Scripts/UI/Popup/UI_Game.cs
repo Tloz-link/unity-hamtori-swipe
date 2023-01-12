@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
+using Unity.Mathematics;
 
 public class UI_Game : UI_Popup
 {
@@ -29,16 +30,22 @@ public class UI_Game : UI_Popup
         WaitBallGroup,
         BlockGroup,
         Floor,
-        PowerSkill,
+        NuclearSkill,
         LeftSkill,
-        RightSkill
+        RightSkill,
+        NuclearEmpty,
+        NuclearFull,
+        NuclearFullStar
     }
 
     enum Texts
     {
         ScoreText,
         PowerUpCooltimeText,
-        GlassesCooltimeText
+        GlassesCooltimeText,
+        NuclearStackText,
+        PlusPowerText,
+        BallCountText
     }
 
     enum Images
@@ -69,15 +76,17 @@ public class UI_Game : UI_Popup
         BindText(typeof(Texts));
         BindImage(typeof(Images));
 
+        // 해상도 별 UI 조정
         AdjustUIByResolution();
 
-        GetObject((int)GameObjects.CloudBG).SetActive(false);
-        GetObject((int)GameObjects.PowerSkill).SetActive(false);
+        GetObject((int)GameObjects.NuclearSkill).SetActive(false);
+        GetText((int)Texts.PlusPowerText).gameObject.SetActive(false);
         GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>();
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPressed, Define.UIEvent.Pressed);
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerUp, Define.UIEvent.PointerUp);
         GetImage((int)Images.PowerUpSkill).gameObject.BindEvent(OnPowerUpSkill);
         GetImage((int)Images.GlassesSkill).gameObject.BindEvent(OnGlassesSkill);
+        GetObject((int)GameObjects.NuclearSkill).BindEvent(OnNuclearSkill);
 
         for (int i = 0; i < _game.FullBallCount; ++i)
         {
@@ -86,6 +95,7 @@ public class UI_Game : UI_Popup
             _waitBalls.Enqueue(ball);
         }
 
+        CheckBlock();
         StartCoroutine(RefreshBoard(0));
         RefreshUI();
         return true;
@@ -93,9 +103,9 @@ public class UI_Game : UI_Popup
 
     void AdjustUIByResolution()
     {
-        // 해상도 별 UI 조정
         float scaleHeight = ((float)Screen.width / Screen.height) / ((float)9 / 16);
         Vector2 canvasSize;
+        GetObject((int)GameObjects.CloudBG).SetActive(false);
 
         if (scaleHeight <= 1)
         {
@@ -137,11 +147,19 @@ public class UI_Game : UI_Popup
         GetObject((int)GameObjects.BackGround).GetComponent<RectTransform>().sizeDelta = canvasSize;
     }
 
+    private int _currentBall = 0;
     void RefreshUI()
     {
         GetText((int)Texts.ScoreText).text = $"{_game.Score}";
         GetText((int)Texts.PowerUpCooltimeText).text = (_game.PowerUpCooltime == 0) ? "" : $"{_game.PowerUpCooltime}";
         GetText((int)Texts.GlassesCooltimeText).text = (_game.GlassesCooltime == 0) ? "" : $"{_game.GlassesCooltime}";
+        GetText((int)Texts.NuclearStackText).text = $"{_game.NuclearStack}";
+        GetText((int)Texts.BallCountText).text = (_currentBall == 0) ? "" : $"x{_currentBall}";
+
+        if (_game.NuclearStack == 0)
+            GetObject((int)GameObjects.NuclearSkill).SetActive(false);
+        else
+            GetObject((int)GameObjects.NuclearSkill).SetActive(true);
 
         if (_game.GlassesCooltime == 0)
             GetImage((int)Images.GlassesSkill).sprite = Managers.Resource.Load<Sprite>(_startData.glassesOnSpritePath);
@@ -154,20 +172,62 @@ public class UI_Game : UI_Popup
             GetImage((int)Images.PowerUpSkill).sprite = Managers.Resource.Load<Sprite>(_startData.powerUpOffSpritePath);
     }
 
+    private bool _nuclear = false;
+    private Vector2 _nuclearDest;
+    private float _nuclearTextTick;
+    private const float NUCLEAR_TICK = 0.8f;
+    protected override void Update()
+    {
+        if (_nuclear == true)
+        {
+            Vector2 size = GetObject((int)GameObjects.NuclearFull).GetComponent<RectTransform>().sizeDelta;
+            size = Vector2.MoveTowards(size, _nuclearDest, 500f * Time.deltaTime);
+            if (Mathf.Abs(size.x - _nuclearDest.x) < 0.0001f)
+            {
+                size = _nuclearDest;
+                Vector2 fullsize = GetObject((int)GameObjects.NuclearEmpty).GetComponent<RectTransform>().sizeDelta;
+                if (size == fullsize)
+                {
+                    _game.NuclearDivisionCount = 0;
+                    float ratio = _startData.nuclearStartRatio + (1 - _startData.nuclearStartRatio) / _startData.nuclearDivisionFullCount * _game.NuclearDivisionCount;
+                    fullsize.x *= ratio;
+                    _nuclearDest = fullsize;
+                    _game.NuclearStack++;
+                    RefreshUI();
+                    return;
+                }
+
+                _nuclear = false;
+            }
+            GetObject((int)GameObjects.NuclearFull).GetComponent<RectTransform>().sizeDelta = size;
+            GetObject((int)GameObjects.NuclearFullStar).GetComponent<RectTransform>().sizeDelta = size;
+        }
+
+        _nuclearTextTick += Time.deltaTime;
+        if (_nuclearTextTick >= NUCLEAR_TICK)
+        {
+            GetText((int)Texts.PlusPowerText).gameObject.SetActive(false);
+        }
+    }
+
     IEnumerator RefreshBoard(float interval)
     {
-        CheckStar();
         yield return new WaitForSeconds(interval);
 
         RefreshBall();
-        RefreshBlock();
+        SpawnBlockAndItem();
+        foreach (var block in _blocks)
+            block.MoveNext();
+
+        foreach (var item in _items)
+            item.MoveNext();
+
         yield return new WaitForSeconds(0.2f);
 
         if (CheckGameOver() == true)
-        {
             yield break;
-        }
 
+        _currentBall = _game.FullBallCount;
         RefreshUI();
         GetObject((int)GameObjects.Floor).SetActive(true);
         GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
@@ -197,7 +257,7 @@ public class UI_Game : UI_Popup
         }
     }
 
-    public void RefreshBlock()
+    public void SpawnBlockAndItem()
     {
         int count = UnityEngine.Random.Range(4, 7);
         if (_game.Score < 5)
@@ -235,12 +295,6 @@ public class UI_Game : UI_Popup
         UI_Item_Star star = Managers.UI.makeSubItem<UI_Item_Star>(GetObject((int)GameObjects.BlockGroup).transform);
         star.SetInfo(itemInfo, AcquireStarCallBack);
         _items.Add(star);
-
-        foreach (var block in _blocks)
-            block.MoveNext();
-
-        foreach (var item in _items)
-            item.MoveNext();
     }
 
     bool CheckGameOver()
@@ -253,8 +307,8 @@ public class UI_Game : UI_Popup
                 UI_GameOver ui = Managers.UI.ShowPopupUI<UI_GameOver>();
                 ui.SetInfo(GetObject((int)GameObjects.Hamster).transform.position, () =>
                 {
-                    Managers.UI.ClosePopupUI();
-                    Managers.UI.ClosePopupUI();
+                    Managers.UI.ClosePopupUI(ui);
+                    Managers.UI.ClosePopupUI(this);
                     Managers.Game.Init();
                     Managers.UI.ShowPopupUI<UI_Game>();
                 });
@@ -291,6 +345,29 @@ public class UI_Game : UI_Popup
         }
     }
 
+    bool CheckBlock()
+    {
+        if (_blocks.Count != 0)
+            return false;
+
+        if (_game.Score != 1)
+        {
+            _game.NuclearDivisionCount++;
+            GetText((int)Texts.PlusPowerText).gameObject.SetActive(true);
+        }
+
+        Vector2 nuclearDest = GetObject((int)GameObjects.NuclearEmpty).GetComponent<RectTransform>().sizeDelta;
+        float ratio = _startData.nuclearStartRatio + (1 - _startData.nuclearStartRatio) / _startData.nuclearDivisionFullCount * _game.NuclearDivisionCount;
+        ratio = Mathf.Clamp(ratio, 0, 1);
+        nuclearDest.x *= ratio;
+        _nuclearDest = nuclearDest;
+
+        _nuclear = true;
+        _nuclearTextTick = 0;
+
+        return _game.Score != 1;
+    }
+
     void OnPadPointerUp()
     {
         if (_game.State != GameState.idle)
@@ -308,8 +385,8 @@ public class UI_Game : UI_Popup
         StartCoroutine(ShootBalls(dir, 0.1f));
     }
 
-    int _returnBallCount;
-    int _createBallCount;
+    int _returnBallCount = 0;
+    int _createBallCount = 0;
     IEnumerator ShootBalls(Vector3 dir, float interval)
     {
         int count = _waitBalls.Count;
@@ -326,6 +403,9 @@ public class UI_Game : UI_Popup
             ball.transform.SetParent(GetObject((int)GameObjects.ShootBallGroup).transform);
             ball.transform.localPosition = shootPos;
             ball.Shoot(dir, transform.localScale.x);
+            _currentBall--;
+            RefreshUI();
+
             RefreshBall();
             _shootBalls.Enqueue(ball);
 
@@ -385,7 +465,11 @@ public class UI_Game : UI_Popup
         if (_returnBallCount + _createBallCount == _game.FullBallCount)
         {
             UpdateValue();
-            StartCoroutine(RefreshBoard(0.4f));
+            CheckStar();
+            float interval = 0.4f;
+            if (CheckBlock() == true)
+                interval = 1.0f;
+            StartCoroutine(RefreshBoard(interval));
         }
     }
 
@@ -398,6 +482,23 @@ public class UI_Game : UI_Popup
             _game.GlassesCooltime--;
         if (_game.PowerUpCooltime > 0)
             _game.PowerUpCooltime--;
+    }
+
+    void OnNuclearSkill()
+    {
+        if (_game.PowerUpCooltime > 0 || _game.State != GameState.idle)
+            return;
+
+        _game.State = GameState.skill;
+
+        foreach (var block in _blocks)
+            Managers.Resource.Destroy(block.gameObject);
+        _blocks.Clear();
+
+        _game.Score++;
+        _game.NuclearStack--;
+        RefreshUI();
+        StartCoroutine(RefreshBoard(0.1f));
     }
 
     void OnPowerUpSkill()

@@ -10,7 +10,7 @@ public class GameScene : BaseScene
             return false;
 
         SceneType = Define.Scene.DevScene;
-        Managers.UI.ShowPopupUI<UI_Game>();
+        //Managers.UI.ShowPopupUI<UI_Game>();
         return true;
     }
 }

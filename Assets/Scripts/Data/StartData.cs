@@ -22,6 +22,7 @@ public class StartData
     [XmlAttribute]
     public float blockStartY;
 
+    // Ω∫≈≥
     [XmlAttribute]
     public int lineCount;
     [XmlAttribute]
@@ -35,6 +36,7 @@ public class StartData
     [XmlAttribute]
     public int powerUpValue;
 
+    // Ω∫≈≥ Ω∫«¡∂Û¿Ã∆Æ ∞Ê∑Œ
     [XmlAttribute]
     public string glassesOnSpritePath;
     [XmlAttribute]
@@ -43,4 +45,10 @@ public class StartData
     public string powerUpOnSpritePath;
     [XmlAttribute]
     public string powerUpOffSpritePath;
+
+    // «Ÿ∆¯≈∫
+    [XmlAttribute]
+    public float nuclearStartRatio;
+    [XmlAttribute]
+    public int nuclearDivisionFullCount;
 }
