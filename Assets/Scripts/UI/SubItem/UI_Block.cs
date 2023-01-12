@@ -53,16 +53,13 @@ public class UI_Block : UI_Spine
         return _info;
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    public void Damaged()
     {
-        if (collision.gameObject.tag == "Ball")
+        _info.hp -= Managers.Game.BallDamage;
+        RefreshUI();
+        if (_info.hp <= 0)
         {
-            _info.hp -= Managers.Game.BallDamage;
-            RefreshUI();
-            if (_info.hp <= 0)
-            {
-                _destroyCallBack?.Invoke(this);
-            }
+            _destroyCallBack?.Invoke(this);
         }
     }
 }

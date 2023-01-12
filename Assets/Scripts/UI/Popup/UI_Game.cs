@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
-using Unity.Mathematics;
 
 public class UI_Game : UI_Popup
 {
@@ -29,7 +28,6 @@ public class UI_Game : UI_Popup
         ShootBallGroup,
         WaitBallGroup,
         BlockGroup,
-        Floor,
         NuclearSkill,
         LeftSkill,
         RightSkill,
@@ -229,7 +227,6 @@ public class UI_Game : UI_Popup
 
         _currentBall = _game.FullBallCount;
         RefreshUI();
-        GetObject((int)GameObjects.Floor).SetActive(true);
         GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
         _game.State = GameState.idle;
     }
@@ -379,30 +376,33 @@ public class UI_Game : UI_Popup
         if (GetShootDir(out dir) == false)
             return;
 
-        GetObject((int)GameObjects.Floor).SetActive(false);
         _game.State = GameState.shoot;
 
-        StartCoroutine(ShootBalls(dir, 0.1f));
+        StartCoroutine(ShootBalls(dir, 0.08f));
     }
 
     int _returnBallCount = 0;
     int _createBallCount = 0;
     IEnumerator ShootBalls(Vector3 dir, float interval)
     {
-        int count = _waitBalls.Count;
         GameObject hamster = GetObject((int)GameObjects.Hamster);
+        GameObject board = GetObject((int)GameObjects.GameBoard);
+        GameObject shootParent = GetObject((int)GameObjects.ShootBallGroup);
+
+        int count = _waitBalls.Count;
         Vector3 shootPos = hamster.transform.localPosition;
         _returnBallCount = 0;
         _createBallCount = 0;
+        yield return null;
 
         for (int i = 0; i < count; ++i)
         {
             hamster.GetComponent<UI_Spine>().PlayAnimationForce(Managers.Data.Spine.hamsterShoot);
 
             var ball = _waitBalls.Dequeue();
-            ball.transform.SetParent(GetObject((int)GameObjects.ShootBallGroup).transform);
+            ball.transform.SetParent(shootParent.transform);
             ball.transform.localPosition = shootPos;
-            ball.Shoot(dir, transform.localScale.x);
+            ball.Shoot(board, dir, transform.localScale.x);
             _currentBall--;
             RefreshUI();
 
@@ -435,6 +435,9 @@ public class UI_Game : UI_Popup
 
         _blocks.Remove(block);
         Managers.Resource.Destroy(block.gameObject);
+
+        foreach (var ball in _shootBalls)
+            ball.CalcLine();
     }
 
     void CreateBallCallBack(UI_Ball ball)
@@ -551,7 +554,7 @@ public class UI_Game : UI_Popup
 
         GameObject hamster = GetObject((int)GameObjects.Hamster);
         hamster.GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterCharge);
-        RaycastHit2D hit = Physics2D.CircleCast(hamster.transform.position, 40 * transform.localScale.x, dir, 10000, 1 << LayerMask.NameToLayer("Wall"));
+        RaycastHit2D hit = Physics2D.CircleCast(hamster.transform.position, 50 * 0.8f * transform.localScale.x, dir, 10000, 1 << LayerMask.NameToLayer("Wall"));
         Vector3 src = hamster.transform.position;
         Vector3 dest = hit.centroid;
 
@@ -563,7 +566,7 @@ public class UI_Game : UI_Popup
 
             src = dest;
             dir = Vector3.Reflect(dir, hit.normal);
-            hit = Physics2D.CircleCast(src + dir, 40 * transform.localScale.x, dir, 10000, 1 << LayerMask.NameToLayer("Wall"));
+            hit = Physics2D.CircleCast(src + dir, 50 * 0.8f * transform.localScale.x, dir, 10000, 1 << LayerMask.NameToLayer("Wall"));
             dest = hit.centroid;
         }
 
