@@ -16,7 +16,7 @@ public class UI_Game : UI_Popup
         // Header
         Score,
         Power,
-        Option,
+        PauseButton,
 
         // Game Board
         GameBoard,
@@ -28,17 +28,22 @@ public class UI_Game : UI_Popup
         ShootBallGroup,
         WaitBallGroup,
         BlockGroup,
-        Floor,
-        PowerSkill,
+        NuclearSkill,
         LeftSkill,
-        RightSkill
+        RightSkill,
+        NuclearEmpty,
+        NuclearFull,
+        NuclearFullStar
     }
 
     enum Texts
     {
         ScoreText,
         PowerUpCooltimeText,
-        GlassesCooltimeText
+        GlassesCooltimeText,
+        NuclearStackText,
+        PlusPowerText,
+        BallCountText
     }
 
     enum Images
@@ -69,15 +74,26 @@ public class UI_Game : UI_Popup
         BindText(typeof(Texts));
         BindImage(typeof(Images));
 
+        // 해상도 별 UI 조정
         AdjustUIByResolution();
 
-        GetObject((int)GameObjects.CloudBG).SetActive(false);
-        GetObject((int)GameObjects.PowerSkill).SetActive(false);
+        GetObject((int)GameObjects.NuclearSkill).SetActive(false);
+        GetText((int)Texts.PlusPowerText).gameObject.SetActive(false);
+
+        Vector3 hamsterStartPos = GetObject((int)GameObjects.Hamster).transform.localPosition;
+        hamsterStartPos.x = _game.HamsterPosX;
+        GetObject((int)GameObjects.Hamster).transform.localPosition = hamsterStartPos;
         GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>();
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPressed, Define.UIEvent.Pressed);
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerUp, Define.UIEvent.PointerUp);
         GetImage((int)Images.PowerUpSkill).gameObject.BindEvent(OnPowerUpSkill);
         GetImage((int)Images.GlassesSkill).gameObject.BindEvent(OnGlassesSkill);
+        GetObject((int)GameObjects.NuclearSkill).BindEvent(OnNuclearSkill);
+        GetObject((int)GameObjects.PauseButton).BindEvent(() =>
+        {
+            Managers.UI.ShowPopupUI<UI_Pause>();
+            Time.timeScale = 0;
+        });
 
         for (int i = 0; i < _game.FullBallCount; ++i)
         {
@@ -86,6 +102,7 @@ public class UI_Game : UI_Popup
             _waitBalls.Enqueue(ball);
         }
 
+        CheckBlock();
         StartCoroutine(RefreshBoard(0));
         RefreshUI();
         return true;
@@ -93,19 +110,19 @@ public class UI_Game : UI_Popup
 
     void AdjustUIByResolution()
     {
-        // 해상도 별 UI 조정
         float scaleHeight = ((float)Screen.width / Screen.height) / ((float)9 / 16);
         Vector2 canvasSize;
+        GetObject((int)GameObjects.CloudBG).SetActive(false);
 
         if (scaleHeight <= 1)
         {
             // 세로로 김
             canvasSize = new Vector2(1080, Screen.height / transform.localScale.x);
             float deltaY = Mathf.Abs((1080 * (Screen.height * 1080 / Screen.width)) - (1080 * 1920)) / 2 / 1080;
-            float scoreDeltaY = GetObject((int)(GameObjects.Option)).GetComponent<RectTransform>().sizeDelta.y;
+            float scoreDeltaY = GetObject((int)(GameObjects.PauseButton)).GetComponent<RectTransform>().sizeDelta.y;
 
             GetObject((int)(GameObjects.StarBG)).transform.localPosition += new Vector3(0, deltaY, 0);
-            GetObject((int)(GameObjects.Option)).transform.localPosition += new Vector3(0, deltaY, 0);
+            GetObject((int)(GameObjects.PauseButton)).transform.localPosition += new Vector3(0, deltaY, 0);
             GetObject((int)(GameObjects.Score)).transform.localPosition += new Vector3(0, deltaY, 0);
             if (deltaY > scoreDeltaY)
             {
@@ -122,7 +139,7 @@ public class UI_Game : UI_Popup
             canvasSize.x = Math.Min(canvasSize.x, Screen.width / transform.localScale.x);
             float deltaX = Mathf.Abs((1920 * (canvasSize.x * 1920 / canvasSize.y)) - (1080 * 1920)) / 2 / 1920;
 
-            GetObject((int)(GameObjects.Option)).transform.localPosition += new Vector3(deltaX, 0, 0);
+            GetObject((int)(GameObjects.PauseButton)).transform.localPosition += new Vector3(deltaX, 0, 0);
             GetObject((int)(GameObjects.RightSkill)).transform.localPosition += new Vector3(deltaX * 0.1f, 0, 0);
             GetObject((int)(GameObjects.LeftSkill)).transform.localPosition -= new Vector3(deltaX * 0.1f, 0, 0);
             GetObject((int)(GameObjects.Power)).transform.localPosition += new Vector3(deltaX * 0.2f, 0, 0);
@@ -137,11 +154,19 @@ public class UI_Game : UI_Popup
         GetObject((int)GameObjects.BackGround).GetComponent<RectTransform>().sizeDelta = canvasSize;
     }
 
+    private int _currentBall = 0;
     void RefreshUI()
     {
         GetText((int)Texts.ScoreText).text = $"{_game.Score}";
         GetText((int)Texts.PowerUpCooltimeText).text = (_game.PowerUpCooltime == 0) ? "" : $"{_game.PowerUpCooltime}";
         GetText((int)Texts.GlassesCooltimeText).text = (_game.GlassesCooltime == 0) ? "" : $"{_game.GlassesCooltime}";
+        GetText((int)Texts.NuclearStackText).text = $"{_game.NuclearStack}";
+        GetText((int)Texts.BallCountText).text = (_currentBall == 0) ? "" : $"x{_currentBall}";
+
+        if (_game.NuclearStack == 0)
+            GetObject((int)GameObjects.NuclearSkill).SetActive(false);
+        else
+            GetObject((int)GameObjects.NuclearSkill).SetActive(true);
 
         if (_game.GlassesCooltime == 0)
             GetImage((int)Images.GlassesSkill).sprite = Managers.Resource.Load<Sprite>(_startData.glassesOnSpritePath);
@@ -154,22 +179,63 @@ public class UI_Game : UI_Popup
             GetImage((int)Images.PowerUpSkill).sprite = Managers.Resource.Load<Sprite>(_startData.powerUpOffSpritePath);
     }
 
+    private bool _nuclear = false;
+    private Vector2 _nuclearDest;
+    private float _nuclearTextTick;
+    private const float NUCLEAR_TICK = 0.8f;
+    protected override void Update()
+    {
+        if (_nuclear == true)
+        {
+            Vector2 size = GetObject((int)GameObjects.NuclearFull).GetComponent<RectTransform>().sizeDelta;
+            size = Vector2.MoveTowards(size, _nuclearDest, 500f * Time.deltaTime);
+            if (Mathf.Abs(size.x - _nuclearDest.x) < 0.0001f)
+            {
+                size = _nuclearDest;
+                Vector2 fullsize = GetObject((int)GameObjects.NuclearEmpty).GetComponent<RectTransform>().sizeDelta;
+                if (size == fullsize)
+                {
+                    _game.NuclearDivisionCount = 0;
+                    float ratio = _startData.nuclearStartRatio + (1 - _startData.nuclearStartRatio) / _startData.nuclearDivisionFullCount * _game.NuclearDivisionCount;
+                    fullsize.x *= ratio;
+                    _nuclearDest = fullsize;
+                    _game.NuclearStack++;
+                    RefreshUI();
+                    return;
+                }
+
+                _nuclear = false;
+            }
+            GetObject((int)GameObjects.NuclearFull).GetComponent<RectTransform>().sizeDelta = size;
+            GetObject((int)GameObjects.NuclearFullStar).GetComponent<RectTransform>().sizeDelta = size;
+        }
+
+        _nuclearTextTick += Time.deltaTime;
+        if (_nuclearTextTick >= NUCLEAR_TICK)
+        {
+            GetText((int)Texts.PlusPowerText).gameObject.SetActive(false);
+        }
+    }
+
     IEnumerator RefreshBoard(float interval)
     {
-        CheckStar();
         yield return new WaitForSeconds(interval);
 
         RefreshBall();
-        RefreshBlock();
+        SpawnBlockAndItem();
+        foreach (var block in _blocks)
+            block.MoveNext();
+
+        foreach (var item in _items)
+            item.MoveNext();
+
         yield return new WaitForSeconds(0.2f);
 
         if (CheckGameOver() == true)
-        {
             yield break;
-        }
 
+        _currentBall = _game.FullBallCount;
         RefreshUI();
-        GetObject((int)GameObjects.Floor).SetActive(true);
         GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
         _game.State = GameState.idle;
     }
@@ -197,7 +263,7 @@ public class UI_Game : UI_Popup
         }
     }
 
-    public void RefreshBlock()
+    public void SpawnBlockAndItem()
     {
         int count = UnityEngine.Random.Range(4, 7);
         if (_game.Score < 5)
@@ -235,12 +301,6 @@ public class UI_Game : UI_Popup
         UI_Item_Star star = Managers.UI.makeSubItem<UI_Item_Star>(GetObject((int)GameObjects.BlockGroup).transform);
         star.SetInfo(itemInfo, AcquireStarCallBack);
         _items.Add(star);
-
-        foreach (var block in _blocks)
-            block.MoveNext();
-
-        foreach (var item in _items)
-            item.MoveNext();
     }
 
     bool CheckGameOver()
@@ -253,11 +313,12 @@ public class UI_Game : UI_Popup
                 UI_GameOver ui = Managers.UI.ShowPopupUI<UI_GameOver>();
                 ui.SetInfo(GetObject((int)GameObjects.Hamster).transform.position, () =>
                 {
-                    Managers.UI.ClosePopupUI();
-                    Managers.UI.ClosePopupUI();
+                    Managers.UI.ClosePopupUI(ui);
+                    Managers.UI.ClosePopupUI(this);
                     Managers.Game.Init();
                     Managers.UI.ShowPopupUI<UI_Game>();
                 });
+                GetObject((int)GameObjects.Hamster).SetActive(false);
                 return true;
             }
         }
@@ -291,6 +352,29 @@ public class UI_Game : UI_Popup
         }
     }
 
+    bool CheckBlock()
+    {
+        if (_blocks.Count != 0)
+            return false;
+
+        if (_game.Score != 1)
+        {
+            _game.NuclearDivisionCount++;
+            GetText((int)Texts.PlusPowerText).gameObject.SetActive(true);
+        }
+
+        Vector2 nuclearDest = GetObject((int)GameObjects.NuclearEmpty).GetComponent<RectTransform>().sizeDelta;
+        float ratio = _startData.nuclearStartRatio + (1 - _startData.nuclearStartRatio) / _startData.nuclearDivisionFullCount * _game.NuclearDivisionCount;
+        ratio = Mathf.Clamp(ratio, 0, 1);
+        nuclearDest.x *= ratio;
+        _nuclearDest = nuclearDest;
+
+        _nuclear = true;
+        _nuclearTextTick = 0;
+
+        return _game.Score != 1;
+    }
+
     void OnPadPointerUp()
     {
         if (_game.State != GameState.idle)
@@ -302,30 +386,36 @@ public class UI_Game : UI_Popup
         if (GetShootDir(out dir) == false)
             return;
 
-        GetObject((int)GameObjects.Floor).SetActive(false);
         _game.State = GameState.shoot;
 
-        StartCoroutine(ShootBalls(dir, 0.1f));
+        StartCoroutine(ShootBalls(dir, 0.08f));
     }
 
-    int _returnBallCount;
-    int _createBallCount;
+    int _returnBallCount = 0;
+    int _createBallCount = 0;
     IEnumerator ShootBalls(Vector3 dir, float interval)
     {
-        int count = _waitBalls.Count;
         GameObject hamster = GetObject((int)GameObjects.Hamster);
+        GameObject board = GetObject((int)GameObjects.GameBoard);
+        GameObject shootParent = GetObject((int)GameObjects.ShootBallGroup);
+
+        int count = _waitBalls.Count;
         Vector3 shootPos = hamster.transform.localPosition;
         _returnBallCount = 0;
         _createBallCount = 0;
+        yield return null;
 
         for (int i = 0; i < count; ++i)
         {
             hamster.GetComponent<UI_Spine>().PlayAnimationForce(Managers.Data.Spine.hamsterShoot);
 
             var ball = _waitBalls.Dequeue();
-            ball.transform.SetParent(GetObject((int)GameObjects.ShootBallGroup).transform);
+            ball.transform.SetParent(shootParent.transform);
             ball.transform.localPosition = shootPos;
-            ball.Shoot(dir, transform.localScale.x);
+            ball.Shoot(board, dir, transform.localScale.x);
+            _currentBall--;
+            RefreshUI();
+
             RefreshBall();
             _shootBalls.Enqueue(ball);
 
@@ -355,6 +445,9 @@ public class UI_Game : UI_Popup
 
         _blocks.Remove(block);
         Managers.Resource.Destroy(block.gameObject);
+
+        foreach (var ball in _shootBalls)
+            ball.CalcLine();
     }
 
     void CreateBallCallBack(UI_Ball ball)
@@ -366,13 +459,6 @@ public class UI_Game : UI_Popup
     void ShootBallCallBack(UI_Ball ball)
     {
         _returnBallCount++;
-        ReachBall(ball);
-    }
-
-    void ReachBall(UI_Ball ball)
-    {
-        ball.transform.SetParent(GetObject((int)GameObjects.WaitBallGroup).transform);
-        _waitBalls.Enqueue(ball);
 
         if (_returnBallCount == 1)
         {
@@ -382,10 +468,22 @@ public class UI_Game : UI_Popup
             hamster.GetComponent<UI_Spine>().Move(dest);
         }
 
+        ReachBall(ball);
+    }
+
+    void ReachBall(UI_Ball ball)
+    {
+        ball.transform.SetParent(GetObject((int)GameObjects.WaitBallGroup).transform);
+        _waitBalls.Enqueue(ball);
+
         if (_returnBallCount + _createBallCount == _game.FullBallCount)
         {
             UpdateValue();
-            StartCoroutine(RefreshBoard(0.4f));
+            CheckStar();
+            float interval = 0.4f;
+            if (CheckBlock() == true)
+                interval = 1.0f;
+            StartCoroutine(RefreshBoard(interval));
         }
     }
 
@@ -398,6 +496,23 @@ public class UI_Game : UI_Popup
             _game.GlassesCooltime--;
         if (_game.PowerUpCooltime > 0)
             _game.PowerUpCooltime--;
+    }
+
+    void OnNuclearSkill()
+    {
+        if (_game.PowerUpCooltime > 0 || _game.State != GameState.idle)
+            return;
+
+        _game.State = GameState.skill;
+
+        foreach (var block in _blocks)
+            Managers.Resource.Destroy(block.gameObject);
+        _blocks.Clear();
+
+        _game.Score++;
+        _game.NuclearStack--;
+        RefreshUI();
+        StartCoroutine(RefreshBoard(0.1f));
     }
 
     void OnPowerUpSkill()
@@ -450,7 +565,7 @@ public class UI_Game : UI_Popup
 
         GameObject hamster = GetObject((int)GameObjects.Hamster);
         hamster.GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterCharge);
-        RaycastHit2D hit = Physics2D.CircleCast(hamster.transform.position, 40 * transform.localScale.x, dir, 10000, 1 << LayerMask.NameToLayer("Wall"));
+        RaycastHit2D hit = Physics2D.CircleCast(hamster.transform.position, 50 * 0.8f * transform.localScale.x, dir, 10000, 1 << LayerMask.NameToLayer("Wall"));
         Vector3 src = hamster.transform.position;
         Vector3 dest = hit.centroid;
 
@@ -462,7 +577,7 @@ public class UI_Game : UI_Popup
 
             src = dest;
             dir = Vector3.Reflect(dir, hit.normal);
-            hit = Physics2D.CircleCast(src + dir, 40 * transform.localScale.x, dir, 10000, 1 << LayerMask.NameToLayer("Wall"));
+            hit = Physics2D.CircleCast(src + dir, 50 * 0.8f * transform.localScale.x, dir, 10000, 1 << LayerMask.NameToLayer("Wall"));
             dest = hit.centroid;
         }
 
@@ -502,7 +617,7 @@ public class UI_Game : UI_Popup
         dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad), 0);
         if (mousePos.x < leftLimit || mousePos.x > rightLimit || mousePos.y > upLimit)
         {
-            GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
+            GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterGameover);
             return false;
         }
         return true;

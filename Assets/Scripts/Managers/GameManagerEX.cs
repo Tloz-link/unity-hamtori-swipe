@@ -41,6 +41,10 @@ public class GameData
     public int powerUpCooltime;
     public int ballDamage;
 
+    //ÇÙÆøÅº
+    public int nuclearDivisionCount;
+    public int nuclearStack;
+
     public float hamsterPosX;
     public BlockInfo[] blockList = new BlockInfo[MAX_BLOCK_COUNT];
     public ItemInfo[] itemList = new ItemInfo[MAX_BLOCK_COUNT];
@@ -105,6 +109,18 @@ public class GameManagerEX
         set { _gameData.ballDamage = value; }
     }
 
+    public int NuclearDivisionCount
+    {
+        get { return _gameData.nuclearDivisionCount; }
+        set { _gameData.nuclearDivisionCount = value; }
+    }
+
+    public int NuclearStack
+    {
+        get { return _gameData.nuclearStack; }
+        set { _gameData.nuclearStack = value; }
+    }
+
     public void Init()
     {
         StartData data = Managers.Data.Start;
@@ -118,5 +134,7 @@ public class GameManagerEX
         PowerUpCooltime = 0;
         LineCount = data.lineCount;
         BallDamage = data.ballDamage;
+        NuclearDivisionCount = 0;
+        NuclearStack = 0;
     }
 }

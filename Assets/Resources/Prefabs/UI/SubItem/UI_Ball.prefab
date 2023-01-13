@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 7442994645837451382}
   - component: {fileID: 4376370419469081271}
   - component: {fileID: 1162458663077156524}
-  - component: {fileID: 6773135206358111615}
-  - component: {fileID: 4115162260455485628}
   - component: {fileID: 8233894524900186472}
+  - component: {fileID: -8557081706840588849}
+  - component: {fileID: -4434513425119889334}
   m_Layer: 3
   m_Name: UI_Ball
   m_TagString: Ball
@@ -100,7 +100,20 @@ MonoBehaviour:
       immutableTriangles: 0
   updateTiming: 1
   unscaledTime: 0
---- !u!58 &6773135206358111615
+--- !u!114 &8233894524900186472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1186352974582394232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18bfeaf959020fe459b2550b6d7da9f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsUsing: 0
+--- !u!58 &-8557081706840588849
 CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -116,7 +129,7 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 50
---- !u!50 &4115162260455485628
+--- !u!50 &-4434513425119889334
 Rigidbody2D:
   serializedVersion: 4
   m_ObjectHideFlags: 0
@@ -128,25 +141,12 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 0.0001
+  m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0
   m_GravityScale: 0
-  m_Material: {fileID: 6200000, guid: 3c8cecc5c08807249ac06a77743a99f0, type: 2}
+  m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &8233894524900186472
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1186352974582394232}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18bfeaf959020fe459b2550b6d7da9f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  IsUsing: 0

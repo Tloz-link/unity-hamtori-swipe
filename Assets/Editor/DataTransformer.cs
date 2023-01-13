@@ -68,7 +68,9 @@ public class DataTransformer : EditorWindow
             glassesOnSpritePath = row[14],
             glassesOffSpritePath = row[15],
             powerUpOnSpritePath = row[16],
-            powerUpOffSpritePath = row[17]
+            powerUpOffSpritePath = row[17],
+            nuclearStartRatio = float.Parse(row[18]),
+            nuclearDivisionFullCount = int.Parse(row[19]),
         };
         #endregion
 
