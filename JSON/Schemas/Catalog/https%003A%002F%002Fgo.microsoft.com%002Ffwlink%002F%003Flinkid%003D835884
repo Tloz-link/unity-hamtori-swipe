@@ -355,6 +355,24 @@
       }
     },
     {
+      "name": "CodeCV",
+      "description": "CV format specification",
+      "fileMatch": [
+        "cv.json",
+        "cv.yaml",
+        "cv.yml",
+        "cv.toml",
+        "*.cv.json",
+        "*.cv.yaml",
+        "*.cv.yml",
+        "*.cv.toml"
+      ],
+      "url": "https://raw.githubusercontent.com/hexagonkt/codecv/master/cv.schema.json",
+      "versions": {
+        "0.9.9": "https://raw.githubusercontent.com/hexagonkt/codecv/0.9.9/cv.schema.json"
+      }
+    },
+    {
       "name": "Azure Pipelines",
       "description": "Azure Pipelines YAML pipelines definition",
       "fileMatch": ["azure-pipelines.yml", "azure-pipelines.yaml"],
@@ -4440,6 +4458,15 @@
       "description": "Unreal Engine project configuration file",
       "fileMatch": [".uproject"],
       "url": "https://json.schemastore.org/uproject.json"
+    },
+    {
+      "name": "Pantsbuild",
+      "description": "Pantsbuild configuration file",
+      "fileMatch": ["pants*.toml"],
+      "url": "https://json.schemastore.org/pantsbuild-2.14.0.json",
+      "versions": {
+        "2.14.0": "https://json.schemastore.org/pantsbuild-2.14.0.json"
+      }
     }
   ],
   "version": 1

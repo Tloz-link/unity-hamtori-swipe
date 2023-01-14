@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,124 +6,149 @@ using UnityEngine;
 
 public class UI_Ball : UI_Spine
 {
-    enum State
-    {
-        idle,
-        shoot,
-        move,
-        create
-    }
-    State _state;
-
-    //shoot
-    Action<UI_Ball> _shootCallBack;
-    Action<UI_Ball> _createCallBack;
+    Action<UI_Ball> _callBack;
 
     RaycastHit2D _hit;
     Vector3 _lineEnd;
     Vector3 _dir;
     Vector3 _normal;
 
+    float _startLine;
+
+    Sequence _idleSequence;
+    Sequence _createSequence;
+    Sequence _rollSequence;
+
     //로컬 변환
     Vector2 _boardPos;
     float _canvasSize;
-
-    float _startLine;
 
     public override bool Init()
     {
         if (base.Init() == false)
             return false;
 
-        _state = State.idle;
+        _shoot = false;
         return true;
     }
 
-    public void SetInfo(Vector3 initPos, float startLine, Action<UI_Ball> shootCallBack, Action<UI_Ball> createCallBack)
+    #region DOTween
+    public void CreateIdleSequence()
     {
+        _idleSequence.Kill();
+        _idleSequence = DOTween.Sequence()
+            .SetAutoKill(false)
+            .AppendInterval(0.4f)
+            .Append(transform.DOLocalMoveY(60, 0.3f).SetRelative().SetEase(Ease.OutQuad))
+            .Append(transform.DOLocalMoveY(-60, 0.3f).SetRelative().SetEase(Ease.InQuad))
+            .AppendCallback(() =>
+            {
+                int rand = UnityEngine.Random.Range(0, 100);
+                if (rand <= 25)
+                {
+                    RefreshAnim();
+                    CreateRollSequence();
+                    _rollSequence.Restart();
+                }
+            })
+            .AppendInterval(1.0f)
+            .AppendCallback(() => { _idleSequence.Restart(); });
+    }
+
+    public void CreateCreateSequence(float duration)
+    {
+        _createSequence.Kill();
+        _createSequence = DOTween.Sequence()
+            .Append(transform.DOLocalMoveY(_startLine, duration).SetEase(Ease.Linear))
+            .Join(transform.DORotate(new Vector3(0, 0, -360f), duration, RotateMode.FastBeyond360).SetEase(Ease.Linear))
+            .OnComplete(() =>
+            {
+                GetComponent<CircleCollider2D>().enabled = true;
+                CreateIdleSequence();
+                _idleSequence.Restart();
+                _callBack.Invoke(this);
+            });
+    }
+
+    public void CreateRollSequence()
+    {
+        int rand;
+        while (true)
+        {
+            rand = UnityEngine.Random.Range(-400, 400);
+            if (Mathf.Abs(transform.localPosition.x - rand) > 80)
+                break;
+        }
+        float dir = (transform.localPosition.x - rand < 0) ? -360 : 360;
+
+        _rollSequence.Kill();
+        _rollSequence = DOTween.Sequence()
+            .SetAutoKill(false)
+            .Append(transform.DOLocalMoveX((float)rand, 2.0f).SetEase(Ease.Linear))
+            .Join(transform.DORotate(new Vector3(0, 0, dir), 2.0f, RotateMode.FastBeyond360).SetEase(Ease.Linear))
+            .OnComplete(() =>
+            {
+                transform.rotation = Quaternion.identity;
+                _idleSequence.Restart();
+            });
+    }
+
+    void RefreshAnim()
+    {
+        _idleSequence.Pause();
+        _rollSequence.Pause();
+        _createSequence.Pause();
+        transform.rotation = Quaternion.identity;
+    }
+    #endregion
+
+    public void SetInfo(Vector3 initPos, float startLine, Action<UI_Ball> callBack)
+    {
+        Init();
+
         PlayAnimation(Managers.Data.Spine.ballIdle);
         transform.localPosition = initPos;
         transform.localScale = new Vector3(0.8f, 0.8f, 1f);
         _startLine = startLine;
-        _shootCallBack = shootCallBack;
-        _createCallBack = createCallBack;
+        _callBack = callBack;
+
+        CreateIdleSequence();
+        _idleSequence.Restart();
     }
 
+    private bool _shoot;
     protected override void Update()
     {
-        if (_state == State.idle)
-            return;
-
-        switch(_state)
+        if (_shoot == true)
         {
-            case State.create:
-                {
-                    transform.localPosition += Vector3.down * Time.deltaTime * 800.0f;
-                    transform.Rotate(new Vector3(0, 0, -400.0f * Time.deltaTime));
-                    if (transform.localPosition.y <= _startLine)
-                    {
-                        GetComponent<CircleCollider2D>().enabled = true;
-                        transform.localPosition = new Vector3(transform.localPosition.x, _startLine, 0);
-                        transform.rotation = Quaternion.identity;
-                        _state = State.idle;
-                        _createCallBack.Invoke(this);
-                    }
-                }
-                break;
-            case State.shoot:
-                {
-                    Vector3 delta = _lineEnd - transform.localPosition;
-                    float moveDist = Mathf.Clamp(Managers.Game.BallSpeed * Time.deltaTime, 0, delta.magnitude);
-                    transform.localPosition += delta.normalized * moveDist;
+            Vector3 delta = _lineEnd - transform.localPosition;
+            float moveDist = Mathf.Clamp(Managers.Game.BallSpeed * Time.deltaTime, 0, delta.magnitude);
+            transform.localPosition += delta.normalized * moveDist;
 
-                    delta = _lineEnd - transform.localPosition;
-                    if (delta.magnitude < 0.0001f)
-                    {
-                        _dir = Vector3.Reflect(_dir, _normal);
+            delta = _lineEnd - transform.localPosition;
+            if (delta.magnitude < 0.0001f)
+            {
+                _dir = Vector3.Reflect(_dir, _normal);
 
-                        UI_Block block = _hit.collider.GetComponent<UI_Block>();
-                        if (block != null)
-                            block.Damaged();
+                UI_Block block = _hit.collider.GetComponent<UI_Block>();
+                if (block != null)
+                    block.Damaged();
 
-                        CalcLine();
-                    }
+                CalcLine();
+            }
 
-                    float angle = Mathf.Atan2(_dir.y, _dir.x) * Mathf.Rad2Deg;
-                    transform.rotation = Quaternion.Euler(0, 0, angle - 90);
+            float angle = Mathf.Atan2(_dir.y, _dir.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0, 0, angle - 90);
 
-                    if (transform.localPosition.y <= _startLine)
-                    {
-                        transform.localPosition = new Vector3(transform.localPosition.x, _startLine, 0);
-                        transform.rotation = Quaternion.identity;
-                        _state = State.idle;
-                        _shootCallBack.Invoke(this);
-                    }
-                }
-                break;
-            case State.move:
-                {
-                    Vector3 dir = _dest - transform.localPosition;
-                    if (dir.magnitude < 0.0001f)
-                    {
-                        _state = State.idle;
-                    }
-                    else
-                    {
-                        float delta = 1 + dir.magnitude / 400f;
-                        float moveDist = Mathf.Clamp(1200f * Time.deltaTime * delta, 0, dir.magnitude);
-                        transform.localPosition += dir.normalized * moveDist;
-                    }
-                }
-                break;
+            if (transform.localPosition.y <= _startLine)
+            {
+                transform.localPosition = new Vector3(transform.localPosition.x, _startLine, 0);
+                transform.rotation = Quaternion.identity;
+                _idleSequence.Restart();
+                _callBack.Invoke(this);
+                _shoot = false;
+            }
         }
-    }
-
-    public override void Move(Vector3 dest)
-    {
-        Init();
-
-        _dest = dest;
-        _state = State.move;
     }
 
     public void Shoot(GameObject board, Vector3 dir, float canvasSize)
@@ -133,16 +159,21 @@ public class UI_Ball : UI_Spine
         _boardPos = board.transform.position;
         _canvasSize = canvasSize;
         CalcLine();
-        _state = State.shoot;
+
+        RefreshAnim();
+        _shoot = true;
     }
 
-    public void Create(float delta)
+    public void Create()
     {
         Init();
 
         GetComponent<CircleCollider2D>().enabled = false;
         transform.rotation = Quaternion.identity;
-        _state = State.create;
+
+        RefreshAnim();
+        CreateCreateSequence(1.0f);
+        _createSequence.Restart();
     }
 
     public void CalcLine()

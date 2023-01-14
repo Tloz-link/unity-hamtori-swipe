@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -54,6 +55,7 @@ public class Managers : MonoBehaviour
             s_instance._pool.Init();
             s_instance._game.Init();
 
+            DOTween.Init(false, false, LogBehaviour.Default).SetCapacity(300, 250);
             Application.targetFrameRate = 60;
         }
     }

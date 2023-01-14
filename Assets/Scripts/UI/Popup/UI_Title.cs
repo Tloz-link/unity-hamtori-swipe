@@ -7,7 +7,8 @@ public class UI_Title : UI_Popup
     enum GameObjects
     {
         StartButton,
-        ContinueButton
+        ContinueButton,
+        GachaButton
     }
 
     public override bool Init()
@@ -19,6 +20,7 @@ public class UI_Title : UI_Popup
 
         GetObject((int)GameObjects.StartButton).gameObject.BindEvent(OnStartButton);
         GetObject((int)GameObjects.ContinueButton).gameObject.BindEvent(OnContinueButton);
+        GetObject((int)GameObjects.GachaButton).gameObject.BindEvent(OnGachaButton);
 
         return true;
     }
@@ -33,9 +35,14 @@ public class UI_Title : UI_Popup
     void OnContinueButton()
     {
         UI_Notice notice = Managers.UI.ShowPopupUI<UI_Notice>();
-        notice.SetInfo("아직 세이브 로드 구현이 안됐습니다. ㅠㅠ", () =>
+        notice.SetInfo("아직 세이브 로드 구현이 안 됐습니다. ㅠㅠ", () =>
         {
             Managers.UI.ClosePopupUI(notice);
         });
+    }
+
+    void OnGachaButton()
+    {
+        Managers.UI.ShowPopupUI<UI_Gacha>();
     }
 }
