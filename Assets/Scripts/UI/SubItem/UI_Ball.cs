@@ -129,6 +129,7 @@ public class UI_Ball : UI_Spine
             if (delta.magnitude < 0.0001f)
             {
                 _dir = Vector3.Reflect(_dir, _normal);
+                _dir = Utils.ClampDir(_dir);
 
                 UI_Block block = _hit.collider.GetComponent<UI_Block>();
                 if (block != null)
@@ -164,7 +165,7 @@ public class UI_Ball : UI_Spine
         _shoot = true;
     }
 
-    public void Create()
+    public void Create(float duration)
     {
         Init();
 
@@ -172,7 +173,7 @@ public class UI_Ball : UI_Spine
         transform.rotation = Quaternion.identity;
 
         RefreshAnim();
-        CreateCreateSequence(1.0f);
+        CreateCreateSequence(duration);
         _createSequence.Restart();
     }
 

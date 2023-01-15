@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -48,5 +49,45 @@ public class Utils
         }
 
         return null;
+    }
+
+    public static Vector3 ClampDir(Vector3 dir)
+    {
+        float angle = Quaternion.FromToRotation(Vector3.left, dir).eulerAngles.z;
+        angle -= 180;
+        if (angle < 0)
+            angle += 360;
+
+
+        if (angle < 2f || angle > 358f)
+        {
+            Debug.Log("asdf");
+        }
+
+        // 오른쪽 방향 보정
+        angle = Mathf.Clamp(angle, 0f + Define.CLAMP_ANGLE, 360f - Define.CLAMP_ANGLE);
+
+        // 왼쪽 방향 보정
+        if (angle >= 180 - Define.CLAMP_ANGLE && angle <= 180)
+            angle = 180 - Define.CLAMP_ANGLE;
+        else if (angle > 180 && angle <= 180 + Define.CLAMP_ANGLE)
+            angle = 180 + Define.CLAMP_ANGLE;
+
+        return new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad), 0).normalized;
+    }
+
+    public static Sequence MakePopupOpenSequence(GameObject obj)
+    {
+        Sequence sequence = DOTween.Sequence()
+            .Append(obj.transform.DOScale(0, 0))
+            .Append(obj.transform.DOScale(1, 0.5f).SetEase(Ease.OutBack));
+        return sequence;
+    }
+
+    public static Sequence MakePopupCloseSequence(GameObject obj)
+    {
+        Sequence sequence = DOTween.Sequence()
+            .Append(obj.transform.DOScale(0, 0.3f).SetEase(Ease.InBack));
+        return sequence;
     }
 }

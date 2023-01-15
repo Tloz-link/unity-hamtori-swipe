@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
+using DG.Tweening;
 
 public class UI_Game : UI_Popup
 {
@@ -100,12 +101,11 @@ public class UI_Game : UI_Popup
         for (int i = 0; i < count; ++i)
         {
             UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.WaitBallGroup).transform);
-            ball.SetInfo(GetObject((int)GameObjects.ControlPad).transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallCallBack);
+            ball.SetInfo(GetObject((int)GameObjects.ControlPad).transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallReachCallBack);
             _waitBalls.Enqueue(ball);
         }
 
-        CheckBlock();
-        StartCoroutine(RefreshBoard(0));
+        StartCoroutine(RefreshBoard(0f));
         RefreshUI();
         return true;
     }
@@ -166,9 +166,15 @@ public class UI_Game : UI_Popup
         GetText((int)Texts.BallCountText).text = (_currentBall <= 0) ? "" : $"x{_currentBall}";
 
         if (_game.NuclearStack == 0)
+        {
             GetObject((int)GameObjects.NuclearSkill).SetActive(false);
+            GetText((int)Texts.NuclearStackText).gameObject.SetActive(false);
+        }
         else
+        {
             GetObject((int)GameObjects.NuclearSkill).SetActive(true);
+            GetText((int)Texts.NuclearStackText).gameObject.SetActive(true);
+        }
 
         if (_game.GlassesCooltime == 0)
             GetImage((int)Images.GlassesSkill).sprite = Managers.Resource.Load<Sprite>(_startData.glassesOnSpritePath);
@@ -179,44 +185,8 @@ public class UI_Game : UI_Popup
             GetImage((int)Images.PowerUpSkill).sprite = Managers.Resource.Load<Sprite>(_startData.powerUpOnSpritePath);
         else
             GetImage((int)Images.PowerUpSkill).sprite = Managers.Resource.Load<Sprite>(_startData.powerUpOffSpritePath);
-    }
 
-    private bool _nuclear = false;
-    private Vector2 _nuclearDest;
-    private float _nuclearTextTick;
-    private const float NUCLEAR_TICK = 0.8f;
-    protected override void Update()
-    {
-        if (_nuclear == true)
-        {
-            Vector2 size = GetObject((int)GameObjects.NuclearFull).GetComponent<RectTransform>().sizeDelta;
-            size = Vector2.MoveTowards(size, _nuclearDest, 500f * Time.deltaTime);
-            if (Mathf.Abs(size.x - _nuclearDest.x) < 0.0001f)
-            {
-                size = _nuclearDest;
-                Vector2 fullsize = GetObject((int)GameObjects.NuclearEmpty).GetComponent<RectTransform>().sizeDelta;
-                if (size == fullsize)
-                {
-                    _game.NuclearDivisionCount = 0;
-                    float ratio = _startData.nuclearStartRatio + (1 - _startData.nuclearStartRatio) / _startData.nuclearDivisionFullCount * _game.NuclearDivisionCount;
-                    fullsize.x *= ratio;
-                    _nuclearDest = fullsize;
-                    _game.NuclearStack++;
-                    RefreshUI();
-                    return;
-                }
-
-                _nuclear = false;
-            }
-            GetObject((int)GameObjects.NuclearFull).GetComponent<RectTransform>().sizeDelta = size;
-            GetObject((int)GameObjects.NuclearFullStar).GetComponent<RectTransform>().sizeDelta = size;
-        }
-
-        _nuclearTextTick += Time.deltaTime;
-        if (_nuclearTextTick >= NUCLEAR_TICK)
-        {
-            GetText((int)Texts.PlusPowerText).gameObject.SetActive(false);
-        }
+        RefreshNuclear(0.5f);
     }
 
     IEnumerator RefreshBoard(float interval)
@@ -314,9 +284,9 @@ public class UI_Game : UI_Popup
             if (info.y >= 7)
             {
                 UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.WaitBallGroup).transform);
-                ball.SetInfo(item.transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallCallBack);
-                ball.Create();
-                _waitBalls.Enqueue(ball);
+                ball.SetInfo(item.transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallReachCallBack);
+                ball.Create(0.2f);
+
                 _game.FullBallCount++;
                 _returnBallCount = -1;
 
@@ -331,34 +301,10 @@ public class UI_Game : UI_Popup
         }
     }
 
-    bool CheckBlock()
-    {
-        if (_blocks.Count != 0)
-            return false;
-
-        if (_game.Score != 1)
-        {
-            _game.NuclearDivisionCount++;
-            GetText((int)Texts.PlusPowerText).gameObject.SetActive(true);
-        }
-
-        Vector2 nuclearDest = GetObject((int)GameObjects.NuclearEmpty).GetComponent<RectTransform>().sizeDelta;
-        float ratio = _startData.nuclearStartRatio + (1 - _startData.nuclearStartRatio) / _startData.nuclearDivisionFullCount * _game.NuclearDivisionCount;
-        ratio = Mathf.Clamp(ratio, 0, 1);
-        nuclearDest.x *= ratio;
-        _nuclearDest = nuclearDest;
-
-        _nuclear = true;
-        _nuclearTextTick = 0;
-
-        return _game.Score != 1;
-    }
-
     void OnPadPointerUp()
     {
         if (_game.State != GameState.idle)
             return;
-
         ClearLine();
 
         Vector3 dir;
@@ -366,7 +312,6 @@ public class UI_Game : UI_Popup
             return;
 
         _game.State = GameState.shoot;
-
         StartCoroutine(ShootBalls(dir, 0.08f));
     }
 
@@ -391,7 +336,7 @@ public class UI_Game : UI_Popup
             if (i > Define.MAX_VISIBLE_BALL_COUNT)
             {
                 ball = Managers.UI.makeSubItem<UI_Ball>();
-                ball.SetInfo(Vector3.zero, startLine, OnBallCallBack);
+                ball.SetInfo(Vector3.zero, startLine, OnBallReachCallBack);
             }
             else
             {
@@ -417,8 +362,8 @@ public class UI_Game : UI_Popup
             return;
 
         UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.ShootBallGroup).transform);
-        ball.SetInfo(star.transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallCallBack);
-        ball.Create();
+        ball.SetInfo(star.transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallReachCallBack);
+        ball.Create((8 - star.GetInfo().y) * 0.2f);
         _game.FullBallCount++;
 
         _items.Remove(star);
@@ -437,16 +382,16 @@ public class UI_Game : UI_Popup
             ball.CalcLine();
     }
 
-    Vector3 _hamDest;
-    void OnBallCallBack(UI_Ball ball)
+    float _hamDestX;
+    void OnBallReachCallBack(UI_Ball ball)
     {
         GameObject hamster = GetObject((int)GameObjects.Hamster);
 
         _returnBallCount++;
         if (_returnBallCount == 1)
         {
-            _hamDest = new Vector3(ball.transform.localPosition.x, hamster.transform.localPosition.y, 0);
-            _hamDest.x = Mathf.Clamp(_hamDest.x, -380f, 380f);
+            _hamDestX = ball.transform.localPosition.x;
+            _hamDestX = Mathf.Clamp(_hamDestX, -380f, 380f);
         }
 
         ball.transform.SetParent(GetObject((int)GameObjects.WaitBallGroup).transform);
@@ -457,14 +402,104 @@ public class UI_Game : UI_Popup
 
         if (_returnBallCount == _game.FullBallCount)
         {
-            UpdateValue();
-            CheckStar();
-            hamster.GetComponent<UI_Spine>().Move(_hamDest);
-            float interval = 0.4f;
-            if (CheckBlock() == true)
-                interval = 1.0f;
-            StartCoroutine(RefreshBoard(interval));
+            PostProcess();
         }
+    }
+
+    void PostProcess()
+    {
+        float interval = 0.2f;
+        GameObject hamster = GetObject((int)GameObjects.Hamster);
+
+        UpdateValue();
+        CheckStar();
+
+        Sequence _hamsterMove = DOTween.Sequence()
+            .Append(hamster.transform.DOLocalMoveX(_hamDestX, interval).SetEase(Ease.Linear));
+        _hamsterMove.Restart();
+
+        interval = Mathf.Max(interval, CheckBlockClear());
+        StartCoroutine(RefreshBoard(interval));
+    }
+
+    float RefreshNuclear(float duration)
+    {
+        Vector2 nuclearDest = GetObject((int)GameObjects.NuclearEmpty).GetComponent<RectTransform>().sizeDelta;
+        float ratio = _startData.nuclearStartRatio + (1 - _startData.nuclearStartRatio) / _startData.nuclearDivisionFullCount * _game.NuclearDivisionCount;
+        ratio = Mathf.Clamp(ratio, 0, 1);
+        nuclearDest.x *= ratio;
+
+        RectTransform full = GetObject((int)GameObjects.NuclearFull).GetComponent<RectTransform>();
+        RectTransform fullStar = GetObject((int)GameObjects.NuclearFullStar).GetComponent<RectTransform>();
+
+        Sequence _nuclearSliderSequence = DOTween.Sequence()
+            .Append(full.DOSizeDelta(nuclearDest, duration).SetEase(Ease.Linear))
+            .Join(fullStar.DOSizeDelta(nuclearDest, duration).SetEase(Ease.Linear));
+
+        if (ratio == 1)
+        {
+            _nuclearSliderSequence.OnComplete(() =>
+            {
+                _game.NuclearDivisionCount = 0;
+                RefreshNuclear(1.0f);
+                PlayNuclearInstantiateSequence();
+                _game.NuclearStack++;
+            });
+            duration += (_game.NuclearStack == 0) ? 1.1f : 0.6f;
+        }
+        _nuclearSliderSequence.Restart();
+
+        return duration;
+    }
+
+    void PlayNuclearInstantiateSequence()
+    {
+        GameObject nuclear = GetObject((int)GameObjects.NuclearSkill);
+        Vector3 defaultPos = nuclear.transform.localPosition;
+        nuclear.SetActive(true);
+
+        Sequence _sequence = DOTween.Sequence();
+
+        if (_game.NuclearStack == 0)
+        {
+            _sequence.Append(nuclear.transform.DOLocalMove(Vector3.zero, 0))
+                .Append(nuclear.transform.DOScale(0, 0))
+                .Append(nuclear.transform.DOScale(2.5f, 0.5f).SetEase(Ease.OutBack))
+                .Append(nuclear.transform.DOScale(1f, 0.5f).SetEase(Ease.Linear))
+                .Join(nuclear.transform.DOLocalMove(defaultPos, 0.5f).SetEase(Ease.Linear))
+                .Join(nuclear.transform.DORotate(new Vector3(0, 0, -360), 0.5f, RotateMode.FastBeyond360).SetEase(Ease.Linear));
+        }
+        else
+        {
+            _sequence.Append(nuclear.transform.DORotate(new Vector3(0, 360, 0), 0.5f, RotateMode.FastBeyond360).SetEase(Ease.Linear));
+        }
+
+        _sequence.Restart();
+    }
+
+    float CheckBlockClear()
+    {
+        if (_blocks.Count != 0)
+            return 0f;
+
+        _game.NuclearDivisionCount++;
+        float duration = RefreshNuclear(0.5f);
+
+        GameObject text = GetText((int)Texts.PlusPowerText).gameObject;
+        text.SetActive(true);
+
+        Sequence _powerMessageSequence = DOTween.Sequence()
+            .Append(text.transform.DOLocalMoveY(100, 0))
+            .Append(text.transform.DOScale(0, 0))
+            .Append(text.transform.DOScale(1, 0.5f).SetEase(Ease.OutQuad))
+            .Join(text.transform.DOLocalMoveY(350f, 0.9f).SetRelative().SetEase(Ease.Linear))
+            .Insert(0.8f, text.transform.DOScale(0, 0.3f).SetEase(Ease.InQuad))
+            .AppendCallback(() =>
+            {
+                text.SetActive(false);
+            });
+        _powerMessageSequence.Restart();
+        return Mathf.Max(duration, _powerMessageSequence.Duration());
     }
 
     void UpdateValue()
@@ -480,19 +515,45 @@ public class UI_Game : UI_Popup
 
     void OnNuclearSkill()
     {
-        if (_game.PowerUpCooltime > 0 || _game.State != GameState.idle)
+        if (_game.State != GameState.idle)
             return;
-
         _game.State = GameState.skill;
 
-        foreach (var block in _blocks)
-            Managers.Resource.Destroy(block.gameObject);
-        _blocks.Clear();
+        GameObject nuclear = GetObject((int)GameObjects.NuclearSkill);
+        GameObject board = GetObject((int)GameObjects.GameBoard);
+        Vector3 defaultPos = nuclear.transform.localPosition;
+        GetText((int)Texts.NuclearStackText).gameObject.SetActive(false);
 
-        _game.Score++;
-        _game.NuclearStack--;
-        RefreshUI();
-        StartCoroutine(RefreshBoard(0.1f));
+        Sequence sequence = DOTween.Sequence()
+            .Append(nuclear.transform.DOLocalMove(Vector3.zero, 0.5f).SetEase(Ease.Linear))
+            .Join(nuclear.transform.DORotate(new Vector3(0, 0, 360), 0.5f, RotateMode.FastBeyond360).SetEase(Ease.Linear))
+            .Join(nuclear.transform.DOScale(1.5f, 0.5f).SetEase(Ease.Linear))
+            .Append(nuclear.transform.DOScale(2.5f, 1.0f).SetEase(Ease.InElastic))
+            .Append(nuclear.transform.DOScale(2.5f, 0).SetEase(Ease.Linear))
+            .AppendCallback(() =>
+            {
+                foreach (var block in _blocks)
+                    Managers.Resource.Destroy(block.gameObject);
+                _blocks.Clear();
+
+                _game.Score++;
+                _game.NuclearStack--;
+            })
+            .Join(board.transform.DOShakePosition(0.5f, 100))
+            .AppendInterval(0.5f)
+            .Append(nuclear.transform.DOScale(0f, 0.5f).SetEase(Ease.Linear))
+            .OnComplete(() =>
+            {
+                nuclear.transform.localPosition = defaultPos;
+                RefreshUI();
+                StartCoroutine(RefreshBoard(0f));
+            });
+
+        if (_game.NuclearStack != 1)
+        {
+            sequence.Append(nuclear.transform.DOLocalMove(defaultPos, 0).SetEase(Ease.Linear))
+                .Append(nuclear.transform.DOScale(1.0f, 0.5f).SetEase(Ease.Linear));
+        }
     }
 
     void OnPowerUpSkill()
@@ -557,6 +618,7 @@ public class UI_Game : UI_Popup
 
             src = dest;
             dir = Vector3.Reflect(dir, hit.normal);
+            dir = Utils.ClampDir(dir);
             hit = Physics2D.CircleCast(src + dir, 50 * 0.8f * transform.localScale.x, dir, 10000, 1 << LayerMask.NameToLayer("Wall"));
             dest = hit.centroid;
         }
@@ -640,7 +702,7 @@ public class UI_Game : UI_Popup
 
             if (i <= 2 && index == 0)
             {
-                Color color = star.GetComponent<Image>().color;
+                UnityEngine.Color color = star.GetComponent<Image>().color;
                 color.a = 0.4f;
                 star.GetComponent<Image>().color = color;
             }

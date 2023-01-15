@@ -37,5 +37,7 @@ public class Define
 
     // 가로 7 : 세로 8
     public const int MAX_BLOCK_COUNT = 7 * 8;
+
     public const int MAX_VISIBLE_BALL_COUNT = 20;
+    public const int CLAMP_ANGLE = 2;
 }
