@@ -194,6 +194,9 @@ public class UI_Game : UI_Popup
         yield return new WaitForSeconds(interval);
 
         SpawnBlockAndItem();
+
+        yield return new WaitForSeconds(0.3f);
+
         foreach (var block in _blocks)
             block.MoveNext();
 
@@ -312,7 +315,46 @@ public class UI_Game : UI_Popup
             return;
 
         _game.State = GameState.shoot;
-        StartCoroutine(ShootBalls(dir, 0.08f));
+        StartCoroutine(ShootBalls(dir, 0.04f));
+    }
+
+    List<UI_Ball> GenerateShootBalls()
+    {
+        float startLine = GetObject((int)GameObjects.ControlPad).transform.localPosition.y;
+
+        List<UI_Ball> balls = new List<UI_Ball>();
+        int remainAttack = _game.FullBallCount;
+        for (int i = 0; i < Define.MAX_BALL_COUNT; ++i)
+        {
+            if (i >= _game.FullBallCount)
+                break;
+
+            UI_Ball ball;
+            if (_waitBalls.Count > 0)
+                ball = _waitBalls.Dequeue();
+            else
+            {
+                ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.ShootBallGroup).transform);
+                ball.gameObject.SetActive(false);
+                ball.SetInfo(GetObject((int)GameObjects.ControlPad).transform.localPosition, startLine, OnBallReachCallBack);
+            }
+
+            int attack = 1;
+            if (Define.MAX_BALL_COUNT < _game.FullBallCount)
+            {
+                int remainBall = Define.MAX_BALL_COUNT - i;
+                int ratio = _game.FullBallCount / Define.MAX_BALL_COUNT;
+                if (remainBall == 1)
+                    attack = remainAttack;
+                else
+                    attack = (remainBall < remainAttack / ratio) ? ratio + 1 : ratio;
+            }
+
+            ball.Attack = attack;
+            remainAttack -= attack;
+            balls.Add(ball);
+        }
+        return balls;
     }
 
     int _returnBallCount = 0;
@@ -320,40 +362,28 @@ public class UI_Game : UI_Popup
     {
         GameObject hamster = GetObject((int)GameObjects.Hamster);
         GameObject board = GetObject((int)GameObjects.GameBoard);
-        GameObject shootParent = GetObject((int)GameObjects.ShootBallGroup);
-        float startLine = GetObject((int)GameObjects.ControlPad).transform.localPosition.y;
 
-        int count = _game.FullBallCount;
+        List<UI_Ball> balls = GenerateShootBalls();
         Vector3 shootPos = hamster.transform.localPosition;
         _returnBallCount = 0;
         yield return null;
 
-        for (int i = count; i > 0; --i)
+        for (int i = balls.Count - 1; i >= 0; --i)
         {
-            hamster.GetComponent<UI_Spine>().PlayAnimationForce(Managers.Data.Spine.hamsterShoot);
-
-            UI_Ball ball;
-            if (i > Define.MAX_VISIBLE_BALL_COUNT)
-            {
-                ball = Managers.UI.makeSubItem<UI_Ball>();
-                ball.SetInfo(Vector3.zero, startLine, OnBallReachCallBack);
-            }
-            else
-            {
-                ball = _waitBalls.Dequeue();
-            }
-
-            ball.transform.SetParent(shootParent.transform);
+            UI_Ball ball = balls[i];
+            ball.gameObject.SetActive(true);
+            ball.transform.SetParent(GetObject((int)GameObjects.ShootBallGroup).transform);
             ball.transform.localPosition = shootPos;
             ball.Shoot(board, dir, transform.localScale.x);
-            _currentBall--;
+            _currentBall -= ball.Attack;
             RefreshUI();
-
             _shootBalls.Enqueue(ball);
 
+            hamster.GetComponent<UI_Spine>().PlayAnimationForce(Managers.Data.Spine.hamsterShoot);
             yield return new WaitForSeconds(interval);
         }
         hamster.GetComponent<UI_Spine>().PlayAnimationForce(Managers.Data.Spine.hamsterWait);
+        balls.Clear();
     }
 
     void AcquireStarCallBack(UI_Item_Star star)
@@ -385,8 +415,6 @@ public class UI_Game : UI_Popup
     float _hamDestX;
     void OnBallReachCallBack(UI_Ball ball)
     {
-        GameObject hamster = GetObject((int)GameObjects.Hamster);
-
         _returnBallCount++;
         if (_returnBallCount == 1)
         {
@@ -400,7 +428,8 @@ public class UI_Game : UI_Popup
         else
             Managers.Resource.Destroy(ball.gameObject);
 
-        if (_returnBallCount == _game.FullBallCount)
+        int max = Mathf.Min(_game.FullBallCount, Define.MAX_BALL_COUNT);
+        if (_returnBallCount == max)
         {
             PostProcess();
         }

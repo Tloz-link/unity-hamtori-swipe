@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class UI_Ball : UI_Spine
 {
+    public int Attack { get; set; }
+
     Action<UI_Ball> _callBack;
 
     RaycastHit2D _hit;
@@ -117,12 +119,17 @@ public class UI_Ball : UI_Spine
     }
 
     private bool _shoot;
+    private float _extra;
     protected override void Update()
     {
         if (_shoot == true)
         {
             Vector3 delta = _lineEnd - transform.localPosition;
-            float moveDist = Mathf.Clamp(Managers.Game.BallSpeed * Time.deltaTime, 0, delta.magnitude);
+            float moveDist = (Managers.Game.BallSpeed * Time.deltaTime) + _extra;
+            _extra = (moveDist > delta.magnitude) ? moveDist - delta.magnitude : 0;
+
+            moveDist = Mathf.Clamp(moveDist, 0, delta.magnitude);
+
             transform.localPosition += delta.normalized * moveDist;
 
             delta = _lineEnd - transform.localPosition;
@@ -133,7 +140,7 @@ public class UI_Ball : UI_Spine
 
                 UI_Block block = _hit.collider.GetComponent<UI_Block>();
                 if (block != null)
-                    block.Damaged();
+                    block.Damaged(Attack);
 
                 CalcLine();
             }
@@ -163,6 +170,7 @@ public class UI_Ball : UI_Spine
 
         RefreshAnim();
         _shoot = true;
+        _extra = 0;
     }
 
     public void Create(float duration)

@@ -58,12 +58,6 @@ public class Utils
         if (angle < 0)
             angle += 360;
 
-
-        if (angle < 2f || angle > 358f)
-        {
-            Debug.Log("asdf");
-        }
-
         // 오른쪽 방향 보정
         angle = Mathf.Clamp(angle, 0f + Define.CLAMP_ANGLE, 360f - Define.CLAMP_ANGLE);
 
@@ -88,6 +82,14 @@ public class Utils
     {
         Sequence sequence = DOTween.Sequence()
             .Append(obj.transform.DOScale(0, 0.3f).SetEase(Ease.InBack));
+        return sequence;
+    }
+
+    public static Sequence MakeSpawnSequence(GameObject obj)
+    {
+        Sequence sequence = DOTween.Sequence()
+            .Append(obj.transform.DOScale(0, 0))
+            .Append(obj.transform.DOScale(1, 0.3f).SetEase(Ease.OutQuad));
         return sequence;
     }
 }

@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ public class UI_Block : UI_Spine
             return false;
 
         BindText(typeof(Texts));
+
         _startData = Managers.Data.Start;
         return true;
     }
@@ -33,6 +35,9 @@ public class UI_Block : UI_Spine
         _destroyCallBack = destroyCallBack;
 
         transform.localPosition = new Vector3(_startData.blockStartX + (info.x * _startData.blockGapX), _startData.blockStartY, 0);
+
+        Sequence spawn = Utils.MakeSpawnSequence(gameObject);
+        spawn.Restart();
         RefreshUI();
     }
 
@@ -53,9 +58,9 @@ public class UI_Block : UI_Spine
         return _info;
     }
 
-    public void Damaged()
+    public void Damaged(int attack)
     {
-        _info.hp -= Managers.Game.BallDamage;
+        _info.hp -= Managers.Game.BallDamage * attack;
         RefreshUI();
         if (_info.hp <= 0)
         {
