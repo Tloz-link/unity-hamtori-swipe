@@ -7,10 +7,9 @@ public class UI_Pause : UI_Popup
 {
     enum GameObjects
     {
-        Image,
+        bg,
         CanselButton,
         BackGround,
-        Panel
     }
 
     public override bool Init()
@@ -20,13 +19,12 @@ public class UI_Pause : UI_Popup
 
         BindObject(typeof(GameObjects));
 
-        Sequence open = Utils.MakePopupOpenSequence(GetObject((int)GameObjects.Image));
+        Sequence open = Utils.MakePopupOpenSequence(GetObject((int)GameObjects.bg));
         open.SetUpdate(true);
         open.OnComplete(() =>
         {
             GetObject((int)GameObjects.CanselButton).gameObject.BindEvent(OnCanselButton);
             GetObject((int)GameObjects.BackGround).gameObject.BindEvent(OnCanselButton);
-            GetObject((int)GameObjects.Panel).gameObject.BindEvent(OnCanselButton);
         });
         open.Restart();
 
@@ -35,11 +33,10 @@ public class UI_Pause : UI_Popup
 
     void OnCanselButton()
     {
-        Destroy(GetObject((int)GameObjects.Panel).GetComponent<UI_EventHandler>());
         Destroy(GetObject((int)GameObjects.CanselButton).GetComponent<UI_EventHandler>());
         Destroy(GetObject((int)GameObjects.BackGround).GetComponent<UI_EventHandler>());
 
-        Sequence close = Utils.MakePopupCloseSequence(GetObject((int)GameObjects.Image));
+        Sequence close = Utils.MakePopupCloseSequence(GetObject((int)GameObjects.bg));
         close.SetUpdate(true);
         close.OnComplete(() =>
         {

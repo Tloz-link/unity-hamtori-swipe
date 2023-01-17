@@ -108,6 +108,7 @@ public class UI_Game : UI_Popup
 
         StartCoroutine(RefreshBoard(0f));
         RefreshUI();
+        RefreshNuclear(0.5f);
         return true;
     }
 
@@ -186,8 +187,6 @@ public class UI_Game : UI_Popup
             GetImage((int)Images.PowerUpSkill).sprite = Managers.Resource.Load<Sprite>(_startData.powerUpOnSpritePath);
         else
             GetImage((int)Images.PowerUpSkill).sprite = Managers.Resource.Load<Sprite>(_startData.powerUpOffSpritePath);
-
-        RefreshNuclear(0.5f);
     }
 
     IEnumerator RefreshBoard(float interval)
@@ -398,7 +397,6 @@ public class UI_Game : UI_Popup
         ball.SetInfo(star.transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallReachCallBack);
         ball.Create((8 - star.GetInfo().y) * 0.2f, OnBallCreateCallBack);
         _game.FullBallCount++;
-        _createBallCount++;
 
         _items.Remove(star);
         Managers.Resource.Destroy(star.gameObject);
@@ -421,6 +419,7 @@ public class UI_Game : UI_Popup
         _createBallCount++;
         UI_Text text = Managers.UI.makeSubItem<UI_Text>(GetObject((int)GameObjects.UITextGroup).transform);
         text.transform.localPosition = ball.transform.localPosition;
+        text.SetInfo("+Ham", 100f);
 
         CountReachedBall(ball);
     }
@@ -534,7 +533,7 @@ public class UI_Game : UI_Popup
         GameObject text = GetText((int)Texts.PlusPowerText).gameObject;
         text.SetActive(true);
 
-        Sequence _powerMessageSequence = Utils.MakeIncreaseTextSequence(text);
+        Sequence _powerMessageSequence = Utils.MakeIncreaseTextSequence(text, 200f);
         _powerMessageSequence.AppendCallback(() =>
             {
                 text.SetActive(false);
