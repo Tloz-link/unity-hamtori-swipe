@@ -8,7 +8,8 @@ public class UI_Ball : UI_Spine
 {
     public int Attack { get; set; }
 
-    Action<UI_Ball> _callBack;
+    Action<UI_Ball> _shootCallback;
+    Action<UI_Ball> _createCallback;
 
     RaycastHit2D _hit;
     Vector3 _lineEnd;
@@ -68,7 +69,7 @@ public class UI_Ball : UI_Spine
                 GetComponent<CircleCollider2D>().enabled = true;
                 CreateIdleSequence();
                 _idleSequence.Restart();
-                _callBack.Invoke(this);
+                _createCallback.Invoke(this);
             });
     }
 
@@ -104,7 +105,7 @@ public class UI_Ball : UI_Spine
     }
     #endregion
 
-    public void SetInfo(Vector3 initPos, float startLine, Action<UI_Ball> callBack)
+    public void SetInfo(Vector3 initPos, float startLine, Action<UI_Ball> shootCallback)
     {
         Init();
 
@@ -112,7 +113,7 @@ public class UI_Ball : UI_Spine
         transform.localPosition = initPos;
         transform.localScale = new Vector3(0.8f, 0.8f, 1f);
         _startLine = startLine;
-        _callBack = callBack;
+        _shootCallback = shootCallback;
 
         CreateIdleSequence();
         _idleSequence.Restart();
@@ -153,7 +154,7 @@ public class UI_Ball : UI_Spine
                 transform.localPosition = new Vector3(transform.localPosition.x, _startLine, 0);
                 transform.rotation = Quaternion.identity;
                 _idleSequence.Restart();
-                _callBack.Invoke(this);
+                _shootCallback.Invoke(this);
                 _shoot = false;
             }
         }
@@ -173,12 +174,13 @@ public class UI_Ball : UI_Spine
         _extra = 0;
     }
 
-    public void Create(float duration)
+    public void Create(float duration, Action<UI_Ball> createCallback)
     {
         Init();
 
         GetComponent<CircleCollider2D>().enabled = false;
         transform.rotation = Quaternion.identity;
+        _createCallback = createCallback;
 
         RefreshAnim();
         CreateCreateSequence(duration);

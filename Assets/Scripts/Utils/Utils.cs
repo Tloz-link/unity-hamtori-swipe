@@ -92,4 +92,17 @@ public class Utils
             .Append(obj.transform.DOScale(1, 0.3f).SetEase(Ease.OutQuad));
         return sequence;
     }
+
+    public static Sequence MakeIncreaseTextSequence(GameObject obj)
+    {
+        Vector3 defaultPos = obj.transform.localPosition;
+
+        Sequence sequence = DOTween.Sequence()
+            .Append(obj.transform.DOScale(0, 0))
+            .Append(obj.transform.DOScale(1, 0.5f).SetEase(Ease.OutQuad))
+            .Join(obj.transform.DOLocalMoveY(200f, 0.9f).SetRelative().SetEase(Ease.Linear))
+            .Insert(0.8f, obj.transform.DOScale(0, 0.3f).SetEase(Ease.InQuad))
+            .Append(obj.transform.DOLocalMove(defaultPos, 0));
+        return sequence;
+    }
 }

@@ -134,7 +134,7 @@ public class GameManagerEX
         PowerUpCooltime = 0;
         LineCount = data.lineCount;
         BallDamage = data.ballDamage;
-        NuclearDivisionCount = 0;
+        NuclearDivisionCount = 3;
         NuclearStack = 0;
     }
 }

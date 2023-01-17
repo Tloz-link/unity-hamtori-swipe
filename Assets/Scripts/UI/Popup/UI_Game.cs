@@ -34,7 +34,8 @@ public class UI_Game : UI_Popup
         RightSkill,
         NuclearEmpty,
         NuclearFull,
-        NuclearFullStar
+        NuclearFullStar,
+        UITextGroup
     }
 
     enum Texts
@@ -288,7 +289,7 @@ public class UI_Game : UI_Popup
             {
                 UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.WaitBallGroup).transform);
                 ball.SetInfo(item.transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallReachCallBack);
-                ball.Create(0.2f);
+                ball.Create(0.2f, OnBallCreateCallBack);
 
                 _game.FullBallCount++;
                 _returnBallCount = -1;
@@ -358,6 +359,7 @@ public class UI_Game : UI_Popup
     }
 
     int _returnBallCount = 0;
+    int _createBallCount = 0;
     IEnumerator ShootBalls(Vector3 dir, float interval)
     {
         GameObject hamster = GetObject((int)GameObjects.Hamster);
@@ -366,6 +368,7 @@ public class UI_Game : UI_Popup
         List<UI_Ball> balls = GenerateShootBalls();
         Vector3 shootPos = hamster.transform.localPosition;
         _returnBallCount = 0;
+        _createBallCount = 0;
         yield return null;
 
         for (int i = balls.Count - 1; i >= 0; --i)
@@ -393,8 +396,9 @@ public class UI_Game : UI_Popup
 
         UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.ShootBallGroup).transform);
         ball.SetInfo(star.transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallReachCallBack);
-        ball.Create((8 - star.GetInfo().y) * 0.2f);
+        ball.Create((8 - star.GetInfo().y) * 0.2f, OnBallCreateCallBack);
         _game.FullBallCount++;
+        _createBallCount++;
 
         _items.Remove(star);
         Managers.Resource.Destroy(star.gameObject);
@@ -412,6 +416,15 @@ public class UI_Game : UI_Popup
             ball.CalcLine();
     }
 
+    void OnBallCreateCallBack(UI_Ball ball)
+    {
+        _createBallCount++;
+        UI_Text text = Managers.UI.makeSubItem<UI_Text>(GetObject((int)GameObjects.UITextGroup).transform);
+        text.transform.localPosition = ball.transform.localPosition;
+
+        CountReachedBall(ball);
+    }
+
     float _hamDestX;
     void OnBallReachCallBack(UI_Ball ball)
     {
@@ -421,7 +434,11 @@ public class UI_Game : UI_Popup
             _hamDestX = ball.transform.localPosition.x;
             _hamDestX = Mathf.Clamp(_hamDestX, -380f, 380f);
         }
+        CountReachedBall(ball);
+    }
 
+    void CountReachedBall(UI_Ball ball)
+    {
         ball.transform.SetParent(GetObject((int)GameObjects.WaitBallGroup).transform);
         if (_returnBallCount <= Define.MAX_VISIBLE_BALL_COUNT)
             _waitBalls.Enqueue(ball);
@@ -429,7 +446,7 @@ public class UI_Game : UI_Popup
             Managers.Resource.Destroy(ball.gameObject);
 
         int max = Mathf.Min(_game.FullBallCount, Define.MAX_BALL_COUNT);
-        if (_returnBallCount == max)
+        if (_returnBallCount + _createBallCount == max)
         {
             PostProcess();
         }
@@ -517,17 +534,13 @@ public class UI_Game : UI_Popup
         GameObject text = GetText((int)Texts.PlusPowerText).gameObject;
         text.SetActive(true);
 
-        Sequence _powerMessageSequence = DOTween.Sequence()
-            .Append(text.transform.DOLocalMoveY(100, 0))
-            .Append(text.transform.DOScale(0, 0))
-            .Append(text.transform.DOScale(1, 0.5f).SetEase(Ease.OutQuad))
-            .Join(text.transform.DOLocalMoveY(350f, 0.9f).SetRelative().SetEase(Ease.Linear))
-            .Insert(0.8f, text.transform.DOScale(0, 0.3f).SetEase(Ease.InQuad))
-            .AppendCallback(() =>
+        Sequence _powerMessageSequence = Utils.MakeIncreaseTextSequence(text);
+        _powerMessageSequence.AppendCallback(() =>
             {
                 text.SetActive(false);
             });
         _powerMessageSequence.Restart();
+
         return Mathf.Max(duration, _powerMessageSequence.Duration());
     }
 
