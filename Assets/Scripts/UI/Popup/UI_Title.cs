@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class UI_Title : UI_Popup
@@ -27,18 +28,46 @@ public class UI_Title : UI_Popup
 
     void OnStartButton()
     {
-        Managers.UI.ClosePopupUI(this);
-        Managers.UI.ShowPopupUI<UI_Game>();
-        Managers.UI.ShowPopupUI<UI_Tutorial>();
+        if (Managers.Game.LoadGame())
+        {
+            UI_Confirm confirm = Managers.UI.ShowPopupUI<UI_Confirm>();
+            confirm.SetInfo("세이브 파일이 이미 존재합니다. \n새로 시작하시겠습니까?", () =>
+            {
+                Managers.UI.ClosePopupUI(this);
+
+                Managers.Game.Init();
+                Managers.UI.ShowPopupUI<UI_Game>().NewGame();
+                Managers.UI.ShowPopupUI<UI_Tutorial>();
+            });
+        }
+        else
+        {
+            Managers.UI.ClosePopupUI(this);
+
+            Managers.Game.Init();
+            Managers.UI.ShowPopupUI<UI_Game>().NewGame();
+            Managers.UI.ShowPopupUI<UI_Tutorial>();
+        }
     }
 
     void OnContinueButton()
     {
-        UI_Notice notice = Managers.UI.ShowPopupUI<UI_Notice>();
-        notice.SetInfo("아직 세이브 로드 구현이 안 됐습니다. ㅠㅠ", () =>
+        if (Managers.Game.LoadGame())
         {
-            Managers.UI.ClosePopupUI(notice);
-        });
+            Managers.UI.ClosePopupUI(this);
+
+            Managers.Game.Init();
+            Managers.Game.LoadGame();
+            Managers.UI.ShowPopupUI<UI_Game>().LoadGame();
+        }
+        else
+        {
+            Managers.UI.ClosePopupUI(this);
+
+            Managers.Game.Init();
+            Managers.UI.ShowPopupUI<UI_Game>().NewGame();
+            Managers.UI.ShowPopupUI<UI_Tutorial>();
+        }
     }
 
     void OnGachaButton()

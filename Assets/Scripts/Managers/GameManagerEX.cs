@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using static Define;
 
@@ -32,8 +33,10 @@ public class GameData
     public GameState gameState;
 
     public int score;
+    public int highscore;
     public int fullBallCount;
     public int ballSpeed;
+    public Vector3 shootDir;
 
     //스킬
     public int glassesCooltime;
@@ -45,15 +48,15 @@ public class GameData
     public int nuclearDivisionCount;
     public int nuclearStack;
 
-    public float hamsterPosX;
+    public Vector3 hamsterPos;
     public BlockInfo[] blockList = new BlockInfo[MAX_BLOCK_COUNT];
     public ItemInfo[] itemList = new ItemInfo[MAX_BLOCK_COUNT];
 }
 
-
 public class GameManagerEX
 {
     GameData _gameData = new GameData();
+    public GameData SaveData { get { return _gameData; } set { _gameData = value; } }
 
     public GameState State
     {
@@ -65,6 +68,12 @@ public class GameManagerEX
     {
         get { return _gameData.score; }
         set { _gameData.score = value; }
+    }
+
+    public int Highscore
+    {
+        get { return _gameData.highscore; }
+        set { _gameData.highscore = value; }
     }
 
     public int FullBallCount
@@ -79,10 +88,16 @@ public class GameManagerEX
         set { _gameData.ballSpeed = value; }
     }
 
-    public float HamsterPosX
+    public Vector3 ShootDir
     {
-        get { return _gameData.hamsterPosX; }
-        set { _gameData.hamsterPosX = value; }
+        get { return _gameData.shootDir; }
+        set { _gameData.shootDir = value; }
+    }
+
+    public Vector3 HamsterPos
+    {
+        get { return _gameData.hamsterPos; }
+        set { _gameData.hamsterPos = value; }
     }
 
     public int GlassesCooltime
@@ -121,6 +136,18 @@ public class GameManagerEX
         set { _gameData.nuclearStack = value; }
     }
 
+    public BlockInfo[] BlockList
+    {
+        get { return _gameData.blockList; }
+        set { _gameData.blockList = value; }
+    }
+
+    public ItemInfo[] ItemList
+    {
+        get { return _gameData.itemList; }
+        set { _gameData.itemList = value; }
+    }
+
     public void Init()
     {
         StartData data = Managers.Data.Start;
@@ -129,12 +156,51 @@ public class GameManagerEX
         Score = data.score;
         FullBallCount = data.fullBallCount;
         BallSpeed = data.ballSpeed;
-        HamsterPosX = data.hamsterPosX;
+        ShootDir = Vector3.zero;
+        HamsterPos = new Vector3(data.hamsterPosX, 0f, 0f);
         GlassesCooltime = 0;
         PowerUpCooltime = 0;
         LineCount = data.lineCount;
         BallDamage = data.ballDamage;
         NuclearDivisionCount = 0;
         NuclearStack = 0;
+
+        BlockList = new BlockInfo[MAX_BLOCK_COUNT];
+        ItemList = new ItemInfo[MAX_BLOCK_COUNT];
+
+        // 항상 유지되는 변수들
+        if (File.Exists(Managers._savePath))
+        {
+            string fileStr = File.ReadAllText(Managers._savePath);
+            Highscore = JsonUtility.FromJson<GameData>(fileStr).highscore;
+        }
+        else
+        {
+            Highscore = data.score;
+        }
     }
+
+    #region Save & Load	
+    public void SaveGame()
+    {
+        string jsonStr = JsonUtility.ToJson(Managers.Game.SaveData);
+        File.WriteAllText(Managers._savePath, jsonStr);
+        Debug.Log($"Save Game Completed : {Managers._savePath}");
+    }
+
+    public bool LoadGame()
+    {
+        if (File.Exists(Managers._savePath) == false)
+            return false;
+
+        string fileStr = File.ReadAllText(Managers._savePath);
+        GameData data = JsonUtility.FromJson<GameData>(fileStr);
+        if (data == null || data.score == Managers.Data.Start.score)
+            return false;
+
+        Managers.Game.SaveData = data;
+        Debug.Log($"Save Game Loaded : {Managers._savePath}");
+        return true;
+    }
+    #endregion
 }

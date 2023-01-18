@@ -34,7 +34,7 @@ public class UI_Block : UI_Spine
         _info = info;
         _destroyCallBack = destroyCallBack;
 
-        transform.localPosition = new Vector3(_startData.blockStartX + (info.x * _startData.blockGapX), _startData.blockStartY, 0);
+        transform.localPosition = new Vector3(_startData.blockStartX + (info.x * _startData.blockGapX), _startData.blockStartY - (info.y * _startData.blockGapY), 0);
 
         Sequence spawn = Utils.MakeSpawnSequence(gameObject);
         spawn.Restart();

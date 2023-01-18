@@ -41,6 +41,7 @@ public class UI_Game : UI_Popup
     enum Texts
     {
         ScoreText,
+        HighScoreText,
         PowerUpCooltimeText,
         GlassesCooltimeText,
         NuclearStackText,
@@ -84,8 +85,9 @@ public class UI_Game : UI_Popup
         GetText((int)Texts.PlusPowerText).gameObject.SetActive(false);
 
         Vector3 hamsterStartPos = GetObject((int)GameObjects.Hamster).transform.localPosition;
-        hamsterStartPos.x = _game.HamsterPosX;
-        GetObject((int)GameObjects.Hamster).transform.localPosition = hamsterStartPos;
+        hamsterStartPos.x = _game.HamsterPos.x;
+        _game.HamsterPos = hamsterStartPos;
+        GetObject((int)GameObjects.Hamster).transform.localPosition = _game.HamsterPos;
         GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>();
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPressed, Define.UIEvent.Pressed);
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerUp, Define.UIEvent.PointerUp);
@@ -106,7 +108,6 @@ public class UI_Game : UI_Popup
             _waitBalls.Enqueue(ball);
         }
 
-        StartCoroutine(RefreshBoard(0f));
         RefreshUI();
         RefreshNuclear(0.5f);
         return true;
@@ -133,8 +134,8 @@ public class UI_Game : UI_Popup
                 GetObject((int)(GameObjects.Score)).transform.localPosition -= new Vector3(0, scoreDeltaY, 0);
             }
 
-            GetObject((int)(GameObjects.Power)).transform.localPosition -= new Vector3(0, deltaY * 0.8f, 0);
-            GetObject((int)(GameObjects.GameBoard)).transform.localPosition -= new Vector3(0, deltaY * 0.8f, 0);
+            GetObject((int)(GameObjects.Power)).transform.localPosition -= new Vector3(0, deltaY * 0.4f, 0);
+            GetObject((int)(GameObjects.GameBoard)).transform.localPosition -= new Vector3(0, deltaY * 0.4f, 0);
         }
         else
         {
@@ -162,6 +163,7 @@ public class UI_Game : UI_Popup
     void RefreshUI()
     {
         GetText((int)Texts.ScoreText).text = $"{_game.Score}";
+        GetText((int)Texts.HighScoreText).text = $"{_game.Highscore}";
         GetText((int)Texts.PowerUpCooltimeText).text = (_game.PowerUpCooltime == 0) ? "" : $"{_game.PowerUpCooltime}";
         GetText((int)Texts.GlassesCooltimeText).text = (_game.GlassesCooltime == 0) ? "" : $"{_game.GlassesCooltime}";
         GetText((int)Texts.NuclearStackText).text = $"{_game.NuclearStack}";
@@ -212,22 +214,20 @@ public class UI_Game : UI_Popup
         RefreshUI();
         GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
         _game.State = GameState.idle;
+
+        SaveGame();
     }
 
     public void SpawnBlockAndItem()
     {
         int count = UnityEngine.Random.Range(4, 7);
         if (_game.Score < 5)
-        {
             count = _game.Score + 1;
-        }
 
         List<int> spawnList = new List<int>();
 
         for (int i = 0; i < 7; ++i)
-        {
             spawnList.Add(i);
-        }
 
         for (int i = 0; i < count - 1; ++i)
         {
@@ -267,10 +267,14 @@ public class UI_Game : UI_Popup
                     Clear();
                     Managers.UI.ClosePopupUI(ui);
                     Managers.UI.ClosePopupUI(this);
+
                     Managers.Game.Init();
-                    Managers.UI.ShowPopupUI<UI_Game>();
+                    Managers.UI.ShowPopupUI<UI_Game>().NewGame();
                 });
                 GetObject((int)GameObjects.Hamster).SetActive(false);
+
+                Managers.Game.Init();
+                Managers.Game.SaveGame();
                 return true;
             }
         }
@@ -314,8 +318,10 @@ public class UI_Game : UI_Popup
         if (GetShootDir(out dir) == false)
             return;
 
+        _game.ShootDir = dir;
         _game.State = GameState.shoot;
-        StartCoroutine(ShootBalls(dir, 0.04f));
+        SaveGame();
+        StartCoroutine(ShootBalls(0.04f));
     }
 
     List<UI_Ball> GenerateShootBalls()
@@ -359,8 +365,11 @@ public class UI_Game : UI_Popup
 
     int _returnBallCount = 0;
     int _createBallCount = 0;
-    IEnumerator ShootBalls(Vector3 dir, float interval)
+    IEnumerator ShootBalls(float interval, bool load = false)
     {
+        if (load == true)
+            yield return new WaitForSeconds(0.5f);
+
         GameObject hamster = GetObject((int)GameObjects.Hamster);
         GameObject board = GetObject((int)GameObjects.GameBoard);
 
@@ -376,7 +385,7 @@ public class UI_Game : UI_Popup
             ball.gameObject.SetActive(true);
             ball.transform.SetParent(GetObject((int)GameObjects.ShootBallGroup).transform);
             ball.transform.localPosition = shootPos;
-            ball.Shoot(board, dir, transform.localScale.x);
+            ball.Shoot(board, _game.ShootDir, transform.localScale.x);
             _currentBall -= ball.Attack;
             RefreshUI();
             _shootBalls.Enqueue(ball);
@@ -419,19 +428,20 @@ public class UI_Game : UI_Popup
         _createBallCount++;
         UI_Text text = Managers.UI.makeSubItem<UI_Text>(GetObject((int)GameObjects.UITextGroup).transform);
         text.transform.localPosition = ball.transform.localPosition;
-        text.SetInfo("+Ham", 100f);
+        text.SetInfo("+ZZI", 100f);
 
         CountReachedBall(ball);
     }
 
-    float _hamDestX;
     void OnBallReachCallBack(UI_Ball ball)
     {
         _returnBallCount++;
         if (_returnBallCount == 1)
         {
-            _hamDestX = ball.transform.localPosition.x;
-            _hamDestX = Mathf.Clamp(_hamDestX, -380f, 380f);
+            Vector3 hamDest = _game.HamsterPos;
+            hamDest.x = ball.transform.localPosition.x;
+            hamDest.x = Mathf.Clamp(hamDest.x, -380f, 380f);
+            _game.HamsterPos = hamDest;
         }
         CountReachedBall(ball);
     }
@@ -460,7 +470,7 @@ public class UI_Game : UI_Popup
         CheckStar();
 
         Sequence _hamsterMove = DOTween.Sequence()
-            .Append(hamster.transform.DOLocalMoveX(_hamDestX, interval).SetEase(Ease.Linear));
+            .Append(hamster.transform.DOLocalMove(_game.HamsterPos, interval).SetEase(Ease.Linear));
         _hamsterMove.Restart();
 
         interval = Mathf.Max(interval, CheckBlockClear());
@@ -546,6 +556,8 @@ public class UI_Game : UI_Popup
     void UpdateValue()
     {
         _game.Score++;
+        if (_game.Score >= _game.Highscore)
+            _game.Highscore = _game.Score;
         _game.LineCount = 1;
         _game.BallDamage = 1;
         if (_game.GlassesCooltime > 0)
@@ -579,6 +591,7 @@ public class UI_Game : UI_Popup
 
                 _game.Score++;
                 _game.NuclearStack--;
+                Handheld.Vibrate();
             })
             .Join(board.transform.DOShakePosition(0.5f, 100))
             .AppendInterval(0.5f)
@@ -601,9 +614,10 @@ public class UI_Game : UI_Popup
     {
         if (_game.PowerUpCooltime > 0 || _game.State != GameState.idle)
             return;
-
         _game.PowerUpCooltime = _startData.powerUpFullCooltime;
         _game.BallDamage = _startData.powerUpValue;
+        SaveGame();
+
         StartCoroutine(CoSkillAnimation(Managers.Data.Spine.hamsterSeedEat));
 
         RefreshUI();
@@ -613,9 +627,10 @@ public class UI_Game : UI_Popup
     {
         if (_game.GlassesCooltime > 0 || _game.State != GameState.idle)
             return;
-
         _game.GlassesCooltime = _startData.glassesFullColltime;
         _game.LineCount = _startData.glassesValue;
+        SaveGame();
+
         StartCoroutine(CoSkillAnimation(Managers.Data.Spine.hamsterSeedAfter));
 
         RefreshUI();
@@ -667,17 +682,14 @@ public class UI_Game : UI_Popup
         // 마지막 별을 없에고 달로 변경
         GameObject lastStar = _arrowStars[_arrowStars.Count - 1];
         _arrowMoon = Managers.Resource.Instantiate("Contents/ArrowMoon");
-        CopyObjectStatus(lastStar, _arrowMoon);
+
+        _arrowMoon.transform.SetParent(lastStar.transform.parent);
+        _arrowMoon.transform.position = lastStar.transform.position;
+        _arrowMoon.transform.localRotation = lastStar.transform.localRotation;
+        _arrowMoon.transform.localScale = lastStar.transform.localScale;
+
         _arrowStars.RemoveAt(_arrowStars.Count - 1);
         Managers.Resource.Destroy(lastStar);
-    }
-
-    public void CopyObjectStatus(GameObject src, GameObject dest)
-    {
-        dest.transform.SetParent(src.transform.parent);
-        dest.transform.position = src.transform.position;
-        dest.transform.localRotation = src.transform.localRotation;
-        dest.transform.localScale = src.transform.localScale;
     }
 
     #region Line
@@ -743,7 +755,7 @@ public class UI_Game : UI_Popup
 
             if (i <= 2 && index == 0)
             {
-                UnityEngine.Color color = star.GetComponent<Image>().color;
+                Color color = star.GetComponent<Image>().color;
                 color.a = 0.4f;
                 star.GetComponent<Image>().color = color;
             }
@@ -779,5 +791,59 @@ public class UI_Game : UI_Popup
         foreach (var item in _items)
             Managers.Resource.Destroy(item.gameObject);
         _items.Clear();
+    }
+
+    public void SaveGame()
+    {
+        BlockInfo[] blockInfos = new BlockInfo[Define.MAX_BLOCK_COUNT];
+        for (int i = 0; i < _blocks.Count; ++i)
+            blockInfos[i] = _blocks[i].GetInfo();
+        _game.BlockList = blockInfos;
+
+        ItemInfo[] itemInfos = new ItemInfo[Define.MAX_BLOCK_COUNT];
+        for (int i = 0; i < _items.Count; ++i)
+            itemInfos[i] = _items[i].GetInfo();
+        _game.ItemList = itemInfos;
+
+        Managers.Game.SaveGame();
+    }
+
+    public void LoadGame()
+    {
+        Init();
+
+        foreach (var info in _game.BlockList)
+        {
+            if (info.y == 0)
+                continue;
+
+            UI_Block block = Managers.UI.makeSubItem<UI_Block>(GetObject((int)GameObjects.BlockGroup).transform);
+            block.SetInfo(info, BlockDestroyCallBack);
+            _blocks.Add(block);
+        }
+
+        foreach (var info in _game.ItemList)
+        {
+            if (info.y == 0)
+                continue;
+
+            UI_Item_Star star = Managers.UI.makeSubItem<UI_Item_Star>(GetObject((int)GameObjects.BlockGroup).transform);
+            star.SetInfo(info, AcquireStarCallBack);
+            _items.Add(star);
+        }
+
+        _currentBall = _game.FullBallCount;
+        RefreshUI();
+        GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
+
+        if (_game.State == GameState.shoot)
+            StartCoroutine(ShootBalls(0.04f, true));
+    }
+
+    public void NewGame()
+    {
+        Init();
+
+        StartCoroutine(RefreshBoard(0f));
     }
 }

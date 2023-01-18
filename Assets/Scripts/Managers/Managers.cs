@@ -24,9 +24,13 @@ public class Managers : MonoBehaviour
     public static SoundManager Sound { get { return Instance._sound; } }
     public static SceneManagerEX Scene { get { return Instance._scene; } }
 
+    public static string _savePath;
+
     // Start is called before the first frame update
     void Start()
     {
+        _savePath = Application.persistentDataPath + "/SaveData.json";
+
         Init();
     }
 
@@ -53,7 +57,6 @@ public class Managers : MonoBehaviour
             s_instance._data.Init();
             s_instance._sound.Init();
             s_instance._pool.Init();
-            s_instance._game.Init();
 
             DOTween.Init(false, false, LogBehaviour.Default).SetCapacity(750, 250);
             Application.targetFrameRate = 60;
