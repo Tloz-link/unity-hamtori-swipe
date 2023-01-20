@@ -11,7 +11,7 @@ public class UI_Ball : UI_Spine
     Action<UI_Ball> _shootCallback;
     Action<UI_Ball> _createCallback;
 
-    RaycastHit2D _hit;
+    Collider2D _target;
     Vector3 _lineEnd;
     Vector3 _dir;
     Vector3 _normal;
@@ -38,12 +38,17 @@ public class UI_Ball : UI_Spine
     #region DOTween
     public void CreateIdleSequence()
     {
+        int posX = UnityEngine.Random.Range(-400, 400);
+        float dir = (transform.localPosition.x - posX < 0) ? -180 : 180;
+
         _idleSequence.Kill();
         _idleSequence = DOTween.Sequence()
             .SetAutoKill(false)
             .AppendInterval(0.4f)
-            .Append(transform.DOLocalMoveY(60, 0.3f).SetRelative().SetEase(Ease.OutQuad))
-            .Append(transform.DOLocalMoveY(-60, 0.3f).SetRelative().SetEase(Ease.InQuad))
+            .Append(transform.DOLocalMoveY(60, 0.5f).SetRelative().SetEase(Ease.OutQuad))
+            .Append(transform.DOLocalMoveY(-60, 0.5f).SetRelative().SetEase(Ease.InQuad))
+            .Insert(0.4f, transform.DOLocalMoveX(posX, 1.0f).SetEase(Ease.Linear))
+            .AppendInterval(1.0f)
             .AppendCallback(() =>
             {
                 int rand = UnityEngine.Random.Range(0, 100);
@@ -51,11 +56,11 @@ public class UI_Ball : UI_Spine
                 {
                     RefreshAnim();
                     CreateRollSequence();
-                    _rollSequence.Restart();
                 }
             })
-            .AppendInterval(1.0f)
-            .AppendCallback(() => { _idleSequence.Restart(); });
+            .AppendCallback(() => { CreateIdleSequence(); });
+
+        _idleSequence.Restart();
     }
 
     public void CreateCreateSequence(float duration)
@@ -68,7 +73,6 @@ public class UI_Ball : UI_Spine
             {
                 GetComponent<CircleCollider2D>().enabled = true;
                 CreateIdleSequence();
-                _idleSequence.Restart();
                 _createCallback.Invoke(this);
             });
     }
@@ -88,19 +92,19 @@ public class UI_Ball : UI_Spine
         _rollSequence = DOTween.Sequence()
             .SetAutoKill(false)
             .Append(transform.DOLocalMoveX((float)rand, 2.0f).SetEase(Ease.Linear))
-            .Join(transform.DORotate(new Vector3(0, 0, dir), 2.0f, RotateMode.FastBeyond360).SetEase(Ease.Linear))
+            .Join(transform.DORotate(new Vector3(0, 0, dir), 2.0f, RotateMode.FastBeyond360).SetRelative().SetEase(Ease.Linear))
             .OnComplete(() =>
             {
-                transform.rotation = Quaternion.identity;
-                _idleSequence.Restart();
+                CreateIdleSequence();
             });
+        _rollSequence.Restart();
     }
 
     void RefreshAnim()
     {
-        _idleSequence.Pause();
-        _rollSequence.Pause();
-        _createSequence.Pause();
+        _idleSequence.Kill();
+        _rollSequence.Kill();
+        _createSequence.Kill();
         transform.rotation = Quaternion.identity;
     }
     #endregion
@@ -116,32 +120,30 @@ public class UI_Ball : UI_Spine
         _shootCallback = shootCallback;
 
         CreateIdleSequence();
-        _idleSequence.Restart();
     }
 
     private bool _shoot;
     private float _extra;
-    protected override void Update()
+    private void FixedUpdate()
     {
         if (_shoot == true)
         {
             Vector3 delta = _lineEnd - transform.localPosition;
             float moveDist = (Managers.Game.BallSpeed * Time.deltaTime) + _extra;
             _extra = (moveDist > delta.magnitude) ? moveDist - delta.magnitude : 0;
-
             moveDist = Mathf.Clamp(moveDist, 0, delta.magnitude);
-
             transform.localPosition += delta.normalized * moveDist;
 
             delta = _lineEnd - transform.localPosition;
             if (delta.magnitude < 0.0001f)
             {
+                transform.localPosition = _lineEnd;
                 _dir = Vector3.Reflect(_dir, _normal);
                 _dir = Utils.ClampDir(_dir);
 
-                UI_Block block = _hit.collider.GetComponent<UI_Block>();
+                UI_Block block = _target.GetComponent<UI_Block>();
                 if (block != null)
-                    block.Damaged(Attack);
+                     block.Damaged(Attack);
 
                 CalcLine();
             }
@@ -153,7 +155,7 @@ public class UI_Ball : UI_Spine
             {
                 transform.localPosition = new Vector3(transform.localPosition.x, _startLine, 0);
                 transform.rotation = Quaternion.identity;
-                _idleSequence.Restart();
+                CreateIdleSequence();
                 _shootCallback.Invoke(this);
                 _shoot = false;
             }
@@ -164,6 +166,7 @@ public class UI_Ball : UI_Spine
     {
         Init();
 
+        _target = null;
         _dir = dir;
         _boardPos = board.transform.position;
         _canvasSize = canvasSize;
@@ -189,8 +192,12 @@ public class UI_Ball : UI_Spine
 
     public void CalcLine()
     {
-        _hit = Physics2D.CircleCast(_dir.normalized + transform.position, 50 * 0.8f * _canvasSize, _dir, 10000, 1 << LayerMask.NameToLayer("Wall"));
-        _lineEnd = (_hit.centroid - _boardPos) / _canvasSize;
-        _normal = _hit.normal;
+        RaycastHit2D hit = Physics2D.CircleCast(_dir.normalized + transform.position, 50 * 0.8f * _canvasSize, _dir, 10000, 1 << LayerMask.NameToLayer("Wall"));
+        if (_target == hit.collider)
+            return;
+
+        _target = hit.collider;
+        _lineEnd = (hit.centroid - _boardPos) / _canvasSize;
+        _normal = hit.normal;
     }
 }

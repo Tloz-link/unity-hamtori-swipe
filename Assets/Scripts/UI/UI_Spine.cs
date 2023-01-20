@@ -30,6 +30,11 @@ public class UI_Spine : UI_Base
         return _anim.skeletonDataAsset.GetSkeletonData(true).FindAnimation(name).Duration;
     }
 
+    public string GetCurrentAnimation()
+    {
+        return _anim.startingAnimation;
+    }
+
     public void PlayAnimation(string name, bool loop = true)
     {
         Init();

@@ -8,10 +8,20 @@ public class SpineData
     //block
     [XmlAttribute]
     public string blockIdle;
+    [XmlAttribute]
+    public string blockTarget;
+    [XmlAttribute]
+    public string blockDamaged;
 
     //ball
     [XmlAttribute]
     public string ballIdle;
+    [XmlAttribute]
+    public string ballRIghtRoll;
+    [XmlAttribute]
+    public string ballLeftRoll;
+    [XmlAttribute]
+    public string ballJump;
 
     //hamster
     [XmlAttribute]

@@ -60,6 +60,7 @@ public class UI_Block : UI_Spine
 
     public void Damaged(int attack)
     {
+        PlayAnimationOnce(Managers.Data.Spine.blockDamaged);
         _info.hp -= Managers.Game.BallDamage * attack;
         RefreshUI();
         if (_info.hp <= 0)

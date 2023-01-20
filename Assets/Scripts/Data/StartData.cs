@@ -51,4 +51,12 @@ public class StartData
     public float nuclearStartRatio;
     [XmlAttribute]
     public int nuclearDivisionFullCount;
+
+    // 배경 스프라이트 경로
+    [XmlAttribute]
+    public string backgroundFirstPath;
+    [XmlAttribute]
+    public string backgroundsecondPath;
+    [XmlAttribute]
+    public string backgroundLastPath;
 }

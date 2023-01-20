@@ -33,6 +33,7 @@ public class UI_Title : UI_Popup
             UI_Confirm confirm = Managers.UI.ShowPopupUI<UI_Confirm>();
             confirm.SetInfo("세이브 파일이 이미 존재합니다. \n새로 시작하시겠습니까?", () =>
             {
+                Managers.UI.ClosePopupUI(confirm);
                 Managers.UI.ClosePopupUI(this);
 
                 Managers.Game.Init();

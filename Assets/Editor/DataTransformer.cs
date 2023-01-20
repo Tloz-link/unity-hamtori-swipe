@@ -8,12 +8,7 @@ using System.Text.RegularExpressions;
 using System;
 using UnityEngine;
 using static Define;
-using System.Linq;
-using Codice.Client.Common;
-using NUnit.Framework.Interfaces;
-using Spine;
-using System.Runtime.InteropServices.ComTypes;
-using UnityEditor.Graphs;
+
 
 public class DataTransformer : EditorWindow
 {
@@ -71,6 +66,9 @@ public class DataTransformer : EditorWindow
             powerUpOffSpritePath = row[17],
             nuclearStartRatio = float.Parse(row[18]),
             nuclearDivisionFullCount = int.Parse(row[19]),
+            backgroundFirstPath = row[20],
+            backgroundsecondPath = row[21],
+            backgroundLastPath = row[22],
         };
         #endregion
 
@@ -84,24 +82,32 @@ public class DataTransformer : EditorWindow
         SpineData spineData;
 
         #region ExcelData
-        string[] lines = Resources.Load<TextAsset>($"Data/Excel/SpineData").text.Split("\n");
+        string[] linesBlock = Resources.Load<TextAsset>($"Data/Excel/SpineData/Block").text.Split("\n");
+        string[] linesBall = Resources.Load<TextAsset>($"Data/Excel/SpineData/Ball").text.Split("\n");
+        string[] linesHamster = Resources.Load<TextAsset>($"Data/Excel/SpineData/Hamster").text.Split("\n");
 
-        // 두번째 라인까지 스킵
-        string[] row = lines[2].Replace("\r", "").Split(',');
+        string[] block = linesBlock[2].Replace("\r", "").Split(',');
+        string[] ball = linesBall[2].Replace("\r", "").Split(',');
+        string[] hamster = linesHamster[2].Replace("\r", "").Split(',');
 
         spineData = new SpineData()
         {
-            blockIdle = row[0],
+            blockIdle = block[0],
+            blockTarget = block[1],
+            blockDamaged = block[2],
 
-            ballIdle = row[1],
+            ballIdle = ball[0],
+            ballRIghtRoll = ball[1],
+            ballLeftRoll = ball[2],
+            ballJump = ball[3],
 
-            hamsterIdle = row[2],
-            hamsterCharge = row[3],
-            hamsterShoot = row[4],
-            hamsterWait = row[5],
-            hamsterGameover = row[6],
-            hamsterSeedAfter = row[7],
-            hamsterSeedEat = row[8]
+            hamsterIdle = hamster[0],
+            hamsterCharge = hamster[1],
+            hamsterShoot = hamster[2],
+            hamsterWait = hamster[3],
+            hamsterGameover = hamster[4],
+            hamsterSeedAfter = hamster[5],
+            hamsterSeedEat = hamster[6]
         };
         #endregion
 
@@ -109,54 +115,6 @@ public class DataTransformer : EditorWindow
         File.WriteAllText($"{Application.dataPath}/Resources/Data/SpineData.xml", xmlString);
         AssetDatabase.Refresh();
     }
-
-    //로더 없는 예시
-
-    //static void ParseStartData()
-    //{
-    //    StartData startData;
-
-    //    #region ExcelData
-    //    string[] lines = Resources.Load<TextAsset>($"Data/Excel/StartData").text.Split("\n");
-
-    //    // 두번째 라인까지 스킵
-    //    string[] row = lines[2].Replace("\r", "").Split(',');
-
-    //    startData = new StartData()
-    //    {
-    //        ID = int.Parse(row[0]),
-    //        maxHp = int.Parse(row[1]),
-    //        maxhpIconPath = row[2],
-    //        atk = int.Parse(row[3]),
-    //        money = int.Parse(row[4]),
-    //        moneyIconPath = row[5],
-    //        block = int.Parse(row[6]),
-    //        blockIconPath = row[7],
-    //        salary = int.Parse(row[8]),
-    //        salaryPercent = float.Parse(row[9]),
-    //        revenuePercent = float.Parse(row[10]),
-    //        cooltimePercent = float.Parse(row[11]),
-    //        successPercent = float.Parse(row[12]),
-    //        workAbility = int.Parse(row[13]),
-    //        workAbilityIconPath = row[14],
-    //        likeAbility = int.Parse(row[15]),
-    //        likeAbilityIconPath = row[16],
-    //        stress = int.Parse(row[17]),
-    //        maxStress = int.Parse(row[18]),
-    //        increaseStress = int.Parse(row[19]),
-    //        stressIconPath = row[20],
-    //        luck = int.Parse(row[21]),
-    //        luckIconPath = row[22]
-    //    };
-    //    #endregion
-
-    //    string xmlString = ToXML(startData);
-    //    File.WriteAllText($"{Application.dataPath}/Resources/Data/StartData.xml", xmlString);
-    //    AssetDatabase.Refresh();
-    //}
-
-
-    // 로더 있는 예시
 
     //static void ParseShopData()
     //{

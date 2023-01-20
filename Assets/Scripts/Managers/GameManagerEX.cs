@@ -195,7 +195,7 @@ public class GameManagerEX
 
         string fileStr = File.ReadAllText(Managers._savePath);
         GameData data = JsonUtility.FromJson<GameData>(fileStr);
-        if (data == null || data.score == Managers.Data.Start.score)
+        if (data == null || data.shootDir == Vector3.zero)
             return false;
 
         Managers.Game.SaveData = data;

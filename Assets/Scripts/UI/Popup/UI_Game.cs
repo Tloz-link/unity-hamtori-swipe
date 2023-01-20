@@ -11,8 +11,9 @@ public class UI_Game : UI_Popup
     enum GameObjects
     {
         BackGround,
-        StarBG,
+        StarBG,  // 15점 이후 표시
         CloudBG,
+        Moon,    // 100점 이후 표시
 
         // Header
         Score,
@@ -52,7 +53,8 @@ public class UI_Game : UI_Popup
     enum Images
     {
         PowerUpSkill,
-        GlassesSkill
+        GlassesSkill,
+        BackGround
     }
 
     GameManagerEX _game;
@@ -82,6 +84,8 @@ public class UI_Game : UI_Popup
         AdjustUIByResolution();
 
         GetObject((int)GameObjects.NuclearSkill).SetActive(false);
+        GetObject((int)GameObjects.StarBG).SetActive(false);
+        GetObject((int)GameObjects.Moon).SetActive(false);
         GetText((int)Texts.PlusPowerText).gameObject.SetActive(false);
 
         Vector3 hamsterStartPos = GetObject((int)GameObjects.Hamster).transform.localPosition;
@@ -169,6 +173,20 @@ public class UI_Game : UI_Popup
         GetText((int)Texts.NuclearStackText).text = $"{_game.NuclearStack}";
         GetText((int)Texts.BallCountText).text = (_currentBall <= 0) ? "" : $"x{_currentBall}";
 
+        // 점수별 장식 on/off
+        if (_game.Score >= 15)
+            GetObject((int)GameObjects.StarBG).SetActive(true);
+        if (_game.Score >= 100)
+            GetObject((int)GameObjects.Moon).SetActive(true);
+
+        // 점수별 배경
+        if (_game.Score < 15)
+            GetImage((int)Images.BackGround).sprite = Managers.Resource.Load<Sprite>(_startData.backgroundFirstPath);
+        else if (_game.Score < 10000)
+            GetImage((int)Images.BackGround).sprite = Managers.Resource.Load<Sprite>(_startData.backgroundsecondPath);
+        else
+            GetImage((int)Images.BackGround).sprite = Managers.Resource.Load<Sprite>(_startData.backgroundLastPath);
+
         if (_game.NuclearStack == 0)
         {
             GetObject((int)GameObjects.NuclearSkill).SetActive(false);
@@ -209,6 +227,13 @@ public class UI_Game : UI_Popup
 
         if (CheckGameOver() == true)
             yield break;
+
+        if (_createBallCount > 0)
+        {
+            UI_Text text = Managers.UI.makeSubItem<UI_Text>(GetObject((int)GameObjects.UITextGroup).transform);
+            text.transform.position = GetText((int)Texts.BallCountText).transform.position;
+            text.SetInfo($"+{_createBallCount}", 50f);
+        }
 
         _currentBall = _game.FullBallCount;
         RefreshUI();
@@ -312,10 +337,15 @@ public class UI_Game : UI_Popup
     {
         if (_game.State != GameState.idle)
             return;
+
         ClearLine();
 
+        // 블럭 애니메이션 초기화
+        foreach (var block in _blocks)
+            block.PlayAnimation(Managers.Data.Spine.blockIdle);
+
         Vector3 dir;
-        if (GetShootDir(out dir) == false)
+        if (CalcShootDir(out dir) == false)
             return;
 
         _game.ShootDir = dir;
@@ -324,11 +354,11 @@ public class UI_Game : UI_Popup
         StartCoroutine(ShootBalls(0.04f));
     }
 
-    List<UI_Ball> GenerateShootBalls()
+    Stack<UI_Ball> GenerateShootBalls()
     {
         float startLine = GetObject((int)GameObjects.ControlPad).transform.localPosition.y;
 
-        List<UI_Ball> balls = new List<UI_Ball>();
+        Stack<UI_Ball> balls = new Stack<UI_Ball>();
         int remainAttack = _game.FullBallCount;
         for (int i = 0; i < Define.MAX_BALL_COUNT; ++i)
         {
@@ -358,9 +388,44 @@ public class UI_Game : UI_Popup
 
             ball.Attack = attack;
             remainAttack -= attack;
-            balls.Add(ball);
+            balls.Push(ball);
         }
         return balls;
+    }
+
+    Stack<UI_Ball> _loadedBalls;
+    private float _tick = 0f;
+    private float _interval = 0f;
+    private bool _shoot = false;
+    private void FixedUpdate()
+    {
+        if (_shoot == false)
+            return;
+
+        _tick += Time.deltaTime;
+        if (_tick >= _interval)
+        {
+            _tick = 0f;
+
+            if (_loadedBalls.Count <= 0)
+            {
+                GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimationForce(Managers.Data.Spine.hamsterWait);
+                _loadedBalls.Clear();
+                _shoot = false;
+                return;
+            }
+
+            UI_Ball ball = _loadedBalls.Pop();
+            ball.gameObject.SetActive(true);
+            ball.transform.SetParent(GetObject((int)GameObjects.ShootBallGroup).transform);
+            ball.transform.localPosition = GetObject((int)GameObjects.Hamster).transform.localPosition;
+            ball.Shoot(GetObject((int)GameObjects.GameBoard), _game.ShootDir, transform.localScale.x);
+            _currentBall -= ball.Attack;
+            RefreshUI();
+            _shootBalls.Enqueue(ball);
+
+            GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimationForce(Managers.Data.Spine.hamsterShoot);
+        }
     }
 
     int _returnBallCount = 0;
@@ -370,31 +435,11 @@ public class UI_Game : UI_Popup
         if (load == true)
             yield return new WaitForSeconds(0.5f);
 
-        GameObject hamster = GetObject((int)GameObjects.Hamster);
-        GameObject board = GetObject((int)GameObjects.GameBoard);
-
-        List<UI_Ball> balls = GenerateShootBalls();
-        Vector3 shootPos = hamster.transform.localPosition;
+        _interval = interval;
+        _loadedBalls = GenerateShootBalls();
         _returnBallCount = 0;
         _createBallCount = 0;
-        yield return null;
-
-        for (int i = balls.Count - 1; i >= 0; --i)
-        {
-            UI_Ball ball = balls[i];
-            ball.gameObject.SetActive(true);
-            ball.transform.SetParent(GetObject((int)GameObjects.ShootBallGroup).transform);
-            ball.transform.localPosition = shootPos;
-            ball.Shoot(board, _game.ShootDir, transform.localScale.x);
-            _currentBall -= ball.Attack;
-            RefreshUI();
-            _shootBalls.Enqueue(ball);
-
-            hamster.GetComponent<UI_Spine>().PlayAnimationForce(Managers.Data.Spine.hamsterShoot);
-            yield return new WaitForSeconds(interval);
-        }
-        hamster.GetComponent<UI_Spine>().PlayAnimationForce(Managers.Data.Spine.hamsterWait);
-        balls.Clear();
+        _shoot = true;
     }
 
     void AcquireStarCallBack(UI_Item_Star star)
@@ -657,7 +702,7 @@ public class UI_Game : UI_Popup
         ClearLine();
 
         Vector3 dir;
-        if (GetShootDir(out dir) == false)
+        if (CalcShootDir(out dir) == false)
             return;
 
         GameObject hamster = GetObject((int)GameObjects.Hamster);
@@ -669,7 +714,7 @@ public class UI_Game : UI_Popup
         for (int i = 0; i <_game.LineCount; ++i)
         {
             GenerateStar(src, dest, dir, i);
-            if (hit.transform.tag == "Floor")
+            if (hit.transform.tag == "Floor" || i == _game.LineCount - 1)
                 break;
 
             src = dest;
@@ -677,6 +722,18 @@ public class UI_Game : UI_Popup
             dir = Utils.ClampDir(dir);
             hit = Physics2D.CircleCast(src + dir, 50 * 0.8f * transform.localScale.x, dir, 10000, 1 << LayerMask.NameToLayer("Wall"));
             dest = hit.centroid;
+        }
+
+        // 화살표에 닿은 블럭 공포 애니메이션
+        UI_Block target = hit.collider.GetComponent<UI_Block>();
+        if (target != null)
+            target.PlayAnimation(Managers.Data.Spine.blockTarget);
+
+        foreach (var block in _blocks)
+        {
+            if (target == block)
+                continue;
+            block.PlayAnimation(Managers.Data.Spine.blockIdle);
         }
 
         // 마지막 별을 없에고 달로 변경
@@ -693,19 +750,18 @@ public class UI_Game : UI_Popup
     }
 
     #region Line
-    const float DELTA = 10;
-    bool GetShootDir(out Vector3 dir)
+    bool CalcShootDir(out Vector3 dir)
     {
         Vector3 mousePos = Input.mousePosition;
         mousePos -= GetObject((int)GameObjects.GameBoard).transform.position;
         mousePos /= transform.localScale.x;
 
         Vector2 padSize = GetObject((int)GameObjects.ControlPad).GetComponent<RectTransform>().sizeDelta;
-        float upLimit = GetObject((int)GameObjects.ControlPad).transform.localPosition.y - DELTA;
-        float leftLimit = GetObject((int)GameObjects.ControlPad).transform.localPosition.x - (padSize.x / 2) + DELTA;
-        float rightLimit = GetObject((int)GameObjects.ControlPad).transform.localPosition.x + (padSize.x / 2) - DELTA;
+        float upLimit = GetObject((int)GameObjects.ControlPad).transform.localPosition.y - 10;
+        float leftLimit = GetObject((int)GameObjects.ControlPad).transform.localPosition.x - (padSize.x / 2) + 10;
+        float rightLimit = GetObject((int)GameObjects.ControlPad).transform.localPosition.x + (padSize.x / 2) - 10;
 
-        float ratio = (mousePos.x - leftLimit) / (padSize.x - 2 * DELTA);
+        float ratio = (mousePos.x - leftLimit) / (padSize.x - 2 * 10);
         float angle = 10f + (160f * ratio);
         angle = Math.Clamp(angle, 10f, 170f);
 
