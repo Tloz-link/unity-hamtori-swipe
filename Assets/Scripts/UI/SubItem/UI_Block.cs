@@ -50,7 +50,7 @@ public class UI_Block : UI_Spine
 
     public void RefreshUI()
     {
-        GetText((int)Texts.HPText).text = $"{_info.hp}";
+        GetText((int)Texts.HPText).text = (_info.hp > 0) ? $"{_info.hp}" : "";
     }
 
     public BlockInfo GetInfo()
@@ -60,12 +60,29 @@ public class UI_Block : UI_Spine
 
     public void Damaged(int attack)
     {
-        PlayAnimationOnce(Managers.Data.Spine.blockDamaged);
+        if (_info.hp <= 0)
+            return;
+
         _info.hp -= Managers.Game.BallDamage * attack;
         RefreshUI();
-        if (_info.hp <= 0)
+
+        if (_info.hp > 0)
         {
+            PlayAnimationOnce(Managers.Data.Spine.blockDamaged);
+        }
+        else
+        {
+            StartCoroutine(Destroy());
+            GetComponent<Collider2D>().enabled = false;
             _destroyCallBack?.Invoke(this);
         }
+    }
+
+    IEnumerator Destroy()
+    {
+        PlayAnimation(Managers.Data.Spine.blockDestory);
+        float length = GetAnimationLength(Managers.Data.Spine.blockDestory);
+        yield return new WaitForSeconds(length);
+        Managers.Resource.Destroy(gameObject);
     }
 }

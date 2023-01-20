@@ -264,7 +264,7 @@ public class UI_Game : UI_Popup
                 hp = _game.Score
             };
             UI_Block block = Managers.UI.makeSubItem<UI_Block>(GetObject((int)GameObjects.BlockGroup).transform);
-            block.SetInfo(info, BlockDestroyCallBack);
+            block.SetInfo(info, OnDestroyBlockCallBack);
             _blocks.Add(block);
             spawnList.RemoveAt(rand);
         }
@@ -456,14 +456,12 @@ public class UI_Game : UI_Popup
         Managers.Resource.Destroy(star.gameObject);
     }
 
-    void BlockDestroyCallBack(UI_Block block)
+    void OnDestroyBlockCallBack(UI_Block block)
     {
         if (_blocks.Contains(block) == false)
             return;
 
         _blocks.Remove(block);
-        Managers.Resource.Destroy(block.gameObject);
-
         foreach (var ball in _shootBalls)
             ball.CalcLine();
     }
@@ -874,7 +872,7 @@ public class UI_Game : UI_Popup
                 continue;
 
             UI_Block block = Managers.UI.makeSubItem<UI_Block>(GetObject((int)GameObjects.BlockGroup).transform);
-            block.SetInfo(info, BlockDestroyCallBack);
+            block.SetInfo(info, OnDestroyBlockCallBack);
             _blocks.Add(block);
         }
 

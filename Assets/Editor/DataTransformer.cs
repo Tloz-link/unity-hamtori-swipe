@@ -95,6 +95,7 @@ public class DataTransformer : EditorWindow
             blockIdle = block[0],
             blockTarget = block[1],
             blockDamaged = block[2],
+            blockDestory = block[3],
 
             ballIdle = ball[0],
             ballRIghtRoll = ball[1],

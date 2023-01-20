@@ -12,6 +12,8 @@ public class SpineData
     public string blockTarget;
     [XmlAttribute]
     public string blockDamaged;
+    [XmlAttribute]
+    public string blockDestory;
 
     //ball
     [XmlAttribute]
