@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f1b3b4b945939a54ea0b23d3396115fb, type: 3}
-  m_Name: bubble_SkeletonData
+  m_Name: cloud_SkeletonData
   m_EditorClassIdentifier: 
   atlasAssets:
-  - {fileID: 11400000, guid: 539781500c6d08f48a220267d9853e99, type: 2}
+  - {fileID: 11400000, guid: b729db23037650145a00446c700060b2, type: 2}
   scale: 0.01
-  skeletonJSON: {fileID: 4900000, guid: f698aace9c8b0324da047b850074f09c, type: 3}
+  skeletonJSON: {fileID: 4900000, guid: 34358c9ea65138944802d34d6fb7b151, type: 3}
   isUpgradingBlendModeMaterials: 0
   blendModeMaterials:
     requiresBlendModeMaterials: 0

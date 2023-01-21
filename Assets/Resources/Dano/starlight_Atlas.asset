@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a6b194f808b1af6499c93410e504af42, type: 3}
-  m_Name: bubble_Atlas
+  m_Name: starlight_Atlas
   m_EditorClassIdentifier: 
-  atlasFile: {fileID: 4900000, guid: 75e6105338751ec4588578294ee56887, type: 3}
+  atlasFile: {fileID: 4900000, guid: fd1ae90a17a88844f8ecc284615efa30, type: 3}
   materials:
-  - {fileID: 2100000, guid: f3ba3f1200be6fd4b85a4235ee13c57e, type: 2}
+  - {fileID: 2100000, guid: 5955347335e38114ba796278f4c4357f, type: 2}
