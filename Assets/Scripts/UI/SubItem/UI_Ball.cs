@@ -40,6 +40,7 @@ public class UI_Ball : UI_Spine
     {
         int posX = UnityEngine.Random.Range(-400, 400);
         float dir = (transform.localPosition.x - posX < 0) ? -180 : 180;
+        PlayAnimation(Managers.Data.Spine.ballJump, false);
 
         _idleSequence.Kill();
         _idleSequence = DOTween.Sequence()
@@ -51,14 +52,19 @@ public class UI_Ball : UI_Spine
             .AppendInterval(1.0f)
             .AppendCallback(() =>
             {
+                PlayAnimation(Managers.Data.Spine.ballIdle);
+
                 int rand = UnityEngine.Random.Range(0, 100);
                 if (rand <= 25)
                 {
                     RefreshAnim();
                     CreateRollSequence();
                 }
-            })
-            .AppendCallback(() => { CreateIdleSequence(); });
+                else
+                {
+                    CreateIdleSequence();
+                }
+            });
 
         _idleSequence.Restart();
     }
@@ -86,15 +92,19 @@ public class UI_Ball : UI_Spine
             if (Mathf.Abs(transform.localPosition.x - rand) > 80)
                 break;
         }
-        float dir = (transform.localPosition.x - rand < 0) ? -360 : 360;
+
+        if (transform.localPosition.x - rand < 0)
+            PlayAnimation(Managers.Data.Spine.ballRIghtRoll, false);
+        else
+            PlayAnimation(Managers.Data.Spine.ballLeftRoll, false);
 
         _rollSequence.Kill();
         _rollSequence = DOTween.Sequence()
             .SetAutoKill(false)
             .Append(transform.DOLocalMoveX((float)rand, 2.0f).SetEase(Ease.Linear))
-            .Join(transform.DORotate(new Vector3(0, 0, dir), 2.0f, RotateMode.FastBeyond360).SetRelative().SetEase(Ease.Linear))
             .OnComplete(() =>
             {
+                PlayAnimation(Managers.Data.Spine.ballIdle);
                 CreateIdleSequence();
             });
         _rollSequence.Restart();
@@ -155,6 +165,8 @@ public class UI_Ball : UI_Spine
 
             if (transform.localPosition.y <= _startLine)
             {
+                PlayAnimation(Managers.Data.Spine.ballIdle);
+
                 transform.localPosition = new Vector3(transform.localPosition.x, _startLine, 0);
                 transform.rotation = Quaternion.identity;
                 CreateIdleSequence();
