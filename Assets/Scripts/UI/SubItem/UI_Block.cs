@@ -22,7 +22,6 @@ public class UI_Block : UI_Spine
             return false;
 
         BindText(typeof(Texts));
-
         _startData = Managers.Data.Start;
         return true;
     }
@@ -38,6 +37,9 @@ public class UI_Block : UI_Spine
 
         Sequence spawn = Utils.MakeSpawnSequence(gameObject);
         spawn.Restart();
+
+        GetComponent<Collider2D>().enabled = true;
+        PlayAnimation(Managers.Data.Spine.blockIdle);
         RefreshUI();
     }
 
@@ -81,6 +83,7 @@ public class UI_Block : UI_Spine
     IEnumerator Destroy()
     {
         PlayAnimation(Managers.Data.Spine.blockDestory);
+        Managers.Sound.Play(Define.Sound.Effect, "blockDestroyed");
         float length = GetAnimationLength(Managers.Data.Spine.blockDestory);
         yield return new WaitForSeconds(length);
         Managers.Resource.Destroy(gameObject);

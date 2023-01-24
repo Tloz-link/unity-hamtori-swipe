@@ -69,6 +69,7 @@ public class DataTransformer : EditorWindow
             backgroundFirstPath = row[20],
             backgroundsecondPath = row[21],
             backgroundLastPath = row[22],
+            volume = int.Parse(row[23]),
         };
         #endregion
 

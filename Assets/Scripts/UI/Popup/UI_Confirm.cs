@@ -45,6 +45,7 @@ public class UI_Confirm : UI_Popup
 
     void OnCanselButton()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
         Destroy(GetObject((int)GameObjects.ConfirmButton).GetComponent<UI_EventHandler>());
         Destroy(GetObject((int)GameObjects.CanselButton).GetComponent<UI_EventHandler>());
 

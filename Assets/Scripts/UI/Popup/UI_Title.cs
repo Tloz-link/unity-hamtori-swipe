@@ -28,11 +28,15 @@ public class UI_Title : UI_Popup
 
     void OnStartButton()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
+
         if (Managers.Game.LoadGame())
         {
             UI_Confirm confirm = Managers.UI.ShowPopupUI<UI_Confirm>();
             confirm.SetInfo("세이브 파일이 이미 존재합니다. \n새로 시작하시겠습니까?", () =>
             {
+                Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
+
                 Managers.UI.ClosePopupUI(confirm);
                 Managers.UI.ClosePopupUI(this);
 
@@ -53,6 +57,8 @@ public class UI_Title : UI_Popup
 
     void OnContinueButton()
     {
+        Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
+
         if (Managers.Game.LoadGame())
         {
             Managers.UI.ClosePopupUI(this);

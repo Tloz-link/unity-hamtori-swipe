@@ -6,6 +6,9 @@ using System.Xml.Serialization;
 public class StartData
 {
     [XmlAttribute]
+    public int volume;
+
+    [XmlAttribute]
     public int score;
     [XmlAttribute]
     public int fullBallCount;

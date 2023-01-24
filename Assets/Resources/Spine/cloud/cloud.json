@@ -1,7 +1,7 @@
 {
 "skeleton": {
-	"hash": "gWnmoOm+diM",
-	"spine": "4.1.17",
+	"hash": "zyquyB9+W64",
+	"spine": "4.1.18",
 	"x": -489.99,
 	"y": 10.77,
 	"width": 979.75,
@@ -193,100 +193,101 @@
 			"cloud4-1": {
 				"rgba": [
 					{ "color": "ffffffa9" },
-					{ "time": 0.6667, "color": "ffffffff" },
-					{ "time": 2.3333, "color": "ffffff00", "curve": "stepped" },
-					{ "time": 2.6667, "color": "ffffff00" },
-					{ "time": 4, "color": "ffffffa9" }
+					{ "time": 2.1333, "color": "ffffffff" },
+					{ "time": 7.4667, "color": "ffffff00", "curve": "stepped" },
+					{ "time": 8.5333, "color": "ffffff00" },
+					{ "time": 12.8333, "color": "ffffffa9" }
 				]
 			},
 			"cloud4-2": {
 				"rgba": [
 					{ "color": "ffffffff" },
-					{ "time": 1.6667, "color": "ffffff00", "curve": "stepped" },
-					{ "time": 2, "color": "ffffff00" },
-					{ "time": 4, "color": "ffffffff" }
+					{ "time": 5.3333, "color": "ffffff00", "curve": "stepped" },
+					{ "time": 6.4, "color": "ffffff00" },
+					{ "time": 12.8333, "color": "ffffffff" }
 				]
 			},
 			"cloud4-3": {
 				"rgba": [
-					{ "color": "ffffff00" },
-					{ "time": 2, "color": "ffffffff" },
-					{ "time": 4, "color": "ffffff00" }
+					{ "color": "ffffff00", "curve": "stepped" },
+					{ "time": 6.6333, "color": "ffffff00" },
+					{ "time": 7.4, "color": "ffffffff" },
+					{ "time": 12.8333, "color": "ffffff00" }
 				]
 			},
 			"cloud4-4": {
 				"rgba": [
 					{ "color": "ffffff7f" },
-					{ "time": 1, "color": "fffffffe" },
-					{ "time": 2.6667, "color": "ffffff00", "curve": "stepped" },
-					{ "time": 3, "color": "ffffff00" },
-					{ "time": 4, "color": "ffffff7f" }
+					{ "time": 3.2, "color": "fffffffe" },
+					{ "time": 8.5333, "color": "ffffff00", "curve": "stepped" },
+					{ "time": 9.6333, "color": "ffffff00" },
+					{ "time": 12.8333, "color": "ffffff7f" }
 				]
 			},
 			"cloud4-5": {
 				"rgba": [
 					{ "color": "ffffff00" },
-					{ "time": 2, "color": "ffffffff" },
-					{ "time": 4, "color": "ffffff00" }
+					{ "time": 6.4, "color": "ffffffff" },
+					{ "time": 12.8333, "color": "ffffff00" }
 				]
 			},
 			"cloud4-6": {
 				"rgba": [
 					{ "color": "ffffff00" },
-					{ "time": 0.6667, "color": "ffffffaa", "curve": "stepped" },
-					{ "time": 3.3333, "color": "ffffffaa" },
-					{ "time": 4, "color": "ffffff00" }
+					{ "time": 2.1333, "color": "ffffffaa", "curve": "stepped" },
+					{ "time": 10.7, "color": "ffffffaa" },
+					{ "time": 12.8333, "color": "ffffff00" }
 				]
 			},
 			"cloud4-7": {
 				"rgba": [
 					{ "color": "ffffff00" },
-					{ "time": 1, "color": "ffffffbe", "curve": "stepped" },
-					{ "time": 3, "color": "ffffffbe" },
-					{ "time": 4, "color": "ffffff00" }
+					{ "time": 3.2, "color": "ffffffbe", "curve": "stepped" },
+					{ "time": 9.6333, "color": "ffffffbe" },
+					{ "time": 12.8333, "color": "ffffff00" }
 				]
 			},
 			"cloud4-8": {
 				"rgba": [
 					{ "color": "ffffff00" },
-					{ "time": 3, "color": "ffffffc8" },
-					{ "time": 4, "color": "ffffff00" }
+					{ "time": 9.6333, "color": "ffffffc8" },
+					{ "time": 12.8333, "color": "ffffff00" }
 				]
 			},
 			"cloud4-9": {
 				"rgba": [
 					{ "color": "ffffff85" },
-					{ "time": 0.6667, "color": "ffffff00", "curve": "stepped" },
-					{ "time": 1.3333, "color": "ffffff00" },
-					{ "time": 3.6667, "color": "ffffffc8" },
-					{ "time": 4, "color": "ffffff85" }
+					{ "time": 2.1333, "color": "ffffff00", "curve": "stepped" },
+					{ "time": 4.2667, "color": "ffffff00" },
+					{ "time": 11.7667, "color": "ffffffc8" },
+					{ "time": 12.8333, "color": "ffffff85" }
 				]
 			},
 			"cloud4-10": {
 				"rgba": [
 					{ "color": "ffffffbe", "curve": "stepped" },
-					{ "time": 0.6667, "color": "ffffffbe" },
-					{ "time": 1.6667, "color": "ffffff00", "curve": "stepped" },
-					{ "time": 2, "color": "ffffff00" },
-					{ "time": 3, "color": "ffffffbe" }
+					{ "time": 2.1333, "color": "ffffffbe" },
+					{ "time": 5.3333, "color": "ffffff00", "curve": "stepped" },
+					{ "time": 6.4, "color": "ffffff00" },
+					{ "time": 9.6333, "color": "ffffffbe" }
 				]
 			},
 			"cloud4-11": {
 				"rgba": [
 					{ "color": "ffffffaa", "curve": "stepped" },
-					{ "time": 1, "color": "ffffffaa" },
-					{ "time": 1.6667, "color": "ffffff00", "curve": "stepped" },
-					{ "time": 2, "color": "ffffff00" },
-					{ "time": 2.6667, "color": "ffffffaa" }
+					{ "time": 3.2, "color": "ffffffaa" },
+					{ "time": 5.3333, "color": "ffffff00", "curve": "stepped" },
+					{ "time": 6.4, "color": "ffffff00" },
+					{ "time": 8.5333, "color": "ffffffaa" }
 				]
 			},
 			"cloud4-12": {
 				"rgba": [
 					{ "color": "ffffffe5" },
-					{ "time": 1.5, "color": "ffffff00", "curve": "stepped" },
-					{ "time": 1.8333, "color": "ffffff00" },
-					{ "time": 3.8333, "color": "ffffffff" },
-					{ "time": 4, "color": "ffffffe5" }
+					{ "time": 4.8, "color": "ffffff00", "curve": "stepped" },
+					{ "time": 5.8667, "color": "ffffff00" },
+					{ "time": 12.3, "color": "ffffffff" },
+					{ "time": 12.8333, "color": "ffffffe5" }
 				]
 			}
 		},
@@ -294,88 +295,89 @@
 			"cloud4-1": {
 				"translate": [
 					{ "x": -46.75, "y": -0.92 },
-					{ "time": 2.3333 },
-					{ "time": 2.6667, "x": -73.46, "y": -1.44 },
-					{ "time": 4, "x": -46.75, "y": -0.92 }
+					{ "time": 7.4667 },
+					{ "time": 8.5333, "x": -73.46, "y": -1.44 },
+					{ "time": 12.8333, "x": -46.75, "y": -0.92 }
 				]
 			},
 			"cloud4-2": {
 				"translate": [
 					{ "x": -14.41, "y": -0.21 },
-					{ "time": 1.6667, "x": 38.79, "y": 0.56 },
-					{ "time": 2, "x": -78.26, "y": -1.13 },
-					{ "time": 4, "x": -14.41, "y": -0.21 }
+					{ "time": 5.3333, "x": 38.79, "y": 0.56 },
+					{ "time": 6.4, "x": -78.26, "y": -1.13 },
+					{ "time": 12.8333, "x": -14.41, "y": -0.21 }
 				]
 			},
 			"cloud4-3": {
 				"translate": [
 					{ "x": -50.44, "y": -1.48 },
-					{ "time": 2, "x": 61.73, "y": 1.82 },
-					{ "time": 4, "x": -50.44, "y": -1.48 }
+					{ "time": 6.4, "x": 61.73, "y": 1.82 },
+					{ "time": 6.4667, "x": -50.44, "y": -1.48 },
+					{ "time": 12.8333, "x": 61.73, "y": 1.82 }
 				]
 			},
 			"cloud4-4": {
 				"translate": [
 					{ "x": -26.73, "y": 0.8 },
-					{ "time": 2.6667, "x": 55.79, "y": -1.67 },
-					{ "time": 3, "x": -57.68, "y": 1.72 },
-					{ "time": 4, "x": -26.73, "y": 0.8 }
+					{ "time": 8.5333, "x": 55.79, "y": -1.67 },
+					{ "time": 9.6333, "x": -57.68, "y": 1.72 },
+					{ "time": 12.8333, "x": -26.73, "y": 0.8 }
 				]
 			},
 			"cloud4-5": {
 				"translate": [
 					{},
-					{ "time": 4, "x": 61.33, "y": 0.85 }
+					{ "time": 12.8333, "x": 61.33, "y": 0.85 }
 				]
 			},
 			"cloud4-6": {
 				"translate": [
 					{},
-					{ "time": 4, "x": 80.07, "y": -1.31 }
+					{ "time": 12.8333, "x": 80.07, "y": -1.31 }
 				]
 			},
 			"cloud4-7": {
 				"translate": [
 					{ "x": -95.43, "y": -2.42 },
-					{ "time": 4, "x": 49.74, "y": 1.26 }
+					{ "time": 12.8333, "x": 49.74, "y": 1.26 }
 				]
 			},
 			"cloud4-8": {
 				"translate": [
 					{ "x": -60.88, "y": -1.9 },
-					{ "time": 4, "x": 49.46, "y": 1.55 }
+					{ "time": 12.8333, "x": 49.46, "y": 1.55 }
 				]
 			},
 			"cloud4-9": {
 				"translate": [
 					{ "x": 27.39, "y": 0.86 },
-					{ "time": 0.6667, "x": 49.46, "y": 1.55 },
-					{ "time": 1.3333, "x": -60.88, "y": -1.9 },
-					{ "time": 4, "x": 27.39, "y": 0.86 }
+					{ "time": 2.1333, "x": 49.46, "y": 1.55 },
+					{ "time": 4.2667, "x": -60.88, "y": -1.9 },
+					{ "time": 12.8333, "x": 27.39, "y": 0.86 }
 				]
 			},
 			"cloud4-10": {
 				"translate": [
 					{ "x": -16.25, "y": -0.41 },
-					{ "time": 1.6667, "x": 49.74, "y": 1.26 },
-					{ "time": 2, "x": -95.43, "y": -2.42 },
-					{ "time": 4, "x": -16.25, "y": -0.41 }
+					{ "time": 5.3333, "x": 49.74, "y": 1.26 },
+					{ "time": 6.4, "x": -95.43, "y": -2.42 },
+					{ "time": 12.8333, "x": -16.25, "y": -0.41 }
 				]
 			},
 			"cloud4-11": {
 				"translate": [
 					{ "x": 43.68, "y": -0.72 },
-					{ "time": 1.6667, "x": 80.07, "y": -1.31 },
-					{ "time": 2 },
-					{ "time": 4, "x": 43.68, "y": -0.72 }
+					{ "time": 5.3333, "x": 80.07, "y": -1.31 },
+					{ "time": 6.4 },
+					{ "time": 12.8333, "x": 43.68, "y": -0.72 }
 				]
 			},
 			"cloud4-12": {
 				"translate": [
 					{ "x": 36.24, "y": 0.5 },
-					{ "time": 1.5, "x": 61.33, "y": 0.85 },
-					{ "time": 1.8333 },
-					{ "time": 4, "x": 36.24, "y": 0.5 }
+					{ "time": 4.8, "x": 61.33, "y": 0.85 },
+					{ "time": 5.8667 },
+					{ "time": 12.8333, "x": 36.24, "y": 0.5 }
 				]
 			},
 			"root": {

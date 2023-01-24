@@ -115,7 +115,6 @@ public class UI_Ball : UI_Spine
 
         PlayAnimation(Managers.Data.Spine.ballIdle);
         transform.localPosition = initPos;
-        transform.localScale = new Vector3(0.8f, 0.8f, 1f);
         _startLine = startLine;
         _shootCallback = shootCallback;
 
@@ -143,7 +142,10 @@ public class UI_Ball : UI_Spine
 
                 UI_Block block = _target.GetComponent<UI_Block>();
                 if (block != null)
-                     block.Damaged(Attack);
+                {
+                    Managers.Sound.Play(Define.Sound.Effect, "ballBounce");
+                    block.Damaged(Attack);
+                }
 
                 CalcLine();
             }

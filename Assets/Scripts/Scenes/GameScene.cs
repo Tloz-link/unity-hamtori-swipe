@@ -10,6 +10,7 @@ public class GameScene : BaseScene
             return false;
 
         SceneType = Define.Scene.DevScene;
+        Managers.Sound.Play(Define.Sound.Bgm, "mainBGM");
         Managers.UI.ShowPopupUI<UI_Title>();
         return true;
     }

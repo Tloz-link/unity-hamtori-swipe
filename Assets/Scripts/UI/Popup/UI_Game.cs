@@ -95,11 +95,13 @@ public class UI_Game : UI_Popup
         GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>();
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPressed, Define.UIEvent.Pressed);
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerUp, Define.UIEvent.PointerUp);
+        GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerDown, Define.UIEvent.PointerDown);
         GetImage((int)Images.PowerUpSkill).gameObject.BindEvent(OnPowerUpSkill);
         GetImage((int)Images.GlassesSkill).gameObject.BindEvent(OnGlassesSkill);
         GetObject((int)GameObjects.NuclearSkill).BindEvent(OnNuclearSkill);
         GetObject((int)GameObjects.PauseButton).BindEvent(() =>
         {
+            Managers.Sound.Play(Define.Sound.Effect, "popup");
             Managers.UI.ShowPopupUI<UI_Pause>();
             Time.timeScale = 0;
         });
@@ -111,6 +113,11 @@ public class UI_Game : UI_Popup
             ball.SetInfo(GetObject((int)GameObjects.ControlPad).transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallReachCallBack);
             _waitBalls.Enqueue(ball);
         }
+
+        if (_game.Score < 10000)
+            Managers.Sound.Play(Define.Sound.Bgm, "gameBGM");
+        else
+            Managers.Sound.Play(Define.Sound.Bgm, "gameHiddenBGM");
 
         RefreshUI();
         RefreshNuclear(0.5f);
@@ -144,7 +151,7 @@ public class UI_Game : UI_Popup
         else
         {
             // °¡·Î·Î ±è
-            canvasSize = new Vector2(2048, 1920);
+            canvasSize = new Vector2(2463, 1920);
             canvasSize.x = Math.Min(canvasSize.x, Screen.width / transform.localScale.x);
             float deltaX = Mathf.Abs((1920 * (canvasSize.x * 1920 / canvasSize.y)) - (1080 * 1920)) / 2 / 1920;
 
@@ -235,6 +242,9 @@ public class UI_Game : UI_Popup
             text.SetInfo($"+{_createBallCount}", 50f);
         }
 
+        if (_game.Score == 10000)
+            Managers.Sound.Play(Define.Sound.Bgm, "gameHiddenBGM");
+
         _currentBall = _game.FullBallCount;
         RefreshUI();
         GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
@@ -290,6 +300,8 @@ public class UI_Game : UI_Popup
                 ui.SetInfo(GetObject((int)GameObjects.Hamster).transform.position, () =>
                 {
                     Clear();
+                    Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
+
                     Managers.UI.ClosePopupUI(ui);
                     Managers.UI.ClosePopupUI(this);
 
@@ -298,6 +310,7 @@ public class UI_Game : UI_Popup
                 });
                 GetObject((int)GameObjects.Hamster).SetActive(false);
 
+                Managers.Sound.Play(Define.Sound.Effect, "gameover");
                 Managers.Game.Init();
                 Managers.Game.SaveGame();
                 return true;
@@ -318,6 +331,7 @@ public class UI_Game : UI_Popup
                 UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.WaitBallGroup).transform);
                 ball.SetInfo(item.transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallReachCallBack);
                 ball.Create(0.2f, OnBallCreateCallBack);
+                Managers.Sound.Play(Define.Sound.Effect, "getStar");
 
                 _game.FullBallCount++;
                 _returnBallCount = -1;
@@ -414,6 +428,8 @@ public class UI_Game : UI_Popup
                 _shoot = false;
                 return;
             }
+
+            Managers.Sound.Play(Define.Sound.Effect, "shoot");
 
             UI_Ball ball = _loadedBalls.Pop();
             ball.gameObject.SetActive(true);
@@ -538,6 +554,7 @@ public class UI_Game : UI_Popup
         {
             _nuclearSliderSequence.OnComplete(() =>
             {
+                Managers.Sound.Play(Define.Sound.Effect, "nuclearDone");
                 _game.NuclearDivisionCount = 0;
                 RefreshNuclear(1.0f);
                 PlayNuclearInstantiateSequence();
@@ -586,6 +603,7 @@ public class UI_Game : UI_Popup
         GameObject text = GetText((int)Texts.PlusPowerText).gameObject;
         text.SetActive(true);
 
+        Managers.Sound.Play(Define.Sound.Effect, "nuclearCharge");
         Sequence _powerMessageSequence = Utils.MakeIncreaseTextSequence(text, 200f);
         _powerMessageSequence.AppendCallback(() =>
             {
@@ -615,6 +633,7 @@ public class UI_Game : UI_Popup
             return;
         _game.State = GameState.skill;
 
+        Managers.Sound.Play(Define.Sound.Effect, "useGlasses");
         GameObject nuclear = GetObject((int)GameObjects.NuclearSkill);
         GameObject board = GetObject((int)GameObjects.GameBoard);
         Vector3 defaultPos = nuclear.transform.localPosition;
@@ -634,6 +653,7 @@ public class UI_Game : UI_Popup
 
                 _game.Score++;
                 _game.NuclearStack--;
+                Managers.Sound.Play(Define.Sound.Effect, "nuclearAttack");
                 Handheld.Vibrate();
             })
             .Join(board.transform.DOShakePosition(0.5f, 100))
@@ -657,6 +677,8 @@ public class UI_Game : UI_Popup
     {
         if (_game.PowerUpCooltime > 0 || _game.State != GameState.idle)
             return;
+
+        Managers.Sound.Play(Define.Sound.Effect, "usePowerUp");
         _game.PowerUpCooltime = _startData.powerUpFullCooltime;
         _game.BallDamage = _startData.powerUpValue;
         SaveGame();
@@ -670,6 +692,8 @@ public class UI_Game : UI_Popup
     {
         if (_game.GlassesCooltime > 0 || _game.State != GameState.idle)
             return;
+
+        Managers.Sound.Play(Define.Sound.Effect, "useGlasses");
         _game.GlassesCooltime = _startData.glassesFullColltime;
         _game.LineCount = _startData.glassesValue;
         SaveGame();
@@ -690,6 +714,14 @@ public class UI_Game : UI_Popup
 
         _game.State = GameState.idle;
         hamAnim.PlayAnimation(Managers.Data.Spine.hamsterIdle);
+    }
+
+    void OnPadPointerDown()
+    {
+        if (_game.State != GameState.idle)
+            return;
+
+        Managers.Sound.Play(Define.Sound.Effect, "target");
     }
 
     void OnPadPressed()

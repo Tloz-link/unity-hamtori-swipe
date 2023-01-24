@@ -55,6 +55,7 @@ public class UI_Item_Star : UI_Spine
     {
         if (collision.gameObject.tag == "Ball")
         {
+            Managers.Sound.Play(Define.Sound.Effect, "getStar");
             _destroyCallBack.Invoke(this);
         }
     }

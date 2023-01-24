@@ -34,6 +34,7 @@ public class GameData
 
     public int score;
     public int highscore;
+    public int volume;
     public int fullBallCount;
     public int ballSpeed;
     public Vector3 shootDir;
@@ -74,6 +75,12 @@ public class GameManagerEX
     {
         get { return _gameData.highscore; }
         set { _gameData.highscore = value; }
+    }
+
+    public float Volume
+    {
+        get { return (float)_gameData.volume / Define.MAX_VOLUME_COUNT * Define.MAX_VOLUME; }
+        set { _gameData.volume = (int)value; }
     }
 
     public int FullBallCount
@@ -162,7 +169,7 @@ public class GameManagerEX
         PowerUpCooltime = 0;
         LineCount = data.lineCount;
         BallDamage = data.ballDamage;
-        NuclearDivisionCount = 0;
+        NuclearDivisionCount = 3;
         NuclearStack = 0;
 
         BlockList = new BlockInfo[MAX_BLOCK_COUNT];
@@ -172,11 +179,14 @@ public class GameManagerEX
         if (File.Exists(Managers._savePath))
         {
             string fileStr = File.ReadAllText(Managers._savePath);
-            Highscore = JsonUtility.FromJson<GameData>(fileStr).highscore;
+            GameData loadData = JsonUtility.FromJson<GameData>(fileStr);
+            Highscore = loadData.highscore;
+            Volume = loadData.volume;
         }
         else
         {
             Highscore = data.score;
+            Volume = data.volume;
         }
     }
 

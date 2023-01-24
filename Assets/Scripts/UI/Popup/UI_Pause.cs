@@ -32,6 +32,7 @@ public class UI_Pause : UI_Popup
     void OnCanselButton()
     {
         Destroy(GetObject((int)GameObjects.CanselButton).GetComponent<UI_EventHandler>());
+        Managers.Sound.Play(Define.Sound.Effect, "popup");
 
         Sequence close = Utils.MakePopupCloseSequence(GetObject((int)GameObjects.bg));
         close.SetUpdate(true);
