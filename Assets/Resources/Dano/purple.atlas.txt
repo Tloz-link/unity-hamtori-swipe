@@ -1,0 +1,7 @@
+purple.png
+size:204,195
+filter:Linear,Linear
+pma:true
+power_star
+bounds:2,2,200,191
+offsets:3,2,203,193
