@@ -74,18 +74,23 @@ public class UI_Block : UI_Spine
         }
         else
         {
-            StartCoroutine(Destroy());
+            Destroy();
             GetComponent<Collider2D>().enabled = false;
             _destroyCallBack?.Invoke(this);
         }
     }
 
-    IEnumerator Destroy()
+    private void Destroy()
     {
         PlayAnimation(Managers.Data.Spine.blockDestory);
-        Managers.Sound.Play(Define.Sound.Effect, "blockDestroyed");
         float length = GetAnimationLength(Managers.Data.Spine.blockDestory);
-        yield return new WaitForSeconds(length);
-        Managers.Resource.Destroy(gameObject);
+        Managers.Sound.Play(Define.Sound.Effect, "blockDestroyed");
+
+        Sequence destroy = Utils.MakePopupCloseSequence(gameObject, length)
+            .OnComplete(() =>
+            {
+                Managers.Resource.Destroy(gameObject);
+            });
+        destroy.Restart();
     }
 }

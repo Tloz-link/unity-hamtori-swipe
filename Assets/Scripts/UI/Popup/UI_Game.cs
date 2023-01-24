@@ -8,7 +8,7 @@ using DG.Tweening;
 
 public class UI_Game : UI_Popup
 {
-    enum GameObjects
+    public enum GameObjects
     {
         BackGround,
         StarBG,  // 15점 이후 표시
@@ -92,7 +92,7 @@ public class UI_Game : UI_Popup
         hamsterStartPos.x = _game.HamsterPos.x;
         _game.HamsterPos = hamsterStartPos;
         GetObject((int)GameObjects.Hamster).transform.localPosition = _game.HamsterPos;
-        GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>();
+        GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>().SetCustomEvent();
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPressed, Define.UIEvent.Pressed);
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerUp, Define.UIEvent.PointerUp);
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerDown, Define.UIEvent.PointerDown);
@@ -358,8 +358,12 @@ public class UI_Game : UI_Popup
         foreach (var block in _blocks)
             block.PlayAnimation(Managers.Data.Spine.blockIdle);
 
+        Vector3 mousePos = Input.mousePosition;
+        mousePos -= GetObject((int)GameObjects.GameBoard).transform.position;
+        mousePos /= transform.localScale.x;
+
         Vector3 dir;
-        if (CalcShootDir(out dir) == false)
+        if (CalcShootDir(out dir, mousePos) == false)
             return;
 
         _game.ShootDir = dir;
@@ -513,7 +517,7 @@ public class UI_Game : UI_Popup
         else
             Managers.Resource.Destroy(ball.gameObject);
 
-        int max = Mathf.Min(_game.FullBallCount, Define.MAX_BALL_COUNT);
+        int max = Mathf.Min(_game.FullBallCount, Define.MAX_BALL_COUNT + _createBallCount);
         if (_returnBallCount + _createBallCount == max)
         {
             PostProcess();
@@ -731,17 +735,66 @@ public class UI_Game : UI_Popup
 
         ClearLine();
 
-        Vector3 dir;
-        if (CalcShootDir(out dir) == false)
-            return;
+        Vector3 mousePos = Input.mousePosition;
+        mousePos -= GetObject((int)GameObjects.GameBoard).transform.position;
+        mousePos /= transform.localScale.x;
 
+        Vector3 dir;
+        if (CalcShootDir(out dir, mousePos) == false)
+            return;
+        GenerateLine(dir);
+    }
+
+    #region Line
+    public bool CalcShootDir(out Vector3 dir, Vector3 mousePos)
+    {
+        Vector2 padSize = GetObject((int)GameObjects.ControlPad).GetComponent<RectTransform>().sizeDelta;
+        float upLimit = GetObject((int)GameObjects.ControlPad).transform.localPosition.y - 10;
+        float leftLimit = GetObject((int)GameObjects.ControlPad).transform.localPosition.x - (padSize.x / 2) + 10;
+        float rightLimit = GetObject((int)GameObjects.ControlPad).transform.localPosition.x + (padSize.x / 2) - 10;
+
+        float ratio = (mousePos.x - leftLimit) / (padSize.x - 2 * 10);
+        float angle = 10f + (160f * ratio);
+        angle = Math.Clamp(angle, 10f, 170f);
+
+        dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad), 0);
+        if (mousePos.x < leftLimit || mousePos.x > rightLimit || mousePos.y > upLimit)
+        {
+            GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
+            return false;
+        }
+        return true;
+    }
+
+    public void ClearLine()
+    {
+        Init();
+
+        foreach(GameObject star in _arrowStars)
+        {
+            Color color = star.GetComponent<Image>().color;
+            color.a = 1f;
+            star.GetComponent<Image>().color = color;
+            Managers.Resource.Destroy(star);
+        }
+        _arrowStars.Clear();
+
+        if (_arrowMoon != null)
+        {
+            Managers.Resource.Destroy(_arrowMoon);
+            _arrowMoon = null;
+        }
+    }
+
+    public void GenerateLine(Vector3 dir)
+    {
         GameObject hamster = GetObject((int)GameObjects.Hamster);
         hamster.GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterCharge);
         RaycastHit2D hit = Physics2D.CircleCast(hamster.transform.position, 50 * 0.8f * transform.localScale.x, dir, 10000, 1 << LayerMask.NameToLayer("Wall"));
         Vector3 src = hamster.transform.position;
         Vector3 dest = hit.centroid;
 
-        for (int i = 0; i <_game.LineCount; ++i)
+        for (int i = 0; i < _game.LineCount; ++i)
         {
             GenerateStar(src, dest, dir, i);
             if (hit.transform.tag == "Floor" || i == _game.LineCount - 1)
@@ -777,51 +830,6 @@ public class UI_Game : UI_Popup
 
         _arrowStars.RemoveAt(_arrowStars.Count - 1);
         Managers.Resource.Destroy(lastStar);
-    }
-
-    #region Line
-    bool CalcShootDir(out Vector3 dir)
-    {
-        Vector3 mousePos = Input.mousePosition;
-        mousePos -= GetObject((int)GameObjects.GameBoard).transform.position;
-        mousePos /= transform.localScale.x;
-
-        Vector2 padSize = GetObject((int)GameObjects.ControlPad).GetComponent<RectTransform>().sizeDelta;
-        float upLimit = GetObject((int)GameObjects.ControlPad).transform.localPosition.y - 10;
-        float leftLimit = GetObject((int)GameObjects.ControlPad).transform.localPosition.x - (padSize.x / 2) + 10;
-        float rightLimit = GetObject((int)GameObjects.ControlPad).transform.localPosition.x + (padSize.x / 2) - 10;
-
-        float ratio = (mousePos.x - leftLimit) / (padSize.x - 2 * 10);
-        float angle = 10f + (160f * ratio);
-        angle = Math.Clamp(angle, 10f, 170f);
-
-        dir = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad), 0);
-        if (mousePos.x < leftLimit || mousePos.x > rightLimit || mousePos.y > upLimit)
-        {
-            GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
-            return false;
-        }
-        return true;
-    }
-
-    void ClearLine()
-    {
-        Init();
-
-        foreach(GameObject star in _arrowStars)
-        {
-            Color color = star.GetComponent<Image>().color;
-            color.a = 1f;
-            star.GetComponent<Image>().color = color;
-            Managers.Resource.Destroy(star);
-        }
-        _arrowStars.Clear();
-
-        if (_arrowMoon != null)
-        {
-            Managers.Resource.Destroy(_arrowMoon);
-            _arrowMoon = null;
-        }
     }
 
     void GenerateStar(Vector3 src, Vector3 dest, Vector3 dir, int index)

@@ -38,7 +38,7 @@ public class UI_Ball : UI_Spine
     #region DOTween
     public void CreateIdleSequence()
     {
-        int posX = UnityEngine.Random.Range(-400, 400);
+        int posX = UnityEngine.Random.Range(-390, 390);
         float dir = (transform.localPosition.x - posX < 0) ? -180 : 180;
         PlayAnimation(Managers.Data.Spine.ballJump, false);
 
@@ -46,9 +46,7 @@ public class UI_Ball : UI_Spine
         _idleSequence = DOTween.Sequence()
             .SetAutoKill(false)
             .AppendInterval(0.4f)
-            .Append(transform.DOLocalMoveY(60, 0.5f).SetRelative().SetEase(Ease.OutQuad))
-            .Append(transform.DOLocalMoveY(-60, 0.5f).SetRelative().SetEase(Ease.InQuad))
-            .Insert(0.4f, transform.DOLocalMoveX(posX, 1.0f).SetEase(Ease.Linear))
+            .Append(transform.DOLocalMoveX(posX, 1.0f).SetEase(Ease.Linear))
             .AppendInterval(1.0f)
             .AppendCallback(() =>
             {
@@ -57,7 +55,7 @@ public class UI_Ball : UI_Spine
                 int rand = UnityEngine.Random.Range(0, 100);
                 if (rand <= 25)
                 {
-                    RefreshAnim();
+                    RefreshSequence();
                     CreateRollSequence();
                 }
                 else
@@ -88,7 +86,7 @@ public class UI_Ball : UI_Spine
         int rand;
         while (true)
         {
-            rand = UnityEngine.Random.Range(-400, 400);
+            rand = UnityEngine.Random.Range(-390, 390);
             if (Mathf.Abs(transform.localPosition.x - rand) > 80)
                 break;
         }
@@ -112,7 +110,7 @@ public class UI_Ball : UI_Spine
         _rollSequence.Restart();
     }
 
-    void RefreshAnim()
+    void RefreshSequence()
     {
         _idleSequence.Kill();
         _rollSequence.Kill();
@@ -188,7 +186,8 @@ public class UI_Ball : UI_Spine
         _canvasSize = canvasSize;
         CalcLine();
 
-        RefreshAnim();
+        RefreshSequence();
+        PlayAnimation(Managers.Data.Spine.ballIdle);
         _shoot = true;
         _extra = 0;
     }
@@ -201,7 +200,8 @@ public class UI_Ball : UI_Spine
         transform.rotation = Quaternion.identity;
         _createCallback = createCallback;
 
-        RefreshAnim();
+        PlayAnimation(Managers.Data.Spine.ballIdle);
+        RefreshSequence();
         CreateCreateSequence(duration);
         _createSequence.Restart();
     }

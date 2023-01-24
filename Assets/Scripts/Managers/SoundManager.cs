@@ -6,10 +6,12 @@ public class SoundManager : MonoBehaviour
 {
     AudioSource[] _audioSources = new AudioSource[(int)Define.Sound.MaxCount];
     Dictionary<string, AudioClip> _audioClips = new Dictionary<string, AudioClip>();
-    static List<float> _playEffectList = new List<float>();
     // Player -> AudioSource -> PlayOneShot = 다른 클립을 실행하더라도 이 클립은 한번은 실행시켜라
     // 음원 -> AudioClip
     // 귀 -> AudioListener -> 디폴트로 카메라에 넣어져있음 -> Scene에 1개만 있으면 됨
+
+    static List<float> _playEffectList = new List<float>();
+
 
     public void Init()
     {
@@ -38,7 +40,7 @@ public class SoundManager : MonoBehaviour
         foreach (float len in _playEffectList)
         {
             float newLen = len - Time.deltaTime;
-            if (newLen > 1.0f)
+            if (newLen > 0.0f)
                 newList.Add(newLen);
         }
         _playEffectList = newList;
@@ -92,11 +94,9 @@ public class SoundManager : MonoBehaviour
             if (audioClip == null)
                 return false;
 
-            float length = audioClip.length;
-
             if (_playEffectList.Count < Define.MAX_SOUND_OVERLAPPED)
             {
-                _playEffectList.Add(length);
+                _playEffectList.Add(0.04f);
 
                 audioSource.pitch = pitch;
                 audioSource.PlayOneShot(audioClip);

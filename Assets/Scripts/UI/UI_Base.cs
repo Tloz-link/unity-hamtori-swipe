@@ -80,7 +80,7 @@ public abstract class UI_Base : MonoBehaviour
     protected void BindButton(Type type) { Bind<Button>(type); }
 
 
-    protected T Get<T>(int idx) where T : UnityEngine.Object
+    public T Get<T>(int idx) where T : UnityEngine.Object
     {
         UnityEngine.Object[] objects = null;
         if (_objects.TryGetValue(typeof(T), out objects) == false)
@@ -89,10 +89,10 @@ public abstract class UI_Base : MonoBehaviour
         return objects[idx] as T;
     }
 
-    protected GameObject GetObject(int idx) { return Get<GameObject>(idx); }
-    protected Image GetImage(int idx) { return Get<Image>(idx); }
-    protected TextMeshProUGUI GetText(int idx) { return Get<TextMeshProUGUI>(idx); }
-    protected Button GetButton(int idx) { return Get<Button>(idx); }
+    public GameObject GetObject(int idx) { return Get<GameObject>(idx); }
+    public Image GetImage(int idx) { return Get<Image>(idx); }
+    public TextMeshProUGUI GetText(int idx) { return Get<TextMeshProUGUI>(idx); }
+    public Button GetButton(int idx) { return Get<Button>(idx); }
 
 
     public static void BindEvent(GameObject go, Action action, Define.UIEvent type = Define.UIEvent.Click)

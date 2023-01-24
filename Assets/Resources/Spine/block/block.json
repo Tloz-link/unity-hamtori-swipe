@@ -1,6 +1,6 @@
 {
 "skeleton": {
-	"hash": "maUHVcXT9xg",
+	"hash": "ce+2bz4EGg8",
 	"spine": "4.1.18",
 	"x": -67.81,
 	"y": -62.76,
@@ -26,7 +26,7 @@
 	{ "name": "eyebrows", "bone": "eyebrows", "attachment": "eyebrows" },
 	{ "name": "hands", "bone": "hands", "attachment": "hands" },
 	{ "name": "eye_white", "bone": "eyes", "attachment": "eye_white" },
-	{ "name": "scream03", "bone": "root", "color": "561867ff", "attachment": "scream03" },
+	{ "name": "scream03", "bone": "root", "color": "fb27ff9c", "attachment": "scream03", "blend": "multiply" },
 	{ "name": "scream01", "bone": "scream01", "attachment": "x" },
 	{ "name": "scream02", "bone": "scream02", "attachment": "x2" }
 ],
@@ -64,7 +64,7 @@
 				"x2": { "path": "x", "x": 0.51, "y": 0.62, "width": 20, "height": 17 }
 			},
 			"scream03": {
-				"scream03": { "x": -1.83, "y": 12.89, "width": 128, "height": 105 }
+				"scream03": { "x": -1.83, "y": 12.89, "rotation": 0.04, "width": 128, "height": 105 }
 			}
 		}
 	}
@@ -133,11 +133,6 @@
 				"attachment": [
 					{}
 				]
-			},
-			"scream03": {
-				"rgba": [
-					{ "color": "000000ff" }
-				]
 			}
 		},
 		"bones": {
@@ -186,6 +181,51 @@
 				"rotate": [
 					{},
 					{ "time": 0.6667, "value": 5.88 }
+				]
+			}
+		}
+	},
+	"hit": {
+		"slots": {
+			"eyebrows": {
+				"attachment": [
+					{}
+				]
+			},
+			"eyes": {
+				"attachment": [
+					{}
+				]
+			},
+			"eye_white": {
+				"attachment": [
+					{}
+				]
+			},
+			"scream03": {
+				"rgba": [
+					{ "color": "fb27ff9c" },
+					{ "time": 0.1333, "color": "ff0000ed" },
+					{ "time": 0.3333, "color": "fb27ff9c" }
+				]
+			}
+		},
+		"bones": {
+			"root": {
+				"translate": [
+					{},
+					{ "time": 0.1, "x": -3.22, "y": -1.61 },
+					{ "time": 0.2, "x": -0.54, "y": 1.34 },
+					{ "time": 0.3333 }
+				]
+			},
+			"hands": {
+				"translate": [
+					{ "x": 1.62, "y": 1.82 },
+					{ "time": 0.1 },
+					{ "time": 0.2, "x": -3.23, "y": -2.42 },
+					{ "time": 0.3, "x": 2.15, "y": 2.42 },
+					{ "time": 0.3333, "x": 1.62, "y": 1.82 }
 				]
 			}
 		}

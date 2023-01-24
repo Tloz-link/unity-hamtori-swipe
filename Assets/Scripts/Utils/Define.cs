@@ -44,5 +44,5 @@ public class Define
     public const float MAX_VOLUME = 0.5f;
     public const int MAX_VOLUME_COUNT = 6;
 
-    public const int MAX_SOUND_OVERLAPPED = 5;
+    public const int MAX_SOUND_OVERLAPPED = 3;
 }

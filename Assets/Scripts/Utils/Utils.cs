@@ -78,10 +78,10 @@ public class Utils
         return sequence;
     }
 
-    public static Sequence MakePopupCloseSequence(GameObject obj)
+    public static Sequence MakePopupCloseSequence(GameObject obj, float length = 0.3f)
     {
         Sequence sequence = DOTween.Sequence()
-            .Append(obj.transform.DOScale(0, 0.3f).SetEase(Ease.InBack));
+            .Append(obj.transform.DOScale(0, length).SetEase(Ease.InBack));
         return sequence;
     }
 

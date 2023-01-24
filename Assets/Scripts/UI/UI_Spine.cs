@@ -1,3 +1,4 @@
+using Spine;
 using Spine.Unity;
 using System;
 using System.Collections;
@@ -23,6 +24,19 @@ public class UI_Spine : UI_Base
         Init();
         _anim.skeletonDataAsset = Managers.Resource.Load<SkeletonDataAsset>(path);
         _anim.Initialize(true);
+    }
+
+    public void SetCustomEvent()
+    {
+        Init();
+        _anim.AnimationState.Event -= HandleEvent;
+        _anim.AnimationState.Event += HandleEvent;
+    }
+
+    private void HandleEvent(TrackEntry entry, Spine.Event e)
+    {
+        if (e.Data.Name == "seed_eat")
+            Managers.Sound.Play(Define.Sound.Effect, "useGlasses");
     }
 
     public float GetAnimationLength(string name)
@@ -69,6 +83,9 @@ public class UI_Spine : UI_Base
 
     public void PlayAnimationOnce(string name)
     {
+        if (_anim.startingAnimation == name)
+            return;
+
         StartCoroutine(CoPlayAnimationOnce(name));
     }
 
@@ -83,6 +100,9 @@ public class UI_Spine : UI_Base
 
         float length = _anim.skeletonDataAsset.GetSkeletonData(true).FindAnimation(name).Duration;
         yield return new WaitForSeconds(length); // 애니 시간만큼 대기
+
+        if (_anim.startingAnimation != name)
+            yield break;
 
         // 기존 애니 복원
         PlayAnimation(defaultName, defaultLoop);
