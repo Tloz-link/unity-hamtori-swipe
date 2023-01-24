@@ -101,7 +101,9 @@ public class UI_Ball : UI_Spine
         _rollSequence.Kill();
         _rollSequence = DOTween.Sequence()
             .SetAutoKill(false)
+            .AppendInterval(0.4f)
             .Append(transform.DOLocalMoveX((float)rand, 2.0f).SetEase(Ease.Linear))
+            .AppendInterval(1.0f)
             .OnComplete(() =>
             {
                 PlayAnimation(Managers.Data.Spine.ballIdle);
