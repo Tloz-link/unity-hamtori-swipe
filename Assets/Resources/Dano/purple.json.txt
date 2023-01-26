@@ -1,6 +1,6 @@
 {
 "skeleton": {
-	"hash": "qo/0iA1c7SQ",
+	"hash": "UcHpyX9BlDA",
 	"spine": "4.1.18",
 	"x": -190,
 	"y": -141,
@@ -37,8 +37,47 @@
 	}
 ],
 "animations": {
+	"idle": {
+		"slots": {
+			"fx": {
+				"attachment": [
+					{}
+				]
+			},
+			"power_star": {
+				"rgba": [
+					{ "color": "ffffffff" },
+					{ "time": 1, "color": "ffabf1f0" },
+					{ "time": 2, "color": "ffffffff" }
+				]
+			}
+		},
+		"bones": {
+			"root": {
+				"scale": [
+					{
+						"x": 0.85,
+						"y": 0.85,
+						"curve": [ 0.303, 0.85, 0.701, 1, 0.303, 0.85, 0.701, 1 ]
+					},
+					{
+						"time": 1,
+						"curve": [ 1.303, 1, 1.701, 0.85, 1.303, 1, 1.701, 0.85 ]
+					},
+					{ "time": 2, "x": 0.85, "y": 0.85 }
+				]
+			}
+		}
+	},
 	"purple": {
 		"slots": {
+			"fx": {
+				"rgba": [
+					{ "color": "ffffffff" },
+					{ "time": 1, "color": "ffabf176" },
+					{ "time": 2, "color": "ffffffff" }
+				]
+			},
 			"power_star": {
 				"rgba": [
 					{ "color": "ffffffff" },
