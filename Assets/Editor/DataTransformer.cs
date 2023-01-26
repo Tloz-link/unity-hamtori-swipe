@@ -99,9 +99,7 @@ public class DataTransformer : EditorWindow
             blockDestory = block[3],
 
             ballIdle = ball[0],
-            ballRIghtRoll = ball[1],
-            ballLeftRoll = ball[2],
-            ballJump = ball[3],
+            ballJump = ball[1],
 
             hamsterIdle = hamster[0],
             hamsterCharge = hamster[1],

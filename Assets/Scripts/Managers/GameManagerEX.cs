@@ -169,7 +169,7 @@ public class GameManagerEX
         PowerUpCooltime = 0;
         LineCount = data.lineCount;
         BallDamage = data.ballDamage;
-        NuclearDivisionCount = 3;
+        NuclearDivisionCount = 0;
         NuclearStack = 0;
 
         BlockList = new BlockInfo[MAX_BLOCK_COUNT];

@@ -12,7 +12,6 @@ public class SoundManager : MonoBehaviour
 
     static List<float> _playEffectList = new List<float>();
 
-
     public void Init()
     {
         GameObject root = GameObject.Find("@Sound");
@@ -94,7 +93,7 @@ public class SoundManager : MonoBehaviour
             if (audioClip == null)
                 return false;
 
-            if (_playEffectList.Count < Define.MAX_SOUND_OVERLAPPED)
+            if (_playEffectList.Count < Define.MAX_SOUND_OVERLAPPED || Time.timeScale == 0)
             {
                 _playEffectList.Add(0.04f);
 

@@ -63,7 +63,7 @@ public class UI_Tutorial : UI_Popup
 
     protected override void Update()
     {
-        _board.ClearLine();
+        _board.ClearArrow();
 
         Target();
     }
@@ -81,7 +81,7 @@ public class UI_Tutorial : UI_Popup
         if (_board.CalcShootDir(out dir, cursorPos) == false)
             return;
 
-        _board.GenerateLine(dir);
+        _board.GenerateArrow(dir);
     }
 
     void OnClickTutorial()

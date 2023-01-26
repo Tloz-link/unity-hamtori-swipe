@@ -29,14 +29,16 @@ public class UI_Spine : UI_Base
     public void SetCustomEvent()
     {
         Init();
-        _anim.AnimationState.Event -= HandleEvent;
-        _anim.AnimationState.Event += HandleEvent;
+        //_anim.AnimationState.Event -= HandleEvent;
+        //_anim.AnimationState.Event += HandleEvent;
+        _anim.AnimationState.End += HandleEvent;
     }
 
-    private void HandleEvent(TrackEntry entry, Spine.Event e)
+    private void HandleEvent(TrackEntry entry)
     {
-        if (e.Data.Name == "seed_eat")
-            Managers.Sound.Play(Define.Sound.Effect, "useGlasses");
+        Debug.Log("asdf");
+        //if (e.Data.Name == "seed_eat")
+        //    Managers.Sound.Play(Define.Sound.Effect, "useGlasses");
     }
 
     public float GetAnimationLength(string name)

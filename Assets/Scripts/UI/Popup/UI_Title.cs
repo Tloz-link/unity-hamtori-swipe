@@ -17,6 +17,8 @@ public class UI_Title : UI_Popup
         if (base.Init() == false)
             return false;
 
+        Managers.Sound.Play(Define.Sound.Bgm, "mainBGM");
+
         BindObject(typeof(GameObjects));
 
         GetObject((int)GameObjects.StartButton).gameObject.BindEvent(OnStartButton);

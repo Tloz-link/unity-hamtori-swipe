@@ -27,6 +27,7 @@ public class UI_Confirm : UI_Popup
         BindText(typeof(Texts));
 
         Sequence open = Utils.MakePopupOpenSequence(GetObject((int)GameObjects.Rect));
+        open.SetUpdate(true);
         open.OnComplete(() =>
         {
             GetObject((int)GameObjects.CanselButton).gameObject.BindEvent(OnCanselButton);
@@ -50,6 +51,7 @@ public class UI_Confirm : UI_Popup
         Destroy(GetObject((int)GameObjects.CanselButton).GetComponent<UI_EventHandler>());
 
         Sequence close = Utils.MakePopupCloseSequence(GetObject((int)GameObjects.Rect));
+        close.SetUpdate(true);
         close.OnComplete(() =>
         {
             Managers.UI.ClosePopupUI(this);

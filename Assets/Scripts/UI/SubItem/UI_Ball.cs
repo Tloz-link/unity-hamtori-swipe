@@ -91,20 +91,16 @@ public class UI_Ball : UI_Spine
                 break;
         }
 
-        if (transform.localPosition.x - rand < 0)
-            PlayAnimation(Managers.Data.Spine.ballRIghtRoll, false);
-        else
-            PlayAnimation(Managers.Data.Spine.ballLeftRoll, false);
-
+        float dir = (transform.localPosition.x - rand < 0) ? -360 : 360;
         _rollSequence.Kill();
         _rollSequence = DOTween.Sequence()
             .SetAutoKill(false)
             .AppendInterval(0.4f)
             .Append(transform.DOLocalMoveX((float)rand, 2.0f).SetEase(Ease.Linear))
+            .Join(transform.DORotate(new Vector3(0, 0, dir), 2.0f, RotateMode.FastBeyond360).SetRelative().SetEase(Ease.Linear))
             .AppendInterval(1.0f)
             .OnComplete(() =>
             {
-                PlayAnimation(Managers.Data.Spine.ballIdle);
                 CreateIdleSequence();
             });
         _rollSequence.Restart();
@@ -124,6 +120,8 @@ public class UI_Ball : UI_Spine
         Init();
 
         PlayAnimation(Managers.Data.Spine.ballIdle);
+        ChangeSkin("A");
+
         transform.localPosition = initPos;
         _startLine = startLine;
         _shootCallback = shootCallback;

@@ -19,10 +19,6 @@ public class SpineData
     [XmlAttribute]
     public string ballIdle;
     [XmlAttribute]
-    public string ballRIghtRoll;
-    [XmlAttribute]
-    public string ballLeftRoll;
-    [XmlAttribute]
     public string ballJump;
 
     //hamster
