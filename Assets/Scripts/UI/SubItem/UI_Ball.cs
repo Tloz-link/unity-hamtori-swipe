@@ -16,8 +16,6 @@ public class UI_Ball : UI_Spine
     Vector3 _dir;
     Vector3 _normal;
 
-    float _startLine;
-
     Sequence _idleSequence;
     Sequence _createSequence;
     Sequence _rollSequence;
@@ -67,11 +65,11 @@ public class UI_Ball : UI_Spine
         _idleSequence.Restart();
     }
 
-    public void CreateCreateSequence(float duration)
+    public void CreateCreateSequence(float duration, float destY)
     {
         _createSequence.Kill();
         _createSequence = DOTween.Sequence()
-            .Append(transform.DOLocalMoveY(_startLine, duration).SetEase(Ease.Linear))
+            .Append(transform.DOLocalMoveY(destY, duration).SetEase(Ease.Linear))
             .Join(transform.DORotate(new Vector3(0, 0, -360f), duration, RotateMode.FastBeyond360).SetEase(Ease.Linear))
             .OnComplete(() =>
             {
@@ -115,7 +113,7 @@ public class UI_Ball : UI_Spine
     }
     #endregion
 
-    public void SetInfo(Vector3 initPos, float startLine, Action<UI_Ball> shootCallback)
+    public void SetInfo(Vector3 initPos, Action<UI_Ball> shootCallback)
     {
         Init();
 
@@ -123,7 +121,6 @@ public class UI_Ball : UI_Spine
         ChangeSkin("A");
 
         transform.localPosition = initPos;
-        _startLine = startLine;
         _shootCallback = shootCallback;
 
         CreateIdleSequence();
@@ -148,6 +145,17 @@ public class UI_Ball : UI_Spine
                 _dir = Vector3.Reflect(_dir, _normal);
                 _dir = Utils.ClampDir(_dir);
 
+                if (_target.tag == "Floor")
+                {
+                    PlayAnimation(Managers.Data.Spine.ballIdle);
+
+                    transform.rotation = Quaternion.identity;
+                    CreateIdleSequence();
+                    _shootCallback.Invoke(this);
+                    _shoot = false;
+                    return;
+                }
+
                 UI_Block block = _target.GetComponent<UI_Block>();
                 if (block != null)
                 {
@@ -160,17 +168,6 @@ public class UI_Ball : UI_Spine
 
             float angle = Mathf.Atan2(_dir.y, _dir.x) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(0, 0, angle - 90);
-
-            if (transform.localPosition.y <= _startLine)
-            {
-                PlayAnimation(Managers.Data.Spine.ballIdle);
-
-                transform.localPosition = new Vector3(transform.localPosition.x, _startLine, 0);
-                transform.rotation = Quaternion.identity;
-                CreateIdleSequence();
-                _shootCallback.Invoke(this);
-                _shoot = false;
-            }
         }
     }
 
@@ -190,7 +187,7 @@ public class UI_Ball : UI_Spine
         _extra = 0;
     }
 
-    public void Create(float duration, Action<UI_Ball> createCallback)
+    public void Create(float duration, float destY, Action<UI_Ball> createCallback)
     {
         Init();
 
@@ -200,7 +197,7 @@ public class UI_Ball : UI_Spine
 
         PlayAnimation(Managers.Data.Spine.ballIdle);
         RefreshSequence();
-        CreateCreateSequence(duration);
+        CreateCreateSequence(duration, destY);
         _createSequence.Restart();
     }
 

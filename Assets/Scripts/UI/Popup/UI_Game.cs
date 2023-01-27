@@ -111,7 +111,7 @@ public class UI_Game : UI_Popup
         for (int i = 0; i < count; ++i)
         {
             UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.WaitBallGroup).transform);
-            ball.SetInfo(GetObject((int)GameObjects.ControlPad).transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallReachCallBack);
+            ball.SetInfo(GetObject((int)GameObjects.ControlPad).transform.localPosition, OnBallReachCallBack);
             _waitBalls.Enqueue(ball);
         }
 
@@ -515,7 +515,6 @@ public class UI_Game : UI_Popup
     {
         _loadedBalls.Clear();
 
-        float startLine = GetObject((int)GameObjects.ControlPad).transform.localPosition.y;
         int remainAttack = _game.FullBallCount;
         for (int i = 0; i < Define.MAX_BALL_COUNT; ++i)
         {
@@ -529,7 +528,7 @@ public class UI_Game : UI_Popup
             {
                 ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.ShootBallGroup).transform);
                 ball.gameObject.SetActive(false);
-                ball.SetInfo(GetObject((int)GameObjects.ControlPad).transform.localPosition, startLine, OnBallReachCallBack);
+                ball.SetInfo(GetObject((int)GameObjects.ControlPad).transform.localPosition, OnBallReachCallBack);
             }
 
             int attack = 1;
@@ -643,8 +642,8 @@ public class UI_Game : UI_Popup
             if (info.y >= 7)
             {
                 UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.WaitBallGroup).transform);
-                ball.SetInfo(item.transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallReachCallBack);
-                ball.Create(0.2f, OnBallCreateCallBack);
+                ball.SetInfo(item.transform.localPosition, OnBallReachCallBack);
+                ball.Create(0.2f, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallCreateCallBack);
                 Managers.Sound.Play(Define.Sound.Effect, "getStar");
 
                 _game.FullBallCount++;
@@ -870,8 +869,8 @@ public class UI_Game : UI_Popup
             return;
 
         UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.ShootBallGroup).transform);
-        ball.SetInfo(star.transform.localPosition, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallReachCallBack);
-        ball.Create((8 - star.GetInfo().y) * 0.2f, OnBallCreateCallBack);
+        ball.SetInfo(star.transform.localPosition, OnBallReachCallBack);
+        ball.Create((8 - star.GetInfo().y) * 0.2f, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallCreateCallBack);
         _game.FullBallCount++;
 
         _items.Remove(star);
