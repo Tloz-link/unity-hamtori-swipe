@@ -109,7 +109,7 @@ public class UI_Pause : UI_Popup
         Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
 
         UI_Confirm confirm = Managers.UI.ShowPopupUI<UI_Confirm>();
-        confirm.SetInfo("메인 화면으로 돌아가시겠습니까?", () =>
+        confirm.SetInfo("메인 화면으로 갈까요?", () =>
         {
             Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
             Managers.UI.CloseAllPopupUI();

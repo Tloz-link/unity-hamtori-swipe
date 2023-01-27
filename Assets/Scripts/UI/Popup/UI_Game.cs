@@ -580,6 +580,7 @@ public class UI_Game : UI_Popup
     void CountReachedBall(UI_Ball ball)
     {
         ball.transform.SetParent(GetObject((int)GameObjects.WaitBallGroup).transform);
+        ball.transform.localPosition = new Vector3(ball.transform.localPosition.x, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, 0);
         ball.ChangeSkin("A");
 
         if (_returnBallCount <= Define.MAX_VISIBLE_BALL_COUNT)
@@ -600,6 +601,9 @@ public class UI_Game : UI_Popup
     {
         float delay = 0.2f;
         GameObject hamster = GetObject((int)GameObjects.Hamster);
+
+        // 발사 공들 클리어
+        _shootBalls.Clear();
 
         // 가장 밑줄에 Star가 있는지 체크
         CheckStar();

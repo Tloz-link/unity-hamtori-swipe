@@ -179,12 +179,12 @@ public class UI_Ball : UI_Spine
         _dir = dir;
         _boardPos = board.transform.position;
         _canvasSize = canvasSize;
-        CalcLine();
+        _shoot = true;
+        _extra = 0;
 
         RefreshSequence();
         PlayAnimation(Managers.Data.Spine.ballIdle);
-        _shoot = true;
-        _extra = 0;
+        CalcLine();
     }
 
     public void Create(float duration, float destY, Action<UI_Ball> createCallback)
@@ -203,6 +203,9 @@ public class UI_Ball : UI_Spine
 
     public void CalcLine()
     {
+        if (_shoot == false)
+            return;
+
         RaycastHit2D hit = Physics2D.CircleCast(_dir.normalized + transform.position, 50 * 0.8f * _canvasSize, _dir, 10000, 1 << LayerMask.NameToLayer("Wall"));
         if (_target == hit.collider)
             return;

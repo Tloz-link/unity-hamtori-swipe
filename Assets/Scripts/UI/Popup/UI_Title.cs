@@ -35,7 +35,7 @@ public class UI_Title : UI_Popup
         if (Managers.Game.LoadGame())
         {
             UI_Confirm confirm = Managers.UI.ShowPopupUI<UI_Confirm>();
-            confirm.SetInfo("세이브 파일이 이미 존재합니다. \n새로 시작하시겠습니까?", () =>
+            confirm.SetInfo("지난 기억을 잊고 새로 시작할까요?", () =>
             {
                 Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
 

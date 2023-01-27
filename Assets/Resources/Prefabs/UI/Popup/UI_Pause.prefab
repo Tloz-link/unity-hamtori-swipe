@@ -187,8 +187,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 128, y: 140}
-  m_SizeDelta: {x: 134, y: 124}
+  m_AnchoredPosition: {x: 128.29999, y: 128.80005}
+  m_SizeDelta: {x: 106, y: 96}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &590561302741252628
 CanvasRenderer:
@@ -339,8 +339,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -47, y: 140}
-  m_SizeDelta: {x: 134, y: 124}
+  m_AnchoredPosition: {x: -46.7, y: 128.8}
+  m_SizeDelta: {x: 106, y: 96}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1863668208142627959
 CanvasRenderer:
@@ -415,8 +415,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 299, y: 138.6}
-  m_SizeDelta: {x: 31.082, y: 40.0895}
+  m_AnchoredPosition: {x: 302.8208, y: 128.19815}
+  m_SizeDelta: {x: 40.3235, y: 48.1255}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3418985126106764055
 CanvasRenderer:
@@ -491,8 +491,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 186, y: 140}
-  m_SizeDelta: {x: 134, y: 124}
+  m_AnchoredPosition: {x: 186.29999, y: 128.80005}
+  m_SizeDelta: {x: 106, y: 96}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4305900663404601554
 CanvasRenderer:
@@ -567,8 +567,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 70, y: 140}
-  m_SizeDelta: {x: 134, y: 124}
+  m_AnchoredPosition: {x: 70.29999, y: 128.80005}
+  m_SizeDelta: {x: 106, y: 96}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6454034184677447042
 CanvasRenderer:
@@ -810,7 +810,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 279, y: 314}
-  m_SizeDelta: {x: 141, y: 140}
+  m_SizeDelta: {x: 141, y: 125}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6557270839610003337
 CanvasRenderer:
@@ -885,8 +885,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 84.5, y: -15}
-  m_SizeDelta: {x: 134, y: 124}
+  m_AnchoredPosition: {x: 84.5, y: -23.3}
+  m_SizeDelta: {x: 106, y: 96}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7386381272600625083
 CanvasRenderer:
@@ -1007,8 +1007,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 12, y: 140}
-  m_SizeDelta: {x: 134, y: 124}
+  m_AnchoredPosition: {x: 12.299988, y: 128.80005}
+  m_SizeDelta: {x: 106, y: 96}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2918615887127519153
 CanvasRenderer:
@@ -1083,8 +1083,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 244, y: 140}
-  m_SizeDelta: {x: 134, y: 124}
+  m_AnchoredPosition: {x: 244.29999, y: 128.80005}
+  m_SizeDelta: {x: 106, y: 96}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8316463316379911940
 CanvasRenderer:
@@ -1159,7 +1159,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 98.28345, y: 141.20654}
+  m_AnchoredPosition: {x: 98.28345, y: 129}
   m_SizeDelta: {x: 351.7411, y: 57.3728}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6484273835117413871
@@ -1337,8 +1337,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -101.1, y: 138.6}
-  m_SizeDelta: {x: 31.082, y: 40.0895}
+  m_AnchoredPosition: {x: -103.510826, y: 128.2}
+  m_SizeDelta: {x: 35.9037, y: 48.125}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8837816357915288249
 CanvasRenderer:
