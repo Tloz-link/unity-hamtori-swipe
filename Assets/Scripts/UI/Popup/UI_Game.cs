@@ -47,7 +47,8 @@ public class UI_Game : UI_Popup
         GlassesCooltimeText,
         NuclearStackText,
         PlusPowerText,
-        BallCountText
+        BallCountText,
+        NewRecordText
     }
 
     enum Images
@@ -90,12 +91,13 @@ public class UI_Game : UI_Popup
         GetObject((int)GameObjects.StarBG).SetActive(false);
         GetObject((int)GameObjects.Moon).SetActive(false);
         GetText((int)Texts.PlusPowerText).gameObject.SetActive(false);
+        GetText((int)Texts.NewRecordText).gameObject.SetActive(false);
 
         Vector3 hamsterStartPos = GetObject((int)GameObjects.Hamster).transform.localPosition;
         hamsterStartPos.x = _game.HamsterPos.x;
         _game.HamsterPos = hamsterStartPos;
         GetObject((int)GameObjects.Hamster).transform.localPosition = _game.HamsterPos;
-        GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>().SetCustomEvent();
+        GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>();
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPressed, Define.UIEvent.Pressed);
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerUp, Define.UIEvent.PointerUp);
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerDown, Define.UIEvent.PointerDown);
@@ -600,9 +602,6 @@ public class UI_Game : UI_Popup
         float delay = 0.2f;
         GameObject hamster = GetObject((int)GameObjects.Hamster);
 
-        // 결과 값 갱신
-        UpdateValue();
-
         // 가장 밑줄에 Star가 있는지 체크
         CheckStar();
 
@@ -612,7 +611,10 @@ public class UI_Game : UI_Popup
         _hamsterMove.Restart();
 
         // 한 턴만에 모든 블럭을 부수면 핵 게이지 상승
-        delay = Mathf.Max(delay, CheckBlockClear());
+        delay = Mathf.Max(delay, CheckAchievement());
+
+        // 결과 값 갱신
+        UpdateValue();
 
         // 위 함수들의 실행시간동안 대기 후 게임판 업데이트
         StartCoroutine(RefreshBoard(delay));
@@ -659,26 +661,54 @@ public class UI_Game : UI_Popup
         }
     }
 
-    float CheckBlockClear()
+    float CheckAchievement()
     {
-        if (_blocks.Count != 0)
-            return 0f;
+        Sequence text = DOTween.Sequence();
+        float interval = 0.0f;
 
+        if (_blocks.Count == 0)
+        {
+            text.Insert(interval, AchieveBlockClear());
+            interval += 0.5f;
+        }
+
+        if (_game.Score == _game.Highscore && _game.NewGame == true)
+        {
+            _game.NewGame = false;
+            text.Insert(interval, AchieveNewRecord());
+            interval += 0.5f;
+        }
+
+        return text.Duration();
+    }
+
+    Sequence AchieveBlockClear()
+    {
         _game.NuclearDivisionCount++;
-        float duration = FillNuclearGauge(0.5f);
+        FillNuclearGauge(0.5f);
 
         GameObject text = GetText((int)Texts.PlusPowerText).gameObject;
-        text.SetActive(true);
-
-        Managers.Sound.Play(Define.Sound.Effect, "nuclearCharge");
-        Sequence _powerMessageSequence = Utils.MakeIncreaseTextSequence(text, 200f);
-        _powerMessageSequence.AppendCallback(() =>
+        Sequence textSequence = Utils.MakeIncreaseTextSequence(text, 200f);
+        textSequence.OnStart(() =>
         {
-            text.SetActive(false);
+            text.SetActive(true);
+            Managers.Sound.Play(Define.Sound.Effect, "nuclearCharge");
         });
-        _powerMessageSequence.Restart();
+        textSequence.AppendCallback(() => { text.SetActive(false); });
+        return textSequence;
+    }
 
-        return Mathf.Max(duration, _powerMessageSequence.Duration());
+    Sequence AchieveNewRecord()
+    {
+        GameObject text = GetText((int)Texts.NewRecordText).gameObject;
+        Sequence textSequence = Utils.MakeIncreaseTextSequence(text, 200f);
+        textSequence.OnStart(() =>
+        {
+            text.SetActive(true);
+            Managers.Sound.Play(Define.Sound.Effect, "highscore");
+        });
+        textSequence.AppendCallback(() => { text.SetActive(false); });
+        return textSequence;
     }
     #endregion
 
@@ -763,6 +793,13 @@ public class UI_Game : UI_Popup
     {
         UI_Spine hamAnim = GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>();
         hamAnim.PlayAnimation(name);
+        hamAnim.SetCustomEvent((trackEntry, e) =>
+        {
+            Managers.Sound.Play(Define.Sound.Effect, "useGlasses");
+            foreach (var ball in _waitBalls)
+                ball.ChangeSkin("B");
+        });
+
         _game.State = GameState.skill;
 
         float length = hamAnim.GetAnimationLength(name);
@@ -772,7 +809,7 @@ public class UI_Game : UI_Popup
         hamAnim.PlayAnimation(Managers.Data.Spine.hamsterIdle);
     }
 
-    float FillNuclearGauge(float duration)
+    void FillNuclearGauge(float duration)
     {
         Vector2 nuclearDest = GetObject((int)GameObjects.NuclearEmpty).GetComponent<RectTransform>().sizeDelta;
         float ratio = _startData.nuclearStartRatio + (1 - _startData.nuclearStartRatio) / _startData.nuclearDivisionFullCount * _game.NuclearDivisionCount;
@@ -796,11 +833,8 @@ public class UI_Game : UI_Popup
                 PlayNuclearInstantiateSequence();
                 _game.NuclearStack++;
             });
-            duration += (_game.NuclearStack == 0) ? 1.1f : 0.6f;
         }
         _nuclearSliderSequence.Restart();
-
-        return duration;
     }
 
     void PlayNuclearInstantiateSequence()

@@ -51,6 +51,8 @@ public class GameData
     public int nuclearDivisionCount;
     public int nuclearStack;
 
+    public bool newGame;
+
     public Vector3 hamsterPos;
     public BlockInfo[] blockList = new BlockInfo[MAX_BLOCK_COUNT];
     public ItemInfo[] itemList = new ItemInfo[MAX_BLOCK_COUNT];
@@ -163,6 +165,12 @@ public class GameManagerEX
         set { _gameData.itemList = value; }
     }
 
+    public bool NewGame
+    {
+        get { return _gameData.newGame; }
+        set { _gameData.newGame = value; }
+    }
+
     public void Init()
     {
         StartData data = Managers.Data.Start;
@@ -183,6 +191,8 @@ public class GameManagerEX
         BlockList = new BlockInfo[MAX_BLOCK_COUNT];
         ItemList = new ItemInfo[MAX_BLOCK_COUNT];
 
+        NewGame = true;
+
         // 항상 유지되는 변수들
         if (File.Exists(Managers._savePath))
         {
@@ -197,6 +207,7 @@ public class GameManagerEX
             Highscore = data.score;
             Volume = data.volume;
             Vibrate = data.vibrate;
+            NewGame = false;
         }
     }
 

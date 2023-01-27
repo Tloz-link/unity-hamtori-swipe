@@ -26,19 +26,11 @@ public class UI_Spine : UI_Base
         _anim.Initialize(true);
     }
 
-    public void SetCustomEvent()
+    public void SetCustomEvent(Spine.AnimationState.TrackEntryEventDelegate callback)
     {
         Init();
-        //_anim.AnimationState.Event -= HandleEvent;
-        //_anim.AnimationState.Event += HandleEvent;
-        _anim.AnimationState.End += HandleEvent;
-    }
-
-    private void HandleEvent(TrackEntry entry)
-    {
-        Debug.Log("asdf");
-        //if (e.Data.Name == "seed_eat")
-        //    Managers.Sound.Play(Define.Sound.Effect, "useGlasses");
+        _anim.AnimationState.Event -= callback;
+        _anim.AnimationState.Event += callback;
     }
 
     public float GetAnimationLength(string name)
@@ -74,7 +66,7 @@ public class UI_Spine : UI_Base
     {
         Init();
         _anim.initialSkinName = name;
-        _anim.Initialize(true);
+        _anim.Skeleton.SetSkin(name);
     }
 
     public void Refresh()
