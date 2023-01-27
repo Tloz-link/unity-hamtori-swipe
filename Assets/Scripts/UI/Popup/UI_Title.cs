@@ -75,7 +75,7 @@ public class UI_Title : UI_Popup
 
             Managers.Game.Init();
             Managers.UI.ShowPopupUI<UI_Game>().NewGame();
-            Managers.UI.ShowPopupUI<UI_Tutorial>();
+            //Managers.UI.ShowPopupUI<UI_Tutorial>();
         }
     }
 

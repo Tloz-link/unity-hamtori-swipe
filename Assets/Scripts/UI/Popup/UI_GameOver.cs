@@ -34,8 +34,8 @@ public class UI_GameOver : UI_Popup
     {
         Init();
 
-        GetObject((int)GameObjects.Hamster).transform.position = hamsterPos;
         GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterGameover);
+        GetObject((int)GameObjects.Hamster).transform.position = hamsterPos;
 
         _onRestartCallBack = onRestartCallBack;
         GetButton((int)Buttons.RestartButton).gameObject.BindEvent(onRestartCallBack);

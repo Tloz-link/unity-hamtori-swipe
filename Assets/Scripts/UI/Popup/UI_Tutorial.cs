@@ -61,7 +61,7 @@ public class UI_Tutorial : UI_Popup
         return true;
     }
 
-    protected override void Update()
+    void Update()
     {
         _board.ClearArrow();
 

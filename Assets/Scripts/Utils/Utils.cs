@@ -70,6 +70,12 @@ public class Utils
         return new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad), 0).normalized;
     }
 
+    public static void Vibrate()
+    {
+        if (Managers.Game.Vibrate)
+            Handheld.Vibrate();
+    }
+
     public static Sequence MakePopupOpenSequence(GameObject obj)
     {
         Sequence sequence = DOTween.Sequence()

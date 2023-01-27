@@ -55,7 +55,7 @@ public class SoundManager : MonoBehaviour
         _audioClips.Clear();
     }
 
-    public void AdjustVolume(float volume)
+    public void SetVolume(float volume)
     {
         foreach (AudioSource audioSource in _audioSources)
             audioSource.volume = volume;

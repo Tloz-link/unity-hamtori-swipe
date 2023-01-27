@@ -70,6 +70,7 @@ public class DataTransformer : EditorWindow
             backgroundsecondPath = row[21],
             backgroundLastPath = row[22],
             volume = int.Parse(row[23]),
+            vibrate = bool.Parse(row[24]),
         };
         #endregion
 

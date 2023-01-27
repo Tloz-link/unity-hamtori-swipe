@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Playables;
 using static Define;
 
 [Serializable]
@@ -31,10 +32,11 @@ public enum GameState
 public class GameData
 {
     public GameState gameState;
+    public int volume;
+    public bool vibrate;
 
     public int score;
     public int highscore;
-    public int volume;
     public int fullBallCount;
     public int ballSpeed;
     public Vector3 shootDir;
@@ -65,6 +67,18 @@ public class GameManagerEX
         set { _gameData.gameState = value; }
     }
 
+    public float Volume
+    {
+        get { return (_gameData.volume == 0) ? 0.0f : (float)_gameData.volume / Define.MAX_VOLUME_COUNT * Define.MAX_VOLUME + 0.01f; }
+        set { _gameData.volume = (int)value; }
+    }
+
+    public bool Vibrate
+    {
+        get { return _gameData.vibrate; }
+        set { _gameData.vibrate = value; }
+    }
+
     public int Score
     {
         get { return _gameData.score; }
@@ -75,12 +89,6 @@ public class GameManagerEX
     {
         get { return _gameData.highscore; }
         set { _gameData.highscore = value; }
-    }
-
-    public float Volume
-    {
-        get { return (float)_gameData.volume / Define.MAX_VOLUME_COUNT * Define.MAX_VOLUME; }
-        set { _gameData.volume = (int)value; }
     }
 
     public int FullBallCount
@@ -182,11 +190,13 @@ public class GameManagerEX
             GameData loadData = JsonUtility.FromJson<GameData>(fileStr);
             Highscore = loadData.highscore;
             Volume = loadData.volume;
+            Vibrate = loadData.vibrate;
         }
         else
         {
             Highscore = data.score;
             Volume = data.volume;
+            Vibrate = data.vibrate;
         }
     }
 

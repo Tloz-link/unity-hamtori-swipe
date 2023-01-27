@@ -7,6 +7,8 @@ public class StartData
 {
     [XmlAttribute]
     public int volume;
+    [XmlAttribute]
+    public bool vibrate;
 
     [XmlAttribute]
     public int score;

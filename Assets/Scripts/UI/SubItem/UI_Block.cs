@@ -46,8 +46,7 @@ public class UI_Block : UI_Spine
     public void MoveNext()
     {
         _info.y += 1;
-        Vector3 dest = new Vector3(_startData.blockStartX + (_info.x * _startData.blockGapX), _startData.blockStartY - (_info.y * _startData.blockGapY), 0);
-        Move(dest);
+        transform.DOLocalMoveY(_startData.blockStartY - (_info.y * _startData.blockGapY), 0.2f).SetEase(Ease.Linear);
     }
 
     public void RefreshUI()

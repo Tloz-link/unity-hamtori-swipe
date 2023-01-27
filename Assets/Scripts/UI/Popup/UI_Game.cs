@@ -102,12 +102,7 @@ public class UI_Game : UI_Popup
         GetImage((int)Images.PowerUpSkill).gameObject.BindEvent(OnPowerUpSkill);
         GetImage((int)Images.GlassesSkill).gameObject.BindEvent(OnGlassesSkill);
         GetObject((int)GameObjects.NuclearSkill).BindEvent(OnNuclearSkill);
-        GetObject((int)GameObjects.PauseButton).BindEvent(() =>
-        {
-            Managers.Sound.Play(Define.Sound.Effect, "popup");
-            Managers.UI.ShowPopupUI<UI_Pause>();
-            Time.timeScale = 0;
-        });
+        GetObject((int)GameObjects.PauseButton).BindEvent(OnPauseButton);
 
         // Ball »ý¼º
         int count = Mathf.Min(_game.FullBallCount, Define.MAX_VISIBLE_BALL_COUNT);
@@ -715,7 +710,7 @@ public class UI_Game : UI_Popup
                 _game.Score++;
                 _game.NuclearStack--;
                 Managers.Sound.Play(Define.Sound.Effect, "nuclearAttack");
-                Handheld.Vibrate();
+                Utils.Vibrate();
             })
             .Join(board.transform.DOShakePosition(0.5f, 100))
             .AppendInterval(0.5f)
@@ -857,6 +852,16 @@ public class UI_Game : UI_Popup
         _blocks.Remove(block);
         foreach (var ball in _shootBalls)
             ball.CalcLine();
+    }
+
+    void OnPauseButton()
+    {
+        if (_game.State == GameState.skill)
+            return;
+
+        Managers.Sound.Play(Define.Sound.Effect, "popup");
+        Managers.UI.ShowPopupUI<UI_Pause>();
+        Time.timeScale = 0;
     }
     #endregion
 
