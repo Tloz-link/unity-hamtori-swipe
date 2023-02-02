@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Spine.Unity;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -49,7 +50,6 @@ public abstract class UI_Base : MonoBehaviour
     protected void BindText(Type type) { Bind<TextMeshProUGUI>(type); }
     protected void BindButton(Type type) { Bind<Button>(type); }
 
-
     public T Get<T>(int idx) where T : UnityEngine.Object
     {
         UnityEngine.Object[] objects = null;
@@ -63,7 +63,6 @@ public abstract class UI_Base : MonoBehaviour
     public Image GetImage(int idx) { return Get<Image>(idx); }
     public TextMeshProUGUI GetText(int idx) { return Get<TextMeshProUGUI>(idx); }
     public Button GetButton(int idx) { return Get<Button>(idx); }
-
 
     public static void BindEvent(GameObject go, Action action, Define.UIEvent type = Define.UIEvent.Click)
     {

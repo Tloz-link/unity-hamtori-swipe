@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6b194f808b1af6499c93410e504af42, type: 3}
   m_Name: starlight_Atlas
   m_EditorClassIdentifier: 
-  atlasFile: {fileID: 4900000, guid: 3f7ecf7296c8d1f419ffbb306029128d, type: 3}
+  atlasFile: {fileID: 4900000, guid: c03daad47497ffb49bcb6b839fdc07da, type: 3}
   materials:
-  - {fileID: 2100000, guid: 3f659c162d7e84d4e8a441eda9b49ae5, type: 2}
+  - {fileID: 2100000, guid: 13a5d55147cd7184e829b590d456f081, type: 2}

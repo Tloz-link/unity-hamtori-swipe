@@ -14,12 +14,16 @@ public class SpineData
     public string blockDamaged;
     [XmlAttribute]
     public string blockDestory;
+    [XmlAttribute]
+    public string blockPrologue;
 
     //ball
     [XmlAttribute]
     public string ballIdle;
     [XmlAttribute]
     public string ballJump;
+    [XmlAttribute]
+    public string ballGameover;
 
     //hamster
     [XmlAttribute]
@@ -36,5 +40,24 @@ public class SpineData
     public string hamsterSeedAfter;
     [XmlAttribute]
     public string hamsterSeedEat;
+    [XmlAttribute]
+    public string hamsterPrologue;
 
+    //purple
+    [XmlAttribute]
+    public string purpleIdle;
+    [XmlAttribute]
+    public string purpleCreate;
+
+    //starlight
+    [XmlAttribute]
+    public string starlightIdle;
+    [XmlAttribute]
+    public string starlightPlus;
+
+    //tutoHamster
+    [XmlAttribute]
+    public string tutoHamsterIdle;
+    [XmlAttribute]
+    public string tutoHamsterTouch;
 }

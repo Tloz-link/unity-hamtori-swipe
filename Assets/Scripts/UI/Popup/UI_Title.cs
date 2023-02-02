@@ -32,7 +32,14 @@ public class UI_Title : UI_Popup
     {
         Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
 
-        if (Managers.Game.LoadGame())
+        if (File.Exists(Managers._savePath) == false)
+        {
+            Managers.UI.ClosePopupUI(this);
+
+            Managers.Game.Init();
+            Managers.UI.ShowPopupUI<UI_Game>().Tutorial();
+        }
+        else if (Managers.Game.LoadGame())
         {
             UI_Confirm confirm = Managers.UI.ShowPopupUI<UI_Confirm>();
             confirm.SetInfo("지난 기억을 잊고 새로 시작할까요?", () =>
@@ -44,7 +51,6 @@ public class UI_Title : UI_Popup
 
                 Managers.Game.Init();
                 Managers.UI.ShowPopupUI<UI_Game>().NewGame();
-                //Managers.UI.ShowPopupUI<UI_Tutorial>();
             });
         }
         else
@@ -53,7 +59,6 @@ public class UI_Title : UI_Popup
 
             Managers.Game.Init();
             Managers.UI.ShowPopupUI<UI_Game>().NewGame();
-            //Managers.UI.ShowPopupUI<UI_Tutorial>();
         }
     }
 
@@ -61,7 +66,14 @@ public class UI_Title : UI_Popup
     {
         Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
 
-        if (Managers.Game.LoadGame())
+        if (File.Exists(Managers._savePath) == false)
+        {
+            Managers.UI.ClosePopupUI(this);
+
+            Managers.Game.Init();
+            Managers.UI.ShowPopupUI<UI_Game>().Tutorial();
+        }
+        else if (Managers.Game.LoadGame())
         {
             Managers.UI.ClosePopupUI(this);
 
@@ -75,7 +87,6 @@ public class UI_Title : UI_Popup
 
             Managers.Game.Init();
             Managers.UI.ShowPopupUI<UI_Game>().NewGame();
-            //Managers.UI.ShowPopupUI<UI_Tutorial>();
         }
     }
 

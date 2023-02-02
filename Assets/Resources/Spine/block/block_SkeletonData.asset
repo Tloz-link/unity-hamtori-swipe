@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: block_SkeletonData
   m_EditorClassIdentifier: 
   atlasAssets:
-  - {fileID: 11400000, guid: e14a652ce71c90d469de855e61565706, type: 2}
+  - {fileID: 11400000, guid: 4573cfb09b44aeb46a4b06995b685a0d, type: 2}
   scale: 0.01
-  skeletonJSON: {fileID: 4900000, guid: 1d3b3398a35309048b9d7d7ba66a4e50, type: 3}
+  skeletonJSON: {fileID: 4900000, guid: 1bb481292c57c024ab44c90cb6fbc378, type: 3}
   isUpgradingBlendModeMaterials: 0
   blendModeMaterials:
     requiresBlendModeMaterials: 1
@@ -23,7 +23,7 @@ MonoBehaviour:
     additiveMaterials: []
     multiplyMaterials:
     - pageName: block.png
-      material: {fileID: 2100000, guid: 294931e0bed8ab244a374acaf5b4837e, type: 2}
+      material: {fileID: 2100000, guid: bf45ad07b23dd954bb540bea79df7f74, type: 2}
     screenMaterials: []
   skeletonDataModifiers: []
   fromAnimation: []

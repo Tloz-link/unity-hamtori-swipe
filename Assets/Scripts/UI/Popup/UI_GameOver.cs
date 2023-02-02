@@ -8,11 +8,6 @@ using UnityEngine.UI;
 
 public class UI_GameOver : UI_Popup
 {
-    enum GameObjects
-    {
-        Hamster
-    }
-
     enum Buttons
     {
         RestartButton
@@ -25,17 +20,13 @@ public class UI_GameOver : UI_Popup
         if (base.Init() == false)
             return false;
 
-        BindObject(typeof(GameObjects));
         BindButton(typeof(Buttons));
         return true;
     }
 
-    public void SetInfo(Vector3 hamsterPos, Action onRestartCallBack)
+    public void SetInfo(Action onRestartCallBack)
     {
         Init();
-
-        GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterGameover);
-        GetObject((int)GameObjects.Hamster).transform.position = hamsterPos;
 
         _onRestartCallBack = onRestartCallBack;
         GetButton((int)Buttons.RestartButton).gameObject.BindEvent(onRestartCallBack);

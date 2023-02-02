@@ -104,7 +104,7 @@ public class UI_Ball : UI_Spine
         _rollSequence.Restart();
     }
 
-    void RefreshSequence()
+    public void RefreshSequence()
     {
         _idleSequence.Kill();
         _rollSequence.Kill();

@@ -11,7 +11,7 @@ public class UI_Game : UI_Popup
     public enum GameObjects
     {
         BackGround,
-        StarBG,  // 15점 이후 표시
+        Starlight,  // 15점 이후 강화
         CloudBG,
         Moon,    // 100점 이후 표시
 
@@ -22,6 +22,8 @@ public class UI_Game : UI_Popup
 
         // Game Board
         GameBoard,
+        TutorialBlind,
+        GameoverBlind,
         ControlPad,
         Hamster,
         ArrowGroup1,
@@ -88,8 +90,9 @@ public class UI_Game : UI_Popup
         AdjustUIByResolution();
 
         GetObject((int)GameObjects.NuclearSkill).SetActive(false);
-        GetObject((int)GameObjects.StarBG).SetActive(false);
         GetObject((int)GameObjects.Moon).SetActive(false);
+        GetObject((int)GameObjects.GameoverBlind).SetActive(false);
+        GetObject((int)GameObjects.TutorialBlind).SetActive(false);
         GetText((int)Texts.PlusPowerText).gameObject.SetActive(false);
         GetText((int)Texts.NewRecordText).gameObject.SetActive(false);
 
@@ -98,6 +101,7 @@ public class UI_Game : UI_Popup
         _game.HamsterPos = hamsterStartPos;
         GetObject((int)GameObjects.Hamster).transform.localPosition = _game.HamsterPos;
         GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>();
+        GetObject((int)GameObjects.NuclearSkill).GetOrAddComponent<UI_Spine>();
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPressed, Define.UIEvent.Pressed);
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerUp, Define.UIEvent.PointerUp);
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerDown, Define.UIEvent.PointerDown);
@@ -115,6 +119,16 @@ public class UI_Game : UI_Popup
             _waitBalls.Enqueue(ball);
         }
 
+        // 별동별 애니메이션
+        if (_game.Score < 15)
+            GetObject((int)GameObjects.Starlight).GetOrAddComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.starlightIdle);
+        else
+            GetObject((int)GameObjects.Starlight).GetOrAddComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.starlightPlus);
+
+        // 달 장식
+        if (_game.Score >= 100)
+            GetObject((int)GameObjects.Moon).SetActive(true);
+
         // BGM 실행
         if (_game.Score < 10000)
             Managers.Sound.Play(Define.Sound.Bgm, "gameBGM");
@@ -130,7 +144,7 @@ public class UI_Game : UI_Popup
         return true;
     }
 
-    void AdjustUIByResolution()
+    public override void AdjustUIByResolution()
     {
         float scaleHeight = ((float)Screen.width / Screen.height) / ((float)9 / 16);
         Vector2 canvasSize;
@@ -143,7 +157,7 @@ public class UI_Game : UI_Popup
             float deltaY = Mathf.Abs((1080 * (Screen.height * 1080 / Screen.width)) - (1080 * 1920)) / 2 / 1080;
             float scoreDeltaY = GetObject((int)(GameObjects.PauseButton)).GetComponent<RectTransform>().sizeDelta.y;
 
-            GetObject((int)(GameObjects.StarBG)).transform.localPosition += new Vector3(0, deltaY, 0);
+            GetObject((int)(GameObjects.Starlight)).transform.localPosition += new Vector3(0, deltaY, 0);
             GetObject((int)(GameObjects.PauseButton)).transform.localPosition += new Vector3(0, deltaY, 0);
             GetObject((int)(GameObjects.Score)).transform.localPosition += new Vector3(0, deltaY, 0);
             if (deltaY > scoreDeltaY)
@@ -174,6 +188,10 @@ public class UI_Game : UI_Popup
         }
 
         GetObject((int)GameObjects.BackGround).GetComponent<RectTransform>().sizeDelta = canvasSize;
+        GetObject((int)GameObjects.TutorialBlind).GetComponent<RectTransform>().sizeDelta = canvasSize;
+        GetObject((int)GameObjects.GameoverBlind).GetComponent<RectTransform>().sizeDelta = canvasSize;
+        GetObject((int)GameObjects.TutorialBlind).transform.position = GetObject((int)GameObjects.BackGround).transform.position;
+        GetObject((int)GameObjects.GameoverBlind).transform.position = GetObject((int)GameObjects.BackGround).transform.position;
     }
     #endregion
 
@@ -205,6 +223,14 @@ public class UI_Game : UI_Popup
             text.SetInfo($"+{_createBallCount}", 50f);
         }
 
+        // 15점이 됐으면 별동별 온
+        if (_game.Score == 15)
+            GetObject((int)GameObjects.Starlight).GetOrAddComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.starlightPlus);
+
+        // 100점이 됐으면 달 온
+        if (_game.Score == 100)
+            GetObject((int)GameObjects.Moon).SetActive(true);
+
         // 10000점이 됐으면 히든 브금 온
         if (_game.Score == 10000)
             Managers.Sound.Play(Define.Sound.Bgm, "gameHiddenBGM");
@@ -212,6 +238,13 @@ public class UI_Game : UI_Popup
         // 현재 볼 개수 출력
         _currentBall = _game.FullBallCount;
         RefreshUI();
+
+        // 블럭 애니메이션 초기화
+        foreach (var block in _blocks)
+            InitBlockAnim(block);
+
+        // 게임오버 위기 감지
+        CheckDanger();
 
         GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
         _game.State = GameState.idle;
@@ -263,7 +296,7 @@ public class UI_Game : UI_Popup
             if (info.y >= 8)
             {
                 UI_GameOver ui = Managers.UI.ShowPopupUI<UI_GameOver>();
-                ui.SetInfo(GetObject((int)GameObjects.Hamster).transform.position, () =>
+                ui.SetInfo(() =>
                 {
                     Clear();
                     Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
@@ -274,7 +307,15 @@ public class UI_Game : UI_Popup
                     Managers.Game.Init();
                     Managers.UI.ShowPopupUI<UI_Game>().NewGame();
                 });
-                GetObject((int)GameObjects.Hamster).SetActive(false);
+                GetObject((int)GameObjects.GameoverBlind).SetActive(true);
+                GetObject((int)GameObjects.RightSkill).SetActive(false);
+                GetObject((int)GameObjects.LeftSkill).SetActive(false);
+                GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterGameover);
+                foreach (var ball in _waitBalls)
+                {
+                    ball.PlayAnimation(Managers.Data.Spine.ballGameover);
+                    ball.RefreshSequence();
+                }
 
                 Managers.Sound.Play(Define.Sound.Effect, "gameover");
                 Managers.Game.Init();
@@ -283,6 +324,18 @@ public class UI_Game : UI_Popup
             }
         }
         return false;
+    }
+
+    void CheckDanger()
+    {
+        foreach (var block in _blocks)
+        {
+            if (block.GetInfo().y == 7)
+            {
+                Managers.Sound.Play(Define.Sound.Effect, "danger");
+                return;
+            }
+        }
     }
     #endregion
 
@@ -323,7 +376,7 @@ public class UI_Game : UI_Popup
 
         // 블럭 애니메이션 초기화
         foreach (var block in _blocks)
-            block.PlayAnimation(Managers.Data.Spine.blockIdle);
+            InitBlockAnim(block);
 
         Vector3 mousePos = Input.mousePosition;
         mousePos -= GetObject((int)GameObjects.GameBoard).transform.position;
@@ -402,8 +455,8 @@ public class UI_Game : UI_Popup
             dest = hit.centroid;
         }
 
-        // 화살표에 닿은 블럭 공포 애니메이션
-        UI_Block target = hit.collider.GetComponent<UI_Block>();
+       //화살표에 닿은 블럭 공포 애니메이션
+       UI_Block target = hit.collider.GetComponent<UI_Block>();
         if (target != null)
             target.PlayAnimation(Managers.Data.Spine.blockTarget);
 
@@ -411,7 +464,7 @@ public class UI_Game : UI_Popup
         {
             if (target == block)
                 continue;
-            block.PlayAnimation(Managers.Data.Spine.blockIdle);
+            InitBlockAnim(block);
         }
 
         // 마지막 별을 없에고 달로 변경
@@ -454,11 +507,19 @@ public class UI_Game : UI_Popup
         float angle = 360 - Quaternion.FromToRotation(Vector3.left, dir).eulerAngles.z;
         arrowGroup.transform.rotation = Quaternion.AngleAxis(90 - angle, Vector3.forward);
     }
+
+    void InitBlockAnim(UI_Block block)
+    {
+        if (block.GetInfo().y == 7)
+            block.PlayAnimation(Managers.Data.Spine.blockPrologue);
+        else
+            block.PlayAnimation(Managers.Data.Spine.blockIdle);
+    }
     #endregion
 
     #region 발사
     private float _tick = 0f;
-    private bool _shoot = false;
+    public bool _shoot = false;
     private void FixedUpdate()
     {
         if (_shoot == false)
@@ -511,7 +572,7 @@ public class UI_Game : UI_Popup
     }
 
     Stack<UI_Ball> _loadedBalls = new Stack<UI_Ball>();
-    void LoadBalls()
+    public void LoadBalls()
     {
         _loadedBalls.Clear();
 
@@ -740,7 +801,6 @@ public class UI_Game : UI_Popup
                     Managers.Resource.Destroy(block.gameObject);
                 _blocks.Clear();
 
-                _game.Score++;
                 _game.NuclearStack--;
                 Managers.Sound.Play(Define.Sound.Effect, "nuclearAttack");
                 Utils.Vibrate();
@@ -752,7 +812,17 @@ public class UI_Game : UI_Popup
             {
                 nuclear.transform.localPosition = defaultPos;
                 RefreshUI();
-                StartCoroutine(RefreshBoard(0f));
+                CheckStar();
+
+                float delay = 0f;
+                if (_game.Score == _game.Highscore && _game.NewGame == true)
+                {
+                    _game.NewGame = false;
+                    delay = AchieveNewRecord().Duration();
+                }
+
+                UpdateValue();
+                StartCoroutine(RefreshBoard(delay));
             });
 
         if (_game.NuclearStack != 1)
@@ -842,9 +912,11 @@ public class UI_Game : UI_Popup
 
     void PlayNuclearInstantiateSequence()
     {
-        GameObject nuclear = GetObject((int)GameObjects.NuclearSkill);
+        UI_Spine nuclear = GetObject((int)GameObjects.NuclearSkill).GetOrAddComponent<UI_Spine>();
         Vector3 defaultPos = nuclear.transform.localPosition;
-        nuclear.SetActive(true);
+        nuclear.gameObject.SetActive(true);
+        nuclear.PlayAnimation(Managers.Data.Spine.purpleIdle);
+        nuclear.PlayAnimationOnce(Managers.Data.Spine.purpleCreate);
 
         Sequence _sequence = DOTween.Sequence();
 
@@ -912,12 +984,6 @@ public class UI_Game : UI_Popup
         GetText((int)Texts.NuclearStackText).text = $"{_game.NuclearStack}";
         GetText((int)Texts.BallCountText).text = (_currentBall <= 0) ? "" : $"x{_currentBall}";
 
-        // 점수별 장식 on/off
-        if (_game.Score >= 15)
-            GetObject((int)GameObjects.StarBG).SetActive(true);
-        if (_game.Score >= 100)
-            GetObject((int)GameObjects.Moon).SetActive(true);
-
         // 점수별 배경
         if (_game.Score < 15)
             GetImage((int)Images.BackGround).sprite = Managers.Resource.Load<Sprite>(_startData.backgroundFirstPath);
@@ -959,6 +1025,7 @@ public class UI_Game : UI_Popup
 
             UI_Block block = Managers.UI.makeSubItem<UI_Block>(GetObject((int)GameObjects.BlockGroup).transform);
             block.SetInfo(info, OnDestroyBlock);
+            InitBlockAnim(block);
             _blocks.Add(block);
         }
 
@@ -972,6 +1039,10 @@ public class UI_Game : UI_Popup
             _items.Add(star);
         }
 
+        if (_game.BallDamage != 1)
+            foreach (var ball in _waitBalls)
+                ball.ChangeSkin("B");
+
         _currentBall = _game.FullBallCount;
         RefreshUI();
         GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterIdle);
@@ -979,6 +1050,8 @@ public class UI_Game : UI_Popup
         // 쏘는 도중에 게임을 껐으면 Load시에 지난번 각도로 자동발사됨
         if (_game.State == GameState.shoot)
             StartCoroutine(ShootBalls(true));
+        else
+            CheckDanger();
     }
 
     public void NewGame()
@@ -986,6 +1059,29 @@ public class UI_Game : UI_Popup
         Init();
 
         StartCoroutine(RefreshBoard(0f));
+    }
+
+    public void Tutorial()
+    {
+        Init();
+
+        BlockInfo info = new BlockInfo
+        {
+            x = 3,
+            y = 1,
+            hp = 1,
+        };
+        UI_Block block = Managers.UI.makeSubItem<UI_Block>(GetObject((int)GameObjects.BlockGroup).transform);
+        block.SetInfo(info, OnDestroyBlock);
+        _blocks.Add(block);
+
+        GetObject((int)GameObjects.TutorialBlind).SetActive(true);
+        Managers.UI.ShowPopupUI<UI_Tutorial>().SetInfo(() =>
+        {
+            GetObject((int)GameObjects.TutorialBlind).SetActive(false);
+            Managers.Game.FullBallCount = 1;
+            StartCoroutine(RefreshBoard(0f));
+        });
     }
 
     public void Clear()

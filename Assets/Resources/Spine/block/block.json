@@ -1,7 +1,7 @@
 {
 "skeleton": {
-	"hash": "ce+2bz4EGg8",
-	"spine": "4.1.18",
+	"hash": "Fi1Eorp/N5I",
+	"spine": "4.1.19",
 	"x": -67.81,
 	"y": -62.76,
 	"width": 133,
@@ -21,7 +21,7 @@
 "slots": [
 	{ "name": "Ellipse 1 copy", "bone": "root", "attachment": "Ellipse 1 copy" },
 	{ "name": "Rectangle 4 copy", "bone": "face", "attachment": "Rectangle 4 copy" },
-	{ "name": "eyes", "bone": "eyes", "attachment": "eyes" },
+	{ "name": "eyes", "bone": "eyes", "attachment": "eye_2" },
 	{ "name": "Rectangle 6", "bone": "face", "attachment": "Rectangle 6" },
 	{ "name": "eyebrows", "bone": "eyebrows", "attachment": "eyebrows" },
 	{ "name": "hands", "bone": "hands", "attachment": "hands" },
@@ -41,7 +41,8 @@
 				"eyebrows": { "x": -2.32, "y": -1.57, "width": 58, "height": 12 }
 			},
 			"eyes": {
-				"eyes": { "x": -0.52, "y": 7.64, "width": 45, "height": 18 }
+				"eyes": { "x": -0.52, "y": 7.64, "width": 45, "height": 18 },
+				"eye_2": { "x": -1.5, "y": -8.12, "width": 83, "height": 73 }
 			},
 			"eye_white": {
 				"eye_white": { "x": 3.48, "y": 10.14, "width": 39, "height": 9 }
@@ -70,8 +71,104 @@
 	}
 ],
 "animations": {
+	"1": {
+		"slots": {
+			"eyebrows": {
+				"attachment": [
+					{}
+				]
+			},
+			"eye_white": {
+				"attachment": [
+					{}
+				]
+			},
+			"Rectangle 4 copy": {
+				"attachment": [
+					{}
+				]
+			},
+			"Rectangle 6": {
+				"attachment": [
+					{}
+				]
+			},
+			"scream01": {
+				"attachment": [
+					{}
+				]
+			},
+			"scream02": {
+				"attachment": [
+					{}
+				]
+			},
+			"scream03": {
+				"rgba": [
+					{ "color": "ff004fce" }
+				]
+			}
+		},
+		"bones": {
+			"root": {
+				"translate": [
+					{ "x": -0.65 },
+					{ "time": 0.0667, "x": 0.44, "y": -0.65 },
+					{ "time": 0.1333, "x": 0.22, "y": 0.44 },
+					{ "time": 0.2, "x": 0.44, "y": -1.53 },
+					{ "time": 0.2667, "x": -1.09, "y": -1.53 },
+					{ "time": 0.3, "x": -0.65 }
+				]
+			},
+			"eyes": {
+				"translate": [
+					{ "x": 4.16, "y": 6.66 }
+				]
+			},
+			"scream01": {
+				"scale": [
+					{},
+					{ "time": 0.1, "x": 0.787, "y": 0.787 },
+					{ "time": 0.2 },
+					{ "time": 0.3, "x": 0.787, "y": 0.787 }
+				]
+			},
+			"scream02": {
+				"scale": [
+					{ "x": 0.697, "y": 0.697 },
+					{ "time": 0.1 },
+					{ "time": 0.2, "x": 0.697, "y": 0.697 },
+					{ "time": 0.3 }
+				]
+			},
+			"hands": {
+				"translate": [
+					{ "x": 9.2, "y": -20.89 },
+					{ "time": 0.1333, "x": -0.39, "y": -20.89 },
+					{ "time": 0.3, "x": 9.2, "y": -20.89 }
+				],
+				"scale": [
+					{},
+					{ "time": 0.1333, "x": 1.155 },
+					{ "time": 0.3 }
+				]
+			}
+		},
+		"drawOrder": [
+			{
+				"offsets": [
+					{ "slot": "eyes", "offset": 5 }
+				]
+			}
+		]
+	},
 	"block": {
 		"slots": {
+			"eyes": {
+				"attachment": [
+					{ "name": "eyes" }
+				]
+			},
 			"scream01": {
 				"attachment": [
 					{}

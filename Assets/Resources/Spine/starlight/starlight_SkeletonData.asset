@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: starlight_SkeletonData
   m_EditorClassIdentifier: 
   atlasAssets:
-  - {fileID: 11400000, guid: b9af6c36d6d89f14aa6e81fb06c0ed6e, type: 2}
+  - {fileID: 11400000, guid: a11bac7fdb1465a42b9f0b476c3a1ef4, type: 2}
   scale: 0.01
-  skeletonJSON: {fileID: 4900000, guid: 13f8aafa85511ee45835ae15f19c6622, type: 3}
+  skeletonJSON: {fileID: 4900000, guid: 1f1b98e1170febf4a8730b108a69ecee, type: 3}
   isUpgradingBlendModeMaterials: 0
   blendModeMaterials:
     requiresBlendModeMaterials: 0

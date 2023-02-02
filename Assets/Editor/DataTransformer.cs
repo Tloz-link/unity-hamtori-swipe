@@ -87,10 +87,16 @@ public class DataTransformer : EditorWindow
         string[] linesBlock = Resources.Load<TextAsset>($"Data/Excel/SpineData/Block").text.Split("\n");
         string[] linesBall = Resources.Load<TextAsset>($"Data/Excel/SpineData/Ball").text.Split("\n");
         string[] linesHamster = Resources.Load<TextAsset>($"Data/Excel/SpineData/Hamster").text.Split("\n");
+        string[] linesPurple = Resources.Load<TextAsset>($"Data/Excel/SpineData/Purple").text.Split("\n");
+        string[] linesStarlight = Resources.Load<TextAsset>($"Data/Excel/SpineData/Starlight").text.Split("\n");
+        string[] linesTutoHamster = Resources.Load<TextAsset>($"Data/Excel/SpineData/TutoHamster").text.Split("\n");
 
         string[] block = linesBlock[2].Replace("\r", "").Split(',');
         string[] ball = linesBall[2].Replace("\r", "").Split(',');
         string[] hamster = linesHamster[2].Replace("\r", "").Split(',');
+        string[] purple = linesPurple[2].Replace("\r", "").Split(',');
+        string[] starlight = linesStarlight[2].Replace("\r", "").Split(',');
+        string[] tutoHamster = linesStarlight[2].Replace("\r", "").Split(',');
 
         spineData = new SpineData()
         {
@@ -98,9 +104,11 @@ public class DataTransformer : EditorWindow
             blockTarget = block[1],
             blockDamaged = block[2],
             blockDestory = block[3],
+            blockPrologue = block[4],
 
             ballIdle = ball[0],
             ballJump = ball[1],
+            ballGameover = ball[2],
 
             hamsterIdle = hamster[0],
             hamsterCharge = hamster[1],
@@ -108,7 +116,17 @@ public class DataTransformer : EditorWindow
             hamsterWait = hamster[3],
             hamsterGameover = hamster[4],
             hamsterSeedAfter = hamster[5],
-            hamsterSeedEat = hamster[6]
+            hamsterSeedEat = hamster[6],
+            hamsterPrologue = hamster[7],
+
+            purpleIdle = purple[0],
+            purpleCreate = purple[1],
+
+            starlightIdle = starlight[0],
+            starlightPlus = starlight[1],
+
+            tutoHamsterIdle = tutoHamster[0],
+            tutoHamsterTouch = tutoHamster[1],
         };
         #endregion
 
@@ -116,58 +134,6 @@ public class DataTransformer : EditorWindow
         File.WriteAllText($"{Application.dataPath}/Resources/Data/SpineData.xml", xmlString);
         AssetDatabase.Refresh();
     }
-
-    //static void ParseShopData()
-    //{
-    //    List<ShopData> shopDatas = new List<ShopData>();
-
-    //    #region ExcelData
-    //    string[] lines = Resources.Load<TextAsset>($"Data/Excel/ShopData").text.Split("\n");
-
-    //    // 첫번째 라인까지 스킵
-    //    for (int y = 2; y < lines.Length; y++)
-    //    {
-    //        string[] row = lines[y].Replace("\r", "").Split(',');
-    //        if (row.Length == 0)
-    //            continue;
-    //        if (string.IsNullOrEmpty(row[0]))
-    //            continue;
-
-    //        ShopData shopData = new ShopData()
-    //        {
-    //            ID = int.Parse(row[0]),
-    //            name = int.Parse(row[1]),
-    //            condition = (row[2] == "cash" ? ShopConditionType.Cash : ShopConditionType.Ads),
-    //            price = int.Parse(row[3]),
-    //            productID = row[4],
-    //            rewardCount = int.Parse(row[6]),
-    //            icon = row[7],
-    //        };
-
-    //        switch (row[5])
-    //        {
-    //            case "block":
-    //                shopData.rewardType = ShopRewardType.Block;
-    //                break;
-    //            case "money":
-    //                shopData.rewardType = ShopRewardType.Money;
-    //                break;
-    //            case "noads":
-    //                shopData.rewardType = ShopRewardType.NoAds;
-    //                break;
-    //            case "luck":
-    //                shopData.rewardType = ShopRewardType.Luck;
-    //                break;
-    //        }
-
-    //        shopDatas.Add(shopData);
-    //    }
-    //    #endregion
-
-    //    string xmlString = ToXML(new ShopDataLoader() { _shopDatas = shopDatas });
-    //    File.WriteAllText($"{Application.dataPath}/Resources/Data/ShopData.xml", xmlString);
-    //    AssetDatabase.Refresh();
-    //}
 
     #region XML 유틸
     public sealed class ExtentedStringWriter : StringWriter

@@ -128,4 +128,10 @@ public class UIManager
         CloseAllPopupUI();
         _sceneUI = null;
     }
+
+    public void AdjustUIByResolution()
+    {
+        foreach (var popup in _popupStack)
+            popup.AdjustUIByResolution();
+    }
 }
