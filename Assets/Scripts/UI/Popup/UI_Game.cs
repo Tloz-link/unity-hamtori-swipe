@@ -925,6 +925,7 @@ public class UI_Game : UI_Popup
             _sequence.Append(nuclear.transform.DOLocalMove(Vector3.zero, 0))
                 .Append(nuclear.transform.DOScale(0, 0))
                 .Append(nuclear.transform.DOScale(2.5f, 0.5f).SetEase(Ease.OutBack))
+                .AppendInterval(0.5f)
                 .Append(nuclear.transform.DOScale(1f, 0.5f).SetEase(Ease.Linear))
                 .Join(nuclear.transform.DOLocalMove(defaultPos, 0.5f).SetEase(Ease.Linear))
                 .Join(nuclear.transform.DORotate(new Vector3(0, 0, -360), 0.5f, RotateMode.FastBeyond360).SetEase(Ease.Linear));
