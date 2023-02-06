@@ -26,7 +26,7 @@ public class UI_Block : UI_Spine
         return true;
     }
 
-    public void SetInfo(BlockInfo info, Action<UI_Block> destroyCallBack)
+    public void SetInfo(BlockInfo info, Action<UI_Block> destroyCallBack = null)
     {
         Init();
 
@@ -79,7 +79,7 @@ public class UI_Block : UI_Spine
         }
     }
 
-    private void Destroy()
+    public void Destroy()
     {
         PlayAnimation(Managers.Data.Spine.blockDestory);
         float length = GetAnimationLength(Managers.Data.Spine.blockDestory);

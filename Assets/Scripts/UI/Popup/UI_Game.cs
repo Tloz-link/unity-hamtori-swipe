@@ -16,6 +16,7 @@ public class UI_Game : UI_Popup
         Moon,    // 100점 이후 표시
 
         // Header
+        Header,
         Score,
         Power,
         PauseButton,
@@ -38,10 +39,18 @@ public class UI_Game : UI_Popup
         NuclearEmpty,
         NuclearFull,
         NuclearFullStar,
-        UITextGroup
+        UITextGroup,
+        SkillDescription,
+
+        // Tutorial
+        Dialogue1,
+        Dialogue2,
+        Dialogue3,
+        Dialogue4,
+        Dialogue5,
     }
 
-    enum Texts
+    public enum Texts
     {
         ScoreText,
         HighScoreText,
@@ -50,14 +59,22 @@ public class UI_Game : UI_Popup
         NuclearStackText,
         PlusPowerText,
         BallCountText,
-        NewRecordText
+        NewRecordText,
+        SkillText,
+
+        // Tutorial
+        DialogueText1,
+        DialogueText2,
+        DialogueText3,
+        DialogueText4,
+        DialogueText5,
     }
 
     enum Images
     {
         PowerUpSkill,
         GlassesSkill,
-        BackGround
+        BackGround,
     }
 
     GameManagerEX _game;
@@ -81,6 +98,7 @@ public class UI_Game : UI_Popup
         Clear();
         _game = Managers.Game;
         _startData = Managers.Data.Start;
+        _game.CanvasScale = transform.localScale.x;
 
         BindObject(typeof(GameObjects));
         BindText(typeof(Texts));
@@ -102,12 +120,23 @@ public class UI_Game : UI_Popup
         GetObject((int)GameObjects.Hamster).transform.localPosition = _game.HamsterPos;
         GetObject((int)GameObjects.Hamster).GetOrAddComponent<UI_Spine>();
         GetObject((int)GameObjects.NuclearSkill).GetOrAddComponent<UI_Spine>();
+
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPressed, Define.UIEvent.Pressed);
-        GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerUp, Define.UIEvent.PointerUp);
         GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerDown, Define.UIEvent.PointerDown);
-        GetImage((int)Images.PowerUpSkill).gameObject.BindEvent(OnPowerUpSkill);
-        GetImage((int)Images.GlassesSkill).gameObject.BindEvent(OnGlassesSkill);
-        GetObject((int)GameObjects.NuclearSkill).BindEvent(OnNuclearSkill);
+        GetObject((int)GameObjects.ControlPad).BindEvent(OnPadPointerUp, Define.UIEvent.PointerUp);
+
+        GetImage((int)Images.PowerUpSkill).gameObject.BindEvent(OnPowerUpSkill, Define.UIEvent.PointerUp);
+        GetImage((int)Images.PowerUpSkill).gameObject.BindEvent(OnPowerUpSkillPressedLong, Define.UIEvent.PressedLong);
+        GetImage((int)Images.PowerUpSkill).gameObject.BindEvent(OnSkillPointerExit, Define.UIEvent.PointerExit);
+
+        GetImage((int)Images.GlassesSkill).gameObject.BindEvent(OnGlassesSkill, Define.UIEvent.PointerUp);
+        GetImage((int)Images.GlassesSkill).gameObject.BindEvent(OnGlassesSkillPressedLong, Define.UIEvent.PressedLong);
+        GetImage((int)Images.GlassesSkill).gameObject.BindEvent(OnSkillPointerExit, Define.UIEvent.PointerExit);
+
+        GetObject((int)GameObjects.NuclearSkill).BindEvent(OnNuclearSkill, Define.UIEvent.PointerUp);
+        GetObject((int)GameObjects.NuclearSkill).BindEvent(OnNuclearSkillPressedLong, Define.UIEvent.PressedLong);
+        GetObject((int)GameObjects.NuclearSkill).BindEvent(OnSkillPointerExit, Define.UIEvent.PointerExit);
+
         GetObject((int)GameObjects.PauseButton).BindEvent(OnPauseButton);
 
         // Ball 생성
@@ -832,6 +861,13 @@ public class UI_Game : UI_Popup
         }
     }
 
+    void OnNuclearSkillPressedLong()
+    {
+        PlayDescriptionSequence();
+
+        GetText((int)Texts.SkillText).text = "적을 전부 해치워줘!";
+    }
+
     void OnPowerUpSkill()
     {
         if (_game.PowerUpCooltime > 0 || _game.State != GameState.idle)
@@ -847,6 +883,13 @@ public class UI_Game : UI_Popup
         RefreshUI();
     }
 
+    void OnPowerUpSkillPressedLong()
+    {
+        PlayDescriptionSequence();
+
+        GetText((int)Texts.SkillText).text = "찌의 힘이 2가 돼!";
+    }
+
     void OnGlassesSkill()
     {
         if (_game.GlassesCooltime > 0 || _game.State != GameState.idle)
@@ -860,6 +903,34 @@ public class UI_Game : UI_Popup
         StartCoroutine(CoSkillAnimation(Managers.Data.Spine.hamsterSeedAfter));
 
         RefreshUI();
+    }
+
+    void OnGlassesSkillPressedLong()
+    {
+        PlayDescriptionSequence();
+
+        GetText((int)Texts.SkillText).text = "발사 경로를 더 상세하게 보여줘!";
+    }
+
+    Sequence _description;
+    void PlayDescriptionSequence()
+    {
+        GetObject((int)GameObjects.TutorialBlind).SetActive(true);
+
+        _description.Kill();
+        _description = Utils.MakePopupOpenSequence(GetObject((int)GameObjects.SkillDescription));
+        _description.Insert(0f, GetObject((int)GameObjects.TutorialBlind).GetComponent<Image>().DOFade(0f, 0f));
+        _description.Insert(0f, GetObject((int)GameObjects.TutorialBlind).GetComponent<Image>().DOFade(0.4f, _description.Duration()));
+        _description.Restart();
+    }
+
+    void OnSkillPointerExit()
+    {
+        _description.Kill();
+        _description = Utils.MakePopupCloseSequence(GetObject((int)GameObjects.SkillDescription));
+        _description.Insert(0f, GetObject((int)GameObjects.TutorialBlind).GetComponent<Image>().DOFade(0f, _description.Duration()));
+        _description.AppendCallback(() => { GetObject((int)GameObjects.TutorialBlind).SetActive(false); });
+        _description.Restart();
     }
 
     IEnumerator CoSkillAnimation(string name)
@@ -1066,20 +1137,23 @@ public class UI_Game : UI_Popup
     {
         Init();
 
-        BlockInfo info = new BlockInfo
-        {
-            x = 3,
-            y = 1,
-            hp = 1,
-        };
-        UI_Block block = Managers.UI.makeSubItem<UI_Block>(GetObject((int)GameObjects.BlockGroup).transform);
-        block.SetInfo(info, OnDestroyBlock);
-        _blocks.Add(block);
+        GetObject((int)GameObjects.Score).SetActive(false);
+        GetObject((int)GameObjects.Power).SetActive(false);
+        GetObject((int)GameObjects.LeftSkill).SetActive(false);
+        GetObject((int)GameObjects.RightSkill).SetActive(false);
 
-        GetObject((int)GameObjects.TutorialBlind).SetActive(true);
         Managers.UI.ShowPopupUI<UI_Tutorial>().SetInfo(() =>
         {
+            GetObject((int)GameObjects.TutorialBlind).SetActive(true);
+            GetObject((int)GameObjects.TutorialBlind).GetComponent<Image>().DOFade(0.4f, 0.5f);
+        }, () =>
+        {
+            GetObject((int)GameObjects.Score).SetActive(true);
+            GetObject((int)GameObjects.Power).SetActive(true);
+            GetObject((int)GameObjects.LeftSkill).SetActive(true);
+            GetObject((int)GameObjects.RightSkill).SetActive(true);
             GetObject((int)GameObjects.TutorialBlind).SetActive(false);
+
             Managers.Game.FullBallCount = 1;
             StartCoroutine(RefreshBoard(0f));
         });

@@ -1,6 +1,7 @@
 ﻿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Managers : MonoBehaviour
@@ -13,7 +14,7 @@ public class Managers : MonoBehaviour
     GameManagerEX _game = new GameManagerEX();
     ResourceManager _resource = new ResourceManager();
     SceneManagerEX _scene = new SceneManagerEX();
-    SoundManager _sound = new SoundManager();
+    SoundManager _sound;
     UIManager _ui = new UIManager();
 
     public static DataManager Data { get { return Instance._data; } }
@@ -21,23 +22,22 @@ public class Managers : MonoBehaviour
     public static GameManagerEX Game { get { return Instance._game; } }
     public static ResourceManager Resource { get { return Instance._resource; } }
     public static UIManager UI { get { return Instance._ui; } }
-    public static SoundManager Sound { get { return Instance._sound; } }
+    public static SoundManager Sound
+    { 
+        get 
+        {
+            if (Instance._sound == null)
+                Instance._sound = s_instance.AddComponent<SoundManager>();
+            return Instance._sound;
+        }
+    }
     public static SceneManagerEX Scene { get { return Instance._scene; } }
 
     public static string _savePath;
 
-    // Start is called before the first frame update
     void Start()
     {
         _savePath = Application.persistentDataPath + "/SaveData.json";
-
-        Init();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 
     static void Init()
@@ -53,6 +53,9 @@ public class Managers : MonoBehaviour
 
             DontDestroyOnLoad(go);
             s_instance = go.GetComponent<Managers>();
+
+            if (s_instance._sound == null)
+                s_instance._sound = s_instance.AddComponent<SoundManager>();
 
             s_instance._data.Init();
             s_instance._sound.Init();

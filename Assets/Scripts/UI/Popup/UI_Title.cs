@@ -7,6 +7,8 @@ public class UI_Title : UI_Popup
 {
     enum GameObjects
     {
+        BackGround,
+
         StartButton,
         ContinueButton,
         GachaButton
@@ -21,11 +23,19 @@ public class UI_Title : UI_Popup
 
         BindObject(typeof(GameObjects));
 
+        AdjustUIByResolution();
+
         GetObject((int)GameObjects.StartButton).gameObject.BindEvent(OnStartButton);
         GetObject((int)GameObjects.ContinueButton).gameObject.BindEvent(OnContinueButton);
         GetObject((int)GameObjects.GachaButton).gameObject.BindEvent(OnGachaButton);
 
         return true;
+    }
+
+    public override void AdjustUIByResolution()
+    {
+        float scale = Screen.height / 2732.0f;
+        GetObject((int)GameObjects.BackGround).transform.localScale *= scale / transform.localScale.x;
     }
 
     void OnStartButton()
@@ -92,6 +102,26 @@ public class UI_Title : UI_Popup
 
     void OnGachaButton()
     {
-        Managers.UI.ShowPopupUI<UI_Gacha>();
+        Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
+
+        UI_Confirm confirm = Managers.UI.ShowPopupUI<UI_Confirm>();
+        confirm.SetInfo("세이브 파일을 삭제할까요?", () =>
+        {
+            Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
+
+            string path = Application.persistentDataPath + "/SaveData.json";
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+                Debug.Log("SaveFile Deleted");
+            }
+            else
+            {
+                Debug.Log("No SaveFile Detected");
+            }
+
+            Managers.UI.ClosePopupUI(confirm);
+        });
+
     }
 }

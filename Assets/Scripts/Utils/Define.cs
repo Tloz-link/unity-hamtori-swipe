@@ -21,8 +21,10 @@ public class Define
     {
         Click,
         Pressed,
+        PressedLong,
         PointerDown,
         PointerUp,
+        PointerExit
     }
 
     public enum AnimState

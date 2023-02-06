@@ -78,6 +78,10 @@ public abstract class UI_Base : MonoBehaviour
                 evt.OnPressedHandler -= action;
                 evt.OnPressedHandler += action;
                 break;
+            case Define.UIEvent.PressedLong:
+                evt.OnPressedLongHandler -= action;
+                evt.OnPressedLongHandler += action;
+                break;
             case Define.UIEvent.PointerDown:
                 evt.OnPointerDownHandler -= action;
                 evt.OnPointerDownHandler += action;
@@ -85,6 +89,10 @@ public abstract class UI_Base : MonoBehaviour
             case Define.UIEvent.PointerUp:
                 evt.OnPointerUpHandler -= action;
                 evt.OnPointerUpHandler += action;
+                break;
+            case Define.UIEvent.PointerExit:
+                evt.OnPointerExitHandler -= action;
+                evt.OnPointerExitHandler += action;
                 break;
         }
     }

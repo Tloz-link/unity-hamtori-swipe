@@ -96,7 +96,7 @@ public class DataTransformer : EditorWindow
         string[] hamster = linesHamster[2].Replace("\r", "").Split(',');
         string[] purple = linesPurple[2].Replace("\r", "").Split(',');
         string[] starlight = linesStarlight[2].Replace("\r", "").Split(',');
-        string[] tutoHamster = linesStarlight[2].Replace("\r", "").Split(',');
+        string[] tutoHamster = linesTutoHamster[2].Replace("\r", "").Split(',');
 
         spineData = new SpineData()
         {

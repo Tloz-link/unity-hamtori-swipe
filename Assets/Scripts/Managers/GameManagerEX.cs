@@ -171,6 +171,8 @@ public class GameManagerEX
         set { _gameData.newGame = value; }
     }
 
+    public float CanvasScale { get; set; } = 1.0f;
+
     public void Init()
     {
         StartData data = Managers.Data.Start;
@@ -185,7 +187,7 @@ public class GameManagerEX
         PowerUpCooltime = 0;
         LineCount = data.lineCount;
         BallDamage = data.ballDamage;
-        NuclearDivisionCount = 3;
+        NuclearDivisionCount = 0;
         NuclearStack = 0;
 
         BlockList = new BlockInfo[MAX_BLOCK_COUNT];
