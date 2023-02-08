@@ -43,6 +43,11 @@ public class UI_Spine : UI_Base
         return _anim.startingAnimation;
     }
 
+    public string GetCurrentSkin()
+    {
+        return _anim.initialSkinName;
+    }
+
     public void PlayAnimation(string name, bool loop = true)
     {
         Init();

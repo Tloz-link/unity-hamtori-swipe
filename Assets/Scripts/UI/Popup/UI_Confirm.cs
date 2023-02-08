@@ -18,6 +18,8 @@ public class UI_Confirm : UI_Popup
         Text
     }
 
+    Action _rejectCallback = null;
+
     public override bool Init()
     {
         if (base.Init() == false)
@@ -37,15 +39,23 @@ public class UI_Confirm : UI_Popup
         return true;
     }
 
-    public void SetInfo(string message, Action correctCallBack)
+    public void SetInfo(string message, Action correctCallback, Action rejectCallback = null)
     {
         Init();
         GetText((int)Texts.Text).text = message;
-        GetObject((int)GameObjects.ConfirmButton).BindEvent(correctCallBack);
+        GetObject((int)GameObjects.ConfirmButton).BindEvent(correctCallback);
+
+        _rejectCallback = rejectCallback;
     }
 
     void OnCanselButton()
     {
+        if (_rejectCallback != null)
+        {
+            _rejectCallback.Invoke();
+            return;
+        }
+
         Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
         Destroy(GetObject((int)GameObjects.ConfirmButton).GetComponent<UI_EventHandler>());
         Destroy(GetObject((int)GameObjects.CanselButton).GetComponent<UI_EventHandler>());

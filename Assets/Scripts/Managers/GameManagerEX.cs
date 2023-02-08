@@ -171,6 +171,7 @@ public class GameManagerEX
         set { _gameData.newGame = value; }
     }
 
+
     public float CanvasScale { get; set; } = 1.0f;
 
     public void Init()

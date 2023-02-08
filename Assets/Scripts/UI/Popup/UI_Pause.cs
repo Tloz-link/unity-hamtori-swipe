@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,7 +13,8 @@ public class UI_Pause : UI_Popup
         SoundButton,
         SoundLeftButton,
         SoundRightButton,
-        MainScreenButton
+        MainScreenButton,
+        HiddenButton
     }
 
     enum Images
@@ -37,6 +39,7 @@ public class UI_Pause : UI_Popup
     Sprite _vibrateOn;
     Sprite _vibrateOff;
 
+    Action _hiddenCallback;
 
     public override bool Init()
     {
@@ -64,6 +67,7 @@ public class UI_Pause : UI_Popup
             GetObject((int)GameObjects.SoundButton).BindEvent(OnSoundButtonPressed, Define.UIEvent.Pressed);
             GetObject((int)GameObjects.SoundLeftButton).BindEvent(OnSoundLeftButton);
             GetObject((int)GameObjects.SoundRightButton).BindEvent(OnSoundRightButton);
+            GetObject((int)GameObjects.HiddenButton).BindEvent(OnHiddenButton);
             GetImage((int)Images.VibrationStack).gameObject.BindEvent(OnVibrationButton);
         });
         open.Restart();
@@ -71,6 +75,13 @@ public class UI_Pause : UI_Popup
 
         RefreshUI();
         return true;
+    }
+
+    public void SetInfo(Action hiddenCallback)
+    {
+        Init();
+
+        _hiddenCallback = hiddenCallback;
     }
 
     void RefreshUI()
@@ -91,6 +102,7 @@ public class UI_Pause : UI_Popup
         Destroy(GetObject((int)GameObjects.SoundButton).GetComponent<UI_EventHandler>());
         Destroy(GetObject((int)GameObjects.SoundLeftButton).GetComponent<UI_EventHandler>());
         Destroy(GetObject((int)GameObjects.SoundRightButton).GetComponent<UI_EventHandler>());
+        Destroy(GetObject((int)GameObjects.HiddenButton).GetComponent<UI_EventHandler>());
         Destroy(GetImage((int)Images.VibrationStack).gameObject.GetComponent<UI_EventHandler>());
 
         Managers.Sound.Play(Define.Sound.Effect, "popup");
@@ -118,6 +130,19 @@ public class UI_Pause : UI_Popup
             DOTween.KillAll();
             Managers.UI.ShowPopupUI<UI_Title>();
         });
+    }
+
+    private int _count = 0;
+    void OnHiddenButton()
+    {
+        if (_hiddenCallback == null)
+            return;
+
+        Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
+        _count++;
+
+        if (_count == 5)
+            _hiddenCallback.Invoke();
     }
 
     void OnVibrationButton()

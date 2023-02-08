@@ -671,8 +671,15 @@ public class UI_Game : UI_Popup
     {
         ball.transform.SetParent(GetObject((int)GameObjects.WaitBallGroup).transform);
         ball.transform.localPosition = new Vector3(ball.transform.localPosition.x, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, 0);
-        ball.ChangeSkin("A");
-
+        switch (ball.GetCurrentSkin())
+        {
+            case "B":
+                ball.ChangeSkin("A");
+                break;
+            case "skin_01B":
+                ball.ChangeSkin("skin_01");
+                break;
+        }
         if (_returnBallCount <= Define.MAX_VISIBLE_BALL_COUNT)
             _waitBalls.Enqueue(ball);
         else
@@ -738,6 +745,10 @@ public class UI_Game : UI_Popup
                 UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.WaitBallGroup).transform);
                 ball.SetInfo(item.transform.localPosition, OnBallReachCallBack);
                 ball.Create(0.2f, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallCreateCallBack);
+                if (_skin)
+                    ball.ChangeSkin("skin_01");
+
+                _shootBalls.Enqueue(ball);
                 Managers.Sound.Play(Define.Sound.Effect, "getStar");
 
                 _game.FullBallCount++;
@@ -941,7 +952,17 @@ public class UI_Game : UI_Popup
         {
             Managers.Sound.Play(Define.Sound.Effect, "useGlasses");
             foreach (var ball in _waitBalls)
-                ball.ChangeSkin("B");
+            {
+                switch (ball.GetCurrentSkin())
+                {
+                    case "A":
+                        ball.ChangeSkin("B");
+                        break;
+                    case "skin_01":
+                        ball.ChangeSkin("skin_01B");
+                        break;
+                }
+            }
         });
 
         _game.State = GameState.skill;
@@ -1011,6 +1032,7 @@ public class UI_Game : UI_Popup
     #endregion
 
     #region ฤÝน้
+    private bool _skin = false;
     void OnCollisionStar(UI_Item_Star star)
     {
         if (_items.Contains(star) == false)
@@ -1019,6 +1041,10 @@ public class UI_Game : UI_Popup
         UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.ShootBallGroup).transform);
         ball.SetInfo(star.transform.localPosition, OnBallReachCallBack);
         ball.Create((8 - star.GetInfo().y) * 0.2f, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, OnBallCreateCallBack);
+        if (_skin)
+            ball.ChangeSkin("skin_01");
+
+        _shootBalls.Enqueue(ball);
         _game.FullBallCount++;
 
         _items.Remove(star);
@@ -1041,7 +1067,37 @@ public class UI_Game : UI_Popup
             return;
 
         Managers.Sound.Play(Define.Sound.Effect, "popup");
-        Managers.UI.ShowPopupUI<UI_Pause>();
+        Managers.UI.ShowPopupUI<UI_Pause>().SetInfo(() =>
+        {
+            foreach (var ball in _shootBalls)
+            {
+                switch (ball.GetCurrentSkin())
+                {
+                    case "A":
+                        ball.ChangeSkin("skin_01");
+                        break;
+                    case "B":
+                        ball.ChangeSkin("skin_01B");
+                        break;
+                }
+            }
+
+            foreach (var ball in _waitBalls)
+            {
+                switch (ball.GetCurrentSkin())
+                {
+                    case "A":
+                        ball.ChangeSkin("skin_01");
+                        break;
+                    case "B":
+                        ball.ChangeSkin("skin_01B");
+                        break;
+                }
+            }
+            _skin = true;
+
+            GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().ChangeSkin("B");
+        });
         Time.timeScale = 0;
     }
     #endregion

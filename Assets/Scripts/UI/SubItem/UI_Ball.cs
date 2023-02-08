@@ -33,86 +33,6 @@ public class UI_Ball : UI_Spine
         return true;
     }
 
-    #region DOTween
-    public void CreateIdleSequence()
-    {
-        int posX = UnityEngine.Random.Range(-390, 390);
-        float dir = (transform.localPosition.x - posX < 0) ? -180 : 180;
-        PlayAnimation(Managers.Data.Spine.ballJump, false);
-
-        _idleSequence.Kill();
-        _idleSequence = DOTween.Sequence()
-            .SetAutoKill(false)
-            .AppendInterval(0.4f)
-            .Append(transform.DOLocalMoveX(posX, 1.0f).SetEase(Ease.Linear))
-            .AppendInterval(1.0f)
-            .AppendCallback(() =>
-            {
-                PlayAnimation(Managers.Data.Spine.ballIdle);
-
-                int rand = UnityEngine.Random.Range(0, 100);
-                if (rand <= 25)
-                {
-                    RefreshSequence();
-                    CreateRollSequence();
-                }
-                else
-                {
-                    CreateIdleSequence();
-                }
-            });
-
-        _idleSequence.Restart();
-    }
-
-    public void CreateCreateSequence(float duration, float destY)
-    {
-        _createSequence.Kill();
-        _createSequence = DOTween.Sequence()
-            .Append(transform.DOLocalMoveY(destY, duration).SetEase(Ease.Linear))
-            .Join(transform.DORotate(new Vector3(0, 0, -360f), duration, RotateMode.FastBeyond360).SetEase(Ease.Linear))
-            .OnComplete(() =>
-            {
-                GetComponent<CircleCollider2D>().enabled = true;
-                CreateIdleSequence();
-                _createCallback.Invoke(this);
-            });
-    }
-
-    public void CreateRollSequence()
-    {
-        int rand;
-        while (true)
-        {
-            rand = UnityEngine.Random.Range(-390, 390);
-            if (Mathf.Abs(transform.localPosition.x - rand) > 80)
-                break;
-        }
-
-        float dir = (transform.localPosition.x - rand < 0) ? -360 : 360;
-        _rollSequence.Kill();
-        _rollSequence = DOTween.Sequence()
-            .SetAutoKill(false)
-            .AppendInterval(0.4f)
-            .Append(transform.DOLocalMoveX((float)rand, 2.0f).SetEase(Ease.Linear))
-            .Join(transform.DORotate(new Vector3(0, 0, dir), 2.0f, RotateMode.FastBeyond360).SetRelative().SetEase(Ease.Linear))
-            .AppendInterval(1.0f)
-            .OnComplete(() =>
-            {
-                CreateIdleSequence();
-            });
-        _rollSequence.Restart();
-    }
-
-    public void RefreshSequence()
-    {
-        _idleSequence.Kill();
-        _rollSequence.Kill();
-        _createSequence.Kill();
-        transform.rotation = Quaternion.identity;
-    }
-    #endregion
-
     public void SetInfo(Vector3 initPos, Action<UI_Ball> shootCallback)
     {
         Init();
@@ -214,4 +134,84 @@ public class UI_Ball : UI_Spine
         _lineEnd = (hit.centroid - _boardPos) / _canvasSize;
         _normal = hit.normal;
     }
+
+    #region DOTween
+    public void CreateIdleSequence()
+    {
+        int posX = UnityEngine.Random.Range(-390, 390);
+        float dir = (transform.localPosition.x - posX < 0) ? -180 : 180;
+        PlayAnimation(Managers.Data.Spine.ballJump, false);
+
+        _idleSequence.Kill();
+        _idleSequence = DOTween.Sequence()
+            .SetAutoKill(false)
+            .AppendInterval(0.4f)
+            .Append(transform.DOLocalMoveX(posX, 1.0f).SetEase(Ease.Linear))
+            .AppendInterval(1.0f)
+            .AppendCallback(() =>
+            {
+                PlayAnimation(Managers.Data.Spine.ballIdle);
+
+                int rand = UnityEngine.Random.Range(0, 100);
+                if (rand <= 25)
+                {
+                    RefreshSequence();
+                    CreateRollSequence();
+                }
+                else
+                {
+                    CreateIdleSequence();
+                }
+            });
+
+        _idleSequence.Restart();
+    }
+
+    public void CreateCreateSequence(float duration, float destY)
+    {
+        _createSequence.Kill();
+        _createSequence = DOTween.Sequence()
+            .Append(transform.DOLocalMoveY(destY, duration).SetEase(Ease.Linear))
+            .Join(transform.DORotate(new Vector3(0, 0, -360f), duration, RotateMode.FastBeyond360).SetEase(Ease.Linear))
+            .OnComplete(() =>
+            {
+                GetComponent<CircleCollider2D>().enabled = true;
+                CreateIdleSequence();
+                _createCallback.Invoke(this);
+            });
+    }
+
+    public void CreateRollSequence()
+    {
+        int rand;
+        while (true)
+        {
+            rand = UnityEngine.Random.Range(-390, 390);
+            if (Mathf.Abs(transform.localPosition.x - rand) > 80)
+                break;
+        }
+
+        float dir = (transform.localPosition.x - rand < 0) ? -360 : 360;
+        _rollSequence.Kill();
+        _rollSequence = DOTween.Sequence()
+            .SetAutoKill(false)
+            .AppendInterval(0.4f)
+            .Append(transform.DOLocalMoveX((float)rand, 2.0f).SetEase(Ease.Linear))
+            .Join(transform.DORotate(new Vector3(0, 0, dir), 2.0f, RotateMode.FastBeyond360).SetRelative().SetEase(Ease.Linear))
+            .AppendInterval(1.0f)
+            .OnComplete(() =>
+            {
+                CreateIdleSequence();
+            });
+        _rollSequence.Restart();
+    }
+
+    public void RefreshSequence()
+    {
+        _idleSequence.Kill();
+        _rollSequence.Kill();
+        _createSequence.Kill();
+        transform.rotation = Quaternion.identity;
+    }
+    #endregion
 }
