@@ -573,8 +573,6 @@ public class UI_Game : UI_Popup
             ball.gameObject.SetActive(true);
             ball.transform.SetParent(GetObject((int)GameObjects.ShootBallGroup).transform);
             ball.transform.localPosition = GetObject((int)GameObjects.Hamster).transform.localPosition;
-            if (_game.BallDamage != 1)
-                ball.ChangeSkin("B");
             ball.Shoot(GetObject((int)GameObjects.GameBoard), _game.ShootDir, transform.localScale.x);
             _currentBall -= ball.Attack;
             RefreshUI();
