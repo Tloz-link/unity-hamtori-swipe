@@ -1,0 +1,10 @@
+cloud_message.png
+size:438,216
+filter:Linear,Linear
+pma:true
+a
+bounds:2,2,397,212
+b
+bounds:401,177,37,35
+offsets:8,2,47,39
+rotate:90

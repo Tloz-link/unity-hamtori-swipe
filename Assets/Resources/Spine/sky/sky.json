@@ -1,7 +1,7 @@
 {
 "skeleton": {
-	"hash": "5SfJoZaKRVc",
-	"spine": "4.1.18",
+	"hash": "Pv2mostYv+8",
+	"spine": "4.1.19",
 	"x": -501.6,
 	"y": -1.65,
 	"width": 1004,
@@ -12,7 +12,7 @@
 "bones": [
 	{ "name": "root" },
 	{ "name": "star0", "parent": "root", "x": -254.84, "y": 1687.82 },
-	{ "name": "star2", "parent": "root", "x": -150.33, "y": 1606.03, "color": "ffdc23ff" },
+	{ "name": "star2", "parent": "root", "x": -130.42, "y": 1632.96, "color": "ffdc23ff" },
 	{ "name": "star1", "parent": "root", "x": -349.5, "y": 1474.26, "color": "ffe02bff" },
 	{ "name": "cloud1-1", "parent": "root", "length": 35.72, "rotation": 1.43, "x": 327.06, "y": 630.97 },
 	{ "name": "cloud1-2", "parent": "root", "length": 31.3, "rotation": 3.27, "x": 40.47, "y": 545.27 },
@@ -316,10 +316,9 @@
 		"slots": {
 			"cloud1-1": {
 				"rgba": [
+					{ "color": "ffffff00" },
 					{ "time": 3.6333, "color": "ffffffff" },
-					{ "time": 5.1667, "color": "ffffff00", "curve": "stepped" },
-					{ "time": 6.2, "color": "ffffff00" },
-					{ "time": 8.8, "color": "ffffffff" }
+					{ "time": 9.2, "color": "ffffff00" }
 				]
 			},
 			"cloud1-2": {
@@ -567,9 +566,8 @@
 			"cloud1-1": {
 				"translate": [
 					{ "x": -2.29, "y": -0.06 },
-					{ "time": 5.1667, "x": 30.17, "y": 0.75 },
-					{ "time": 6.2, "x": -115.05, "y": -2.88 },
-					{ "time": 12.4333, "x": -51.87, "y": -1.3 }
+					{ "time": 9.3333, "x": 30.17, "y": 0.75 },
+					{ "time": 10.1333, "x": -2.29, "y": -0.06 }
 				]
 			},
 			"cloud2-1": {
