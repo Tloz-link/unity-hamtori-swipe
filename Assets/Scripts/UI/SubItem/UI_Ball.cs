@@ -28,14 +28,13 @@ public class UI_Ball : UI_Spine
     {
         if (base.Init() == false)
             return false;
-
-        _shoot = false;
         return true;
     }
 
     public void SetInfo(Vector3 initPos, Action<UI_Ball> shootCallback)
     {
         Init();
+        _shoot = false;
 
         PlayAnimation(Managers.Data.Spine.ballIdle);
         ChangeSkin("A");
@@ -110,6 +109,7 @@ public class UI_Ball : UI_Spine
     public void Create(float duration, float destY, Action<UI_Ball> createCallback)
     {
         Init();
+        _shoot = false;
 
         GetComponent<CircleCollider2D>().enabled = false;
         transform.rotation = Quaternion.identity;

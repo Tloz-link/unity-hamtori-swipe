@@ -39,11 +39,14 @@ public class UI_Confirm : UI_Popup
         return true;
     }
 
-    public void SetInfo(string message, Action correctCallback, Action rejectCallback = null)
+    public void SetInfo(string message, Action correctCallback, Action rejectCallback = null, bool caution = false)
     {
         Init();
         GetText((int)Texts.Text).text = message;
         GetObject((int)GameObjects.ConfirmButton).BindEvent(correctCallback);
+
+        if (caution)
+            GetText((int)Texts.Text).color = new Color(0.6196079f, 0.1176471f, 0.1176471f);
 
         _rejectCallback = rejectCallback;
     }

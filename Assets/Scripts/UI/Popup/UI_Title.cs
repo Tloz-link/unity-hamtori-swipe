@@ -70,11 +70,17 @@ public class UI_Title : UI_Popup
             {
                 Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
 
-                Managers.UI.ClosePopupUI(confirm);
-                Managers.UI.ClosePopupUI(this);
+                UI_Confirm caution = Managers.UI.ShowPopupUI<UI_Confirm>();
+                caution.SetInfo("기억이 사라져요. 정말 괜찮아요?!", () =>
+                {
+                    Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
 
-                Managers.Game.Init();
-                Managers.UI.ShowPopupUI<UI_Game>().NewGame();
+                    Managers.UI.ClosePopupUI(confirm);
+                    Managers.UI.ClosePopupUI(this);
+
+                    Managers.Game.Init();
+                    Managers.UI.ShowPopupUI<UI_Game>().NewGame();
+                }, null, true);
             });
         }
     }

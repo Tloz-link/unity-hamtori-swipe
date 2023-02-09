@@ -41,6 +41,8 @@ public class UI_Game : UI_Popup
         NuclearFullStar,
         UITextGroup,
         SkillDescription,
+        PlusPower,
+        NewRecord,
 
         // Tutorial
         Dialogue1,
@@ -57,9 +59,7 @@ public class UI_Game : UI_Popup
         PowerUpCooltimeText,
         GlassesCooltimeText,
         NuclearStackText,
-        PlusPowerText,
         BallCountText,
-        NewRecordText,
         SkillText,
 
         // Tutorial
@@ -80,8 +80,8 @@ public class UI_Game : UI_Popup
     GameManagerEX _game;
     StartData _startData;
 
-    Queue<UI_Ball> _waitBalls = new Queue<UI_Ball>();
-    Queue<UI_Ball> _shootBalls = new Queue<UI_Ball>();
+    List<UI_Ball> _waitBalls = new List<UI_Ball>();
+    List<UI_Ball> _shootBalls = new List<UI_Ball>();
     List<UI_Block> _blocks = new List<UI_Block>();
     List<UI_Item_Star> _items = new List<UI_Item_Star>();
 
@@ -111,8 +111,8 @@ public class UI_Game : UI_Popup
         GetObject((int)GameObjects.Moon).SetActive(false);
         GetObject((int)GameObjects.GameoverBlind).SetActive(false);
         GetObject((int)GameObjects.TutorialBlind).SetActive(false);
-        GetText((int)Texts.PlusPowerText).gameObject.SetActive(false);
-        GetText((int)Texts.NewRecordText).gameObject.SetActive(false);
+        GetObject((int)GameObjects.PlusPower).SetActive(false);
+        GetObject((int)GameObjects.NewRecord).SetActive(false);
 
         Vector3 hamsterStartPos = GetObject((int)GameObjects.Hamster).transform.localPosition;
         hamsterStartPos.x = _game.HamsterPos.x;
@@ -145,7 +145,7 @@ public class UI_Game : UI_Popup
         {
             UI_Ball ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.WaitBallGroup).transform);
             ball.SetInfo(GetObject((int)GameObjects.ControlPad).transform.localPosition, OnBallReachCallBack);
-            _waitBalls.Enqueue(ball);
+            _waitBalls.Add(ball);
         }
 
         // 별동별 애니메이션
@@ -339,6 +339,7 @@ public class UI_Game : UI_Popup
                 GetObject((int)GameObjects.GameoverBlind).SetActive(true);
                 GetObject((int)GameObjects.RightSkill).SetActive(false);
                 GetObject((int)GameObjects.LeftSkill).SetActive(false);
+                GetObject((int)GameObjects.ControlPad).SetActive(false);
                 GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterGameover);
                 foreach (var ball in _waitBalls)
                 {
@@ -347,6 +348,7 @@ public class UI_Game : UI_Popup
                 }
 
                 Managers.Sound.Play(Define.Sound.Effect, "gameover");
+                Managers.Game.SaveGame();
                 Managers.Game.Init();
                 Managers.Game.SaveGame();
                 return true;
@@ -576,7 +578,7 @@ public class UI_Game : UI_Popup
             ball.Shoot(GetObject((int)GameObjects.GameBoard), _game.ShootDir, transform.localScale.x);
             _currentBall -= ball.Attack;
             RefreshUI();
-            _shootBalls.Enqueue(ball);
+            _shootBalls.Add(ball);
 
             GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimationForce(Managers.Data.Spine.hamsterShoot);
         }
@@ -611,7 +613,10 @@ public class UI_Game : UI_Popup
 
             UI_Ball ball;
             if (_waitBalls.Count > 0)
-                ball = _waitBalls.Dequeue();
+            {
+                ball = _waitBalls[_waitBalls.Count - 1];
+                _waitBalls.Remove(ball);
+            }
             else
             {
                 ball = Managers.UI.makeSubItem<UI_Ball>(GetObject((int)GameObjects.ShootBallGroup).transform);
@@ -642,9 +647,13 @@ public class UI_Game : UI_Popup
     void OnBallCreateCallBack(UI_Ball ball)
     {
         _createBallCount++;
-        UI_Text text = Managers.UI.makeSubItem<UI_Text>(GetObject((int)GameObjects.UITextGroup).transform);
+        GameObject text = Managers.Resource.Instantiate("Contents/ZziPlus", GetObject((int)GameObjects.UITextGroup).transform);
         text.transform.localPosition = ball.transform.localPosition;
-        text.SetInfo("+ZZI", 100f);
+        Sequence create = Utils.MakeIncreaseTextSequence(text, 100f);
+        create.OnComplete(() =>
+        {
+            Managers.Resource.Destroy(text);
+        });
 
         Managers.Sound.Play(Define.Sound.Effect, "addBall");
 
@@ -667,6 +676,8 @@ public class UI_Game : UI_Popup
 
     void CountReachedBall(UI_Ball ball)
     {
+        _shootBalls.Remove(ball);
+
         ball.transform.SetParent(GetObject((int)GameObjects.WaitBallGroup).transform);
         ball.transform.localPosition = new Vector3(ball.transform.localPosition.x, GetObject((int)GameObjects.ControlPad).transform.localPosition.y, 0);
         switch (ball.GetCurrentSkin())
@@ -679,7 +690,7 @@ public class UI_Game : UI_Popup
                 break;
         }
         if (_returnBallCount <= Define.MAX_VISIBLE_BALL_COUNT)
-            _waitBalls.Enqueue(ball);
+            _waitBalls.Add(ball);
         else
             Managers.Resource.Destroy(ball.gameObject);
 
@@ -709,7 +720,7 @@ public class UI_Game : UI_Popup
         _hamsterMove.Restart();
 
         // 한 턴만에 모든 블럭을 부수면 핵 게이지 상승
-        delay = Mathf.Max(delay, CheckAchievement());
+        delay = Mathf.Max(delay + 0.3f, CheckAchievement());
 
         // 결과 값 갱신
         UpdateValue();
@@ -729,6 +740,7 @@ public class UI_Game : UI_Popup
             _game.GlassesCooltime--;
         if (_game.PowerUpCooltime > 0)
             _game.PowerUpCooltime--;
+        RefreshUI();
     }
 
     void CheckStar()
@@ -746,7 +758,7 @@ public class UI_Game : UI_Popup
                 if (_skin)
                     ball.ChangeSkin("skin_01");
 
-                _shootBalls.Enqueue(ball);
+                _shootBalls.Add(ball);
                 Managers.Sound.Play(Define.Sound.Effect, "getStar");
 
                 _game.FullBallCount++;
@@ -789,7 +801,7 @@ public class UI_Game : UI_Popup
         _game.NuclearDivisionCount++;
         FillNuclearGauge(0.5f);
 
-        GameObject text = GetText((int)Texts.PlusPowerText).gameObject;
+        GameObject text = GetObject((int)GameObjects.PlusPower);
         Sequence textSequence = Utils.MakeIncreaseTextSequence(text, 200f);
         textSequence.OnStart(() =>
         {
@@ -802,7 +814,7 @@ public class UI_Game : UI_Popup
 
     Sequence AchieveNewRecord()
     {
-        GameObject text = GetText((int)Texts.NewRecordText).gameObject;
+        GameObject text = GetObject((int)GameObjects.NewRecord);
         Sequence textSequence = Utils.MakeIncreaseTextSequence(text, 200f);
         textSequence.OnStart(() =>
         {
@@ -1042,7 +1054,7 @@ public class UI_Game : UI_Popup
         if (_skin)
             ball.ChangeSkin("skin_01");
 
-        _shootBalls.Enqueue(ball);
+        _shootBalls.Add(ball);
         _game.FullBallCount++;
 
         _items.Remove(star);

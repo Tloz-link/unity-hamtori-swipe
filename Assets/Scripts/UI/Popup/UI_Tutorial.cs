@@ -80,46 +80,48 @@ public class UI_Tutorial : UI_Popup
         yield return new WaitForSeconds(0.5f);
 
         List<string> s = new List<string>();
-        s.Add("안녕? 나는 햄이양");
-        s.Add("내 옆에 있는 동그란 친구는 찌라고 행");
-        s.Add("만나서 반가웡!!");
+        s.Add("반가웡! 나는 햄이양!");
+        s.Add("그리고 옆에있는 내 귀여운 친구는 찌!");
+        s.Add("우린 햄스 스카이에 사는 둘도 없는 친구야.\n그리고 너와도 친구가 되고 싶은뎅!");
 
         yield return StartCoroutine(ShowTexts(s, 0));
         s.Clear();
 
-        s.Add("크하하하!!!");
+        s.Add("함함함♪");
         yield return StartCoroutine(ShowTexts(s, 3));
         s.Clear();
 
-        s.Add("이게 무슨 소리징?");
+        s.Add("이 소리는.. 넴찌쪽의 대장?!");
         yield return StartCoroutine(ShowTexts(s, 0));
         s.Clear();
 
         GetObject((int)GameObjects.Block).transform.DOMoveY(_blockSecondPosY, 2f).SetEase(Ease.Linear);
         yield return new WaitForSeconds(2.0f);
 
-        s.Add("정말 예쁜 곳이구남!!");
-        s.Add("지금부터 이 땅은 우리 넴찌족이 지배하겠담!!");
+        s.Add("찌 라고 하는구남!! 내 맘에 쏙 든 녀석!!");
+        s.Add("귀여운 네 모습을 똑같이 베끼다가\n마력을 도중에 다 쓰고 말았담..");
+        s.Add("지상으로 내려가 마력을 잔뜩 빨아먹으면\n완벽한 찌가 될 수 있겠짐!!");
         yield return StartCoroutine(ShowTexts(s, 3));
         s.Clear();
 
         _board.GetObject((int)UI_Game.GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(Managers.Data.Spine.hamsterPrologue);
-        s.Add("뭐라공?");
-        s.Add("너희한테 순순히 뺏길 거 같앙?");
+        s.Add("대체 무슨 소릴 하는거양?!");
+        s.Add("내 친구들을 곤란하게 만들지 말앙!!");
         yield return StartCoroutine(ShowTexts(s, 0));
         s.Clear();
 
-        s.Add("가소롭구남!!");
-        s.Add("해바라기씨나 까먹으면서 기다려람!!");
-        s.Add("크하하하!!!");
+        s.Add("함~♪");
+        s.Add("찌가 되면 더 이상 네 자린 없을 것이담!!");
+        s.Add("해바라기 씨나 까먹으며 기다려람!!");
         yield return StartCoroutine(ShowTexts(s, 3));
         s.Clear();
 
         GetObject((int)GameObjects.Block).transform.DOMoveY(_blockFirstPosY, 1f).SetEase(Ease.Linear);
         yield return new WaitForSeconds(1.0f);
 
-        s.Add("큰일이양!");
-        s.Add("우리와 함께 넴찌족의 공격을 막고\n평화를 지켜줘!");
+        s.Add("정말 이상한 녀석이양!");
+        s.Add("넴찌족들이 지상에 내려오게 둘 순 없엉…\n지상에도 큰 혼란을 불러올 거양!");
+        s.Add("만난지는 얼마 되지 않았지만\n나와 찌를 조금만 도와주지 않을랭?");
         yield return StartCoroutine(ShowTexts(s, 0));
         s.Clear();
 

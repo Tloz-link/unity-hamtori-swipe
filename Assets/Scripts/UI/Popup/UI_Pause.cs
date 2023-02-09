@@ -14,7 +14,8 @@ public class UI_Pause : UI_Popup
         SoundLeftButton,
         SoundRightButton,
         MainScreenButton,
-        HiddenButton
+        HiddenButton,
+        CreditButton
     }
 
     enum Images
@@ -68,6 +69,7 @@ public class UI_Pause : UI_Popup
             GetObject((int)GameObjects.SoundLeftButton).BindEvent(OnSoundLeftButton);
             GetObject((int)GameObjects.SoundRightButton).BindEvent(OnSoundRightButton);
             GetObject((int)GameObjects.HiddenButton).BindEvent(OnHiddenButton);
+            GetObject((int)GameObjects.CreditButton).BindEvent(OnCreditButton);
             GetImage((int)Images.VibrationStack).gameObject.BindEvent(OnVibrationButton);
         });
         open.Restart();
@@ -103,6 +105,7 @@ public class UI_Pause : UI_Popup
         Destroy(GetObject((int)GameObjects.SoundLeftButton).GetComponent<UI_EventHandler>());
         Destroy(GetObject((int)GameObjects.SoundRightButton).GetComponent<UI_EventHandler>());
         Destroy(GetObject((int)GameObjects.HiddenButton).GetComponent<UI_EventHandler>());
+        Destroy(GetObject((int)GameObjects.CreditButton).GetComponent<UI_EventHandler>());
         Destroy(GetImage((int)Images.VibrationStack).gameObject.GetComponent<UI_EventHandler>());
 
         Managers.Sound.Play(Define.Sound.Effect, "popup");
@@ -143,6 +146,13 @@ public class UI_Pause : UI_Popup
 
         if (_count == 5)
             _hiddenCallback.Invoke();
+    }
+
+    void OnCreditButton()
+    {
+        Managers.Sound.Play(Define.Sound.Effect, "popup");
+
+        Managers.UI.ShowPopupUI<UI_Credit>();
     }
 
     void OnVibrationButton()
