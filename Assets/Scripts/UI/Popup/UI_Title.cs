@@ -42,7 +42,7 @@ public class UI_Title : UI_Popup
 
         if (File.Exists(Managers._savePath) == false)
         {
-            Managers.UI.ClosePopupUI(this);
+            Managers.UI.CloseAllPopupUI();
 
             Managers.Game.Init();
             Managers.UI.ShowPopupUI<UI_Game>().Tutorial();
@@ -54,8 +54,7 @@ public class UI_Title : UI_Popup
             {
                 Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
 
-                Managers.UI.ClosePopupUI(confirm);
-                Managers.UI.ClosePopupUI(this);
+                Managers.UI.CloseAllPopupUI();
 
                 Managers.Game.Init();
                 if (Managers.Game.LoadGame())
@@ -75,9 +74,7 @@ public class UI_Title : UI_Popup
                 {
                     Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
 
-                    Managers.UI.ClosePopupUI(confirm);
-                    Managers.UI.ClosePopupUI(this);
-
+                    Managers.UI.CloseAllPopupUI();
                     Managers.Game.Init();
                     Managers.UI.ShowPopupUI<UI_Game>().NewGame();
                 }, null, true);

@@ -329,9 +329,7 @@ public class UI_Game : UI_Popup
                 {
                     Clear();
                     Managers.Sound.Play(Define.Sound.Effect, "uiTouch");
-
-                    Managers.UI.ClosePopupUI(ui);
-                    Managers.UI.ClosePopupUI(this);
+                    Managers.UI.CloseAllPopupUI();
 
                     Managers.Game.Init();
                     Managers.UI.ShowPopupUI<UI_Game>().NewGame();
@@ -347,10 +345,12 @@ public class UI_Game : UI_Popup
                     ball.RefreshSequence();
                 }
 
+                int savepoint = _game.Score / 100;
                 Managers.Sound.Play(Define.Sound.Effect, "gameover");
-                Managers.Game.SaveGame();
-                Managers.Game.Init();
-                Managers.Game.SaveGame();
+                _game.SaveGame();
+                _game.Init();
+                _game.Score = savepoint * 100;
+                _game.SaveGame();
                 return true;
             }
         }
@@ -575,6 +575,18 @@ public class UI_Game : UI_Popup
             ball.gameObject.SetActive(true);
             ball.transform.SetParent(GetObject((int)GameObjects.ShootBallGroup).transform);
             ball.transform.localPosition = GetObject((int)GameObjects.Hamster).transform.localPosition;
+
+            if (_skin)
+                ball.ChangeSkin("skin_01");
+
+            if (_game.BallDamage != 1)
+            {
+                if (_skin)
+                    ball.ChangeSkin("skin_01B");
+                else
+                    ball.ChangeSkin("B");
+            }
+
             ball.Shoot(GetObject((int)GameObjects.GameBoard), _game.ShootDir, transform.localScale.x);
             _currentBall -= ball.Attack;
             RefreshUI();
@@ -848,7 +860,7 @@ public class UI_Game : UI_Popup
             .AppendCallback(() =>
             {
                 foreach (var block in _blocks)
-                    Managers.Resource.Destroy(block.gameObject);
+                    block.Destroy();
                 _blocks.Clear();
 
                 _game.NuclearStack--;
@@ -1104,9 +1116,24 @@ public class UI_Game : UI_Popup
                         break;
                 }
             }
+
+            foreach (var ball in _loadedBalls)
+            {
+                switch (ball.GetCurrentSkin())
+                {
+                    case "A":
+                        ball.ChangeSkin("skin_01");
+                        break;
+                    case "B":
+                        ball.ChangeSkin("skin_01B");
+                        break;
+                }
+            }
             _skin = true;
 
-            GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().ChangeSkin("B");
+            string defaultAnim = GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().GetCurrentAnimation();
+            GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().SetSkeletonAsset("Spine/c2/c2_skin");
+            GetObject((int)GameObjects.Hamster).GetComponent<UI_Spine>().PlayAnimation(defaultAnim);
         });
         Time.timeScale = 0;
     }

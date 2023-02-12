@@ -84,13 +84,23 @@ public class GameManagerEX
     public int Score
     {
         get { return _gameData.score; }
-        set { _gameData.score = value; }
+        set
+        {
+            if (value > MAX_SCORE)
+                return;
+            _gameData.score = value;
+        }
     }
 
     public int Highscore
     {
         get { return _gameData.highscore; }
-        set { _gameData.highscore = value; }
+        set
+        {
+            if (value > MAX_SCORE)
+                return;
+            _gameData.highscore = value;
+        }
     }
 
     public int FullBallCount
@@ -188,7 +198,7 @@ public class GameManagerEX
         PowerUpCooltime = 0;
         LineCount = data.lineCount;
         BallDamage = data.ballDamage;
-        NuclearDivisionCount = 3;
+        NuclearDivisionCount = 0;
         NuclearStack = 0;
 
         BlockList = new BlockInfo[MAX_BLOCK_COUNT];

@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f1b3b4b945939a54ea0b23d3396115fb, type: 3}
-  m_Name: c2_SkeletonData
+  m_Name: c2_skin
   m_EditorClassIdentifier: 
   atlasAssets:
-  - {fileID: 11400000, guid: 2cba780dcac895a408ff6f134d60eb52, type: 2}
+  - {fileID: 11400000, guid: 6860026098f2d314488ee0c7dd6acdd7, type: 2}
   scale: 0.01
-  skeletonJSON: {fileID: 4900000, guid: 458c8c8da0e42544a89e3ca76d5f06f6, type: 3}
+  skeletonJSON: {fileID: 4900000, guid: 301fed26e95e00e418cd80eb0e2bf61b, type: 3}
   isUpgradingBlendModeMaterials: 0
   blendModeMaterials:
     requiresBlendModeMaterials: 1
@@ -23,8 +23,8 @@ MonoBehaviour:
     additiveMaterials: []
     multiplyMaterials: []
     screenMaterials:
-    - pageName: c2.png
-      material: {fileID: 2100000, guid: 4d43b471d3cba7544be83fd47d0f479f, type: 2}
+    - pageName: c2_skin01.png
+      material: {fileID: 2100000, guid: 1ced3e9502bfee5418c20a2760dbe9ed, type: 2}
   skeletonDataModifiers: []
   fromAnimation: []
   toAnimation: []

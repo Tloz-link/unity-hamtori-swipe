@@ -49,4 +49,6 @@ public class Define
     public const int MAX_SOUND_OVERLAPPED = 2;
 
     public const float SHOOT_INTERVAL = 0.04f;
+
+    public const int MAX_SCORE = 999999;
 }
